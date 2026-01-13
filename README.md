@@ -190,7 +190,8 @@ pip install -r requirements.txt
 ├── main.py              # Single experiment entry point with argparse
 ├── models.py            # ResNet-18 model definition
 ├── utils.py             # Training/evaluation loops, seed setting
-├── run_experiments.py   # Automated grid search for 3 experiment sets
+├── run_experiments.py   # Automated grid search with multi-GPU support
+├── gpu_scheduler.py     # Multi-GPU task scheduler
 ├── plot_results.py      # Visualization script
 └── requirements.txt     # Python dependencies
 ```
@@ -212,29 +213,57 @@ python main.py --batch_size 128 --lr 0.1 --wd 5e-4 --momentum 0.9 --epochs 100
 - `--seed`: Random seed (default: 42)
 - `--use_amp`: Enable mixed precision training (default: True)
 
-#### Option 2: Run Automated Experiment Sets
+#### Option 2: Run Automated Experiment Sets (Multi-GPU Support)
 
-**Experiment Set 1: Optimal LR Ordering (24 runs)**
+The experiment runner now supports parallel execution across multiple GPUs for maximum efficiency.
+
+**Using All Available GPUs (Recommended):**
 ```bash
-python run_experiments.py --experiment 1 --epochs 100 --output results.csv
+# Experiment Set 1: Optimal LR Ordering (24 runs)
+python run_experiments.py --experiment 1 --epochs 100 --gpus all
+
+# Experiment Set 2: Eta-Lambda Interaction Heatmap (35 runs)
+python run_experiments.py --experiment 2 --epochs 100 --gpus all
+
+# Experiment Set 3: Batch Size Scaling (24 runs)
+python run_experiments.py --experiment 3 --epochs 100 --gpus all
 ```
 
-**Experiment Set 2: Eta-Lambda Interaction Heatmap (35 runs)**
+**Specify Specific GPUs:**
 ```bash
-python run_experiments.py --experiment 2 --epochs 100 --output results.csv
+# Use GPUs 0, 1, 2, 3
+python run_experiments.py --experiment 1 --epochs 100 --gpus 0,1,2,3
+
+# Use GPU range 0-7
+python run_experiments.py --experiment 2 --epochs 100 --gpus 0-7
+
+# Use only GPU 0
+python run_experiments.py --experiment 1 --epochs 100 --gpus 0
+
+# Mixed specification (GPUs 0, 2, 3, 4, 7)
+python run_experiments.py --experiment 1 --epochs 100 --gpus 0,2-4,7
 ```
 
-**Experiment Set 3: Batch Size Scaling (24 runs)**
+**Run on CPU (no GPU):**
 ```bash
-python run_experiments.py --experiment 3 --epochs 100 --output results.csv
+# Omit --gpus argument to run sequentially on CPU
+python run_experiments.py --experiment 1 --epochs 100
 ```
 
-**Run all experiments sequentially:**
+**Run All Experiments Sequentially:**
 ```bash
-python run_experiments.py --experiment 1 --epochs 100 && \
-python run_experiments.py --experiment 2 --epochs 100 && \
-python run_experiments.py --experiment 3 --epochs 100
+# With 4 GPUs, this will maximize GPU utilization
+python run_experiments.py --experiment 1 --epochs 100 --gpus all && \
+python run_experiments.py --experiment 2 --epochs 100 --gpus all && \
+python run_experiments.py --experiment 3 --epochs 100 --gpus all
 ```
+
+**How Multi-GPU Works:**
+- Each GPU gets a worker process that runs experiments independently
+- Tasks are distributed via a shared queue
+- Multiple experiments run in parallel (one per GPU)
+- Results are collected and saved to CSV when all tasks complete
+- With 4 GPUs, Experiment 1 (24 runs) completes ~4x faster than single GPU
 
 #### Option 3: Generate Plots
 
@@ -260,24 +289,45 @@ python plot_results.py --input results.csv --stats
 
 **Experiment 1: Optimal LR Ordering**
 - 3 methods × 8 learning rates = 24 runs
-- Time estimate: ~2-3 hours on A100
+- Single GPU: ~2-3 hours on A100
+- 4 GPUs: ~30-45 minutes on A100
 
 **Experiment 2: Eta-Lambda Interaction**
 - 5 learning rates × 7 weight decays = 35 runs
-- Time estimate: ~3-4 hours on A100
+- Single GPU: ~3-4 hours on A100
+- 4 GPUs: ~45-60 minutes on A100
 
 **Experiment 3: Batch Size Scaling**
 - 4 batch sizes × 6 weight decays = 24 runs
-- Time estimate: ~2-3 hours on A100
+- Single GPU: ~2-3 hours on A100
+- 4 GPUs: ~30-45 minutes on A100
 
-**Total time: ~8-10 hours on A100**
+**Total time:**
+- Single GPU: ~8-10 hours on A100
+- 4 GPUs: ~2-3 hours on A100
+- 8 GPUs: ~1-1.5 hours on A100
+
+**Performance Tips:**
+- Using `--gpus all` automatically uses all available GPUs
+- Multi-GPU provides near-linear speedup (4 GPUs ≈ 4x faster)
+- Mixed precision (`--use_amp`) provides additional 1.5-2x speedup
+- Each experiment is independent, so they can be run in parallel on separate GPU sets
 
 ### Tips for Efficiency
 
-1. **Use mixed precision** (enabled by default) to speed up training
-2. **Run experiments overnight** using screen/tmux
-3. **Monitor GPU usage**: `watch -n 1 nvidia-smi`
-4. **Resume interrupted experiments**: Results are appended to CSV, so you can re-run specific experiment sets
+1. **Use multi-GPU for maximum throughput** - `--gpus all` provides near-linear speedup
+2. **Monitor GPU usage**: `watch -n 1 nvidia-smi` to see all GPUs working
+3. **Use mixed precision** (enabled by default) for additional speedup
+4. **Run experiments in background** using screen/tmux for long sessions
+5. **Resume interrupted experiments**: Results are appended to CSV
+6. **Parallel experiment sets**: If you have 8 GPUs, run 2 experiment sets simultaneously:
+   ```bash
+   # Terminal 1
+   python run_experiments.py --experiment 1 --gpus 0-3
+
+   # Terminal 2
+   python run_experiments.py --experiment 2 --gpus 4-7
+   ```
 
 ### Expected Results
 
@@ -289,7 +339,7 @@ python plot_results.py --input results.csv --stats
 
 **Out of memory:**
 ```bash
-# Reduce batch size
+# Reduce batch size (automatically used in that run)
 python main.py --batch_size 64 --lr 0.05
 ```
 
@@ -297,7 +347,25 @@ python main.py --batch_size 64 --lr 0.05
 - The code will automatically fall back to CPU (much slower)
 - Check CUDA installation: `python -c "import torch; print(torch.cuda.is_available())"`
 
+**Multi-GPU not working:**
+- Check available GPUs: `nvidia-smi`
+- Verify GPU IDs are correct: `python -c "import torch; print(torch.cuda.device_count())"`
+- Try single GPU first: `--gpus 0`
+
+**Processes hanging:**
+- Check for dataloader issues: reduce `num_workers` in `get_cifar100_loaders()`
+- Kill hung processes: `pkill -f run_experiments.py`
+
 **Results not matching expectations:**
 - Ensure sufficient epochs (100-200 recommended)
 - Check if cosine annealing scheduler is working
 - Verify data augmentation is applied correctly
+
+**Check GPU utilization:**
+```bash
+# Monitor all GPUs in real-time
+watch -n 1 nvidia-smi
+
+# Or check specific metrics
+nvidia-smi --query-gpu=index,utilization.gpu,memory.used,memory.total --format=csv -l 1
+```
