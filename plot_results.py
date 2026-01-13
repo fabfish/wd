@@ -1,15 +1,16 @@
 """
 Plotting script for visualizing experiment results.
-Reads results.csv and generates three types of plots.
+Reads results from outputs/results/results.csv and generates plots in outputs/plots/.
 """
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from pathlib import Path
 
 
-def plot_experiment_1(df, output_prefix='exp1'):
+def plot_experiment_1(df, output_dir='outputs/plots'):
     """
     Plot Experiment 1: Line Plot for Test Acc vs. LR (3 curves for 3 methods)
     """
@@ -36,13 +37,14 @@ def plot_experiment_1(df, output_prefix='exp1'):
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    output_file = f'{output_prefix}_lr_ordering.png'
+    output_file = Path(output_dir) / 'exp1_lr_ordering.png'
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"Saved: {output_file}")
     plt.close()
 
 
-def plot_experiment_2(df, output_prefix='exp2'):
+def plot_experiment_2(df, output_dir='outputs/plots'):
     """
     Plot Experiment 2: Heatmap for X-axis=LR, Y-axis=WD, Color=Best Test Acc
     """
@@ -76,13 +78,14 @@ def plot_experiment_2(df, output_prefix='exp2'):
     plt.title('Experiment 2: Eta-Lambda Interaction Heatmap', fontsize=14, fontweight='bold')
     plt.tight_layout()
 
-    output_file = f'{output_prefix}_eta_lambda_heatmap.png'
+    output_file = Path(output_dir) / 'exp2_eta_lambda_heatmap.png'
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"Saved: {output_file}")
     plt.close()
 
 
-def plot_experiment_3(df, output_prefix='exp3'):
+def plot_experiment_3(df, output_dir='outputs/plots'):
     """
     Plot Experiment 3: Optimal WD vs. Batch Size
     For each batch size, find the WD that gives the best accuracy
@@ -130,7 +133,8 @@ def plot_experiment_3(df, output_prefix='exp3'):
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    output_file = f'{output_prefix}_batch_size_scaling.png'
+    output_file = Path(output_dir) / 'exp3_batch_size_scaling.png'
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
     print(f"Saved: {output_file}")
     plt.close()
@@ -188,8 +192,10 @@ def print_summary_stats(df):
 
 def main():
     parser = argparse.ArgumentParser(description='Plot experiment results')
-    parser.add_argument('--input', type=str, default='results.csv',
-                        help='Input CSV file with results')
+    parser.add_argument('--input', type=str, default='outputs/results/results.csv',
+                        help='Input CSV file with results (default: outputs/results/results.csv)')
+    parser.add_argument('--output_dir', type=str, default='outputs/plots',
+                        help='Output directory for plots (default: outputs/plots)')
     parser.add_argument('--experiment', type=int, choices=[1, 2, 3],
                         help='Which experiment to plot (default: all available)')
     parser.add_argument('--stats', action='store_true',
@@ -211,16 +217,19 @@ def main():
     if args.stats:
         print_summary_stats(df)
 
+    # Create output directory
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
     # Generate plots
     if args.experiment is None:
         plot_all_experiments(df)
     else:
         if args.experiment == 1:
-            plot_experiment_1(df)
+            plot_experiment_1(df, args.output_dir)
         elif args.experiment == 2:
-            plot_experiment_2(df)
+            plot_experiment_2(df, args.output_dir)
         elif args.experiment == 3:
-            plot_experiment_3(df)
+            plot_experiment_3(df, args.output_dir)
 
 
 if __name__ == '__main__':
