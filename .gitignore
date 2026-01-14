@@ -30,27 +30,19 @@ ENV/
 env.bak/
 venv.bak/
 
-# PyCharm
+# IDE
 .idea/
-
-# VSCode
 .vscode/
+.cursor/
 
 # Jupyter Notebook
 .ipynb_checkpoints/
 *.ipynb
 
-# PyTorch
+# PyTorch checkpoints
 *.pth
 *.pt
 *.ckpt
-
-# Output directories
-outputs/
-logs/
-results/
-checkpoints/
-plots/
 
 # Data
 data/
@@ -60,20 +52,15 @@ datasets/
 *.tar.gz
 *.zip
 
-# CSV files (except example files)
-*.csv
-!example_results.csv
-
-# Logs
+# Logs (large files)
+outputs/logs/
 *.log
+
+# Checkpoints
+outputs/checkpoints/
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Temporary files
@@ -83,30 +70,18 @@ Thumbs.db
 *.swo
 *~
 
-# Experiment artifacts
+# Experiment tracking
 wandb/
 mlruns/
 tensorboard/
 *.tfevents.*
 
-# Compiled files
-*.pyc
-*.pyo
-
 # Cache
 .cache/
 .pytest_cache/
 .mypy_cache/
-.dmypy.json
-dmypy.json
 
-# Coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.hypothesis/
-pytest_cache/
-cover/
-
-__pycache__/
+# Claude/Cursor/Copilot
+.claude/
+.specstory/
+.cursorrules
