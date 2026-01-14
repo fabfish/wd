@@ -6,6 +6,9 @@ import multiprocessing as mp
 from queue import Empty
 import torch
 
+# Use 'spawn' start method for CUDA compatibility
+mp.set_start_method('spawn', force=True)
+
 
 class GPUScheduler:
     """
