@@ -278,6 +278,8 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     ax2.set_title('Optimal λ vs η\n(Inverse Relationship)', fontsize=14, fontweight='bold')
     ax2.legend(fontsize=10)
     ax2.grid(True, alpha=0.3)
+    ax2.set_xlim(left=0)
+    ax2.set_ylim(bottom=0)
 
     # Plot 3: Accuracy vs eta*lambda
     ax3 = axes[2]
@@ -291,6 +293,53 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     ax3.set_ylabel('Test Accuracy (%)', fontsize=12)
     ax3.set_title('Accuracy vs η×λ\n(Verifying λ∝1/η: constant η×λ)', fontsize=14, fontweight='bold')
     ax3.grid(True, alpha=0.3)
+    ax3.set_ylim(bottom=0)
+
+    # Add light green background region for points with accuracy >= 75.5
+    high_acc_threshold = 75.5
+    high_acc_points = exp2_df[exp2_df['best_test_acc'] >= high_acc_threshold]
+    if not high_acc_points.empty:
+        # Use exact x range of high accuracy points (no margin)
+        box_x_min = high_acc_points['eta_lambda'].min()
+        box_x_max = high_acc_points['eta_lambda'].max()
+
+        from matplotlib.patches import Rectangle
+
+        # Get current axis limits (after scatter and ylim are set)
+        ylim = ax3.get_ylim()
+        y_lower = ylim[0]
+        y_upper = ylim[1]
+
+        # Add very light green background below 75.5 threshold (lighter)
+        rect_lower = Rectangle(
+            (box_x_min, y_lower),
+            box_x_max - box_x_min,
+            high_acc_threshold - y_lower,
+            facecolor='lightgreen',
+            alpha=0.03,
+            zorder=0
+        )
+        ax3.add_patch(rect_lower)
+
+        # Add light green background above 75.5 threshold (darker)
+        rect_upper = Rectangle(
+            (box_x_min, high_acc_threshold),
+            box_x_max - box_x_min,
+            y_upper - high_acc_threshold,
+            facecolor='lightgreen',
+            alpha=0.35,
+            zorder=0,
+            label=f'Acc ≥ {high_acc_threshold}%'
+        )
+        ax3.add_patch(rect_upper)
+
+        # Add horizontal green line at 75.5 (only between box_x_min and box_x_max)
+        ax3.plot([box_x_min, box_x_max], [high_acc_threshold, high_acc_threshold],
+                 color='green', linewidth=2, linestyle='-', zorder=2)
+
+        # Add dark green vertical lines at start and end x positions
+        ax3.axvline(x=box_x_min, color='darkgreen', linewidth=2.5, linestyle='-', zorder=2)
+        ax3.axvline(x=box_x_max, color='darkgreen', linewidth=2.5, linestyle='-', zorder=2)
 
     # Mark optimal point
     best_idx = exp2_df['best_test_acc'].idxmax()
