@@ -94,7 +94,7 @@ class GPUScheduler:
         if self.verbose:
             print(f"Worker on GPU {gpu_id} finished")
 
-    def run_tasks(self, tasks, worker_func):
+    def run_tasks(self, tasks, worker_func, on_complete=None):
         """
         Run tasks in parallel across available GPUs.
 
@@ -102,6 +102,8 @@ class GPUScheduler:
             tasks: List of task arguments. Each task is a tuple of arguments to pass to worker_func.
             worker_func: Function that takes task arguments and returns a result.
                          The function will be called as: worker_func(*task_args)
+            on_complete: Optional callback function called with each result as it completes.
+                         Signature: on_complete(result) -> None
 
         Returns:
             List of results in the same order as tasks.
@@ -118,6 +120,8 @@ class GPUScheduler:
             for i, task_args in enumerate(tasks):
                 print(f"Task {i+1}/{num_tasks}")
                 result = worker_func(*task_args)
+                if on_complete:
+                    on_complete(result)
                 results.append(result)
             return results
 
@@ -159,6 +163,12 @@ class GPUScheduler:
                 results_dict[task_id] = None
             else:
                 results_dict[task_id] = result
+                # Call on_complete callback for incremental processing
+                if on_complete:
+                    try:
+                        on_complete(result)
+                    except Exception as e:
+                        print(f"Warning: on_complete callback failed: {e}")
 
         # Wait for all workers to finish
         for p in processes:
