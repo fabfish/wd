@@ -43,6 +43,8 @@ python plot_results.py --experiment 1 --stats
 
 ### Three Experiment Sets
 1. **Exp 1**: Optimal LR ordering across SGD variants (SGD vs SGD+WD vs SGDM+WD)
+   - Theory: eta_SGD > eta_SGD+WD > eta_SGDM+WD (stability boundary ordering)
+   - **Note**: Current grid search didn't include intermediate LR values (0.12-0.14). The SGD optimal LR is 0.15, SGDM+WD is 0.10, but SGD+WD peaks at 0.25-0.30 (with small WD) or 0.05 (with large WD). Finer LR grid may be needed to fully validate the ordering.
 2. **Exp 2**: LR-WD interaction heatmap (tests inverse relationship)
 3. **Exp 3**: Batch size scaling with linear LR rule
 

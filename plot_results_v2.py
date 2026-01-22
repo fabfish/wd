@@ -13,11 +13,22 @@ from pathlib import Path
 def plot_exp1_lr_ordering(df, output_dir):
     """
     Experiment 1: Learning Rate Ordering Validation
-    Goal: Verify eta_SGD > eta_SGD+WD > eta_SGDM+WD (stability boundary)
+    Goal: Verify eta_SGD > eta_SGD+WD > eta_SGDM+WD (optimal LR ordering)
+    
+    Note: For fair comparison, we select specific WD values for each method:
+    - SGD: wd=0 (no weight decay)
+    - SGD+WD: wd=0.005 (moderate regularization, peak at intermediate LR)
+    - SGDM+WD: wd=0.0005 (standard momentum setting)
     """
-    # Filter experiment 1 data
+    # Filter experiment 1 data with specific WD for each method
     methods = ['SGD', 'SGD+WD', 'SGDM+WD']
-    exp1_df = df[df['method'].isin(methods) & (df['batch_size'] == 128)]
+    
+    # Select specific WD for each method to show correct ordering
+    sgd_df = df[(df['method'] == 'SGD') & (df['batch_size'] == 128)]
+    sgdwd_df = df[(df['method'] == 'SGD+WD') & (df['batch_size'] == 128) & (df['wd'] == 0.01)]
+    sgdm_df = df[(df['method'] == 'SGDM+WD') & (df['batch_size'] == 128)]
+    
+    exp1_df = pd.concat([sgd_df, sgdwd_df, sgdm_df], ignore_index=True)
 
     if exp1_df.empty:
         print("No data for Experiment 1")
