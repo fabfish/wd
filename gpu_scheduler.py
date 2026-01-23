@@ -17,13 +17,15 @@ class GPUScheduler:
     Each GPU gets a worker process that pulls tasks from a shared queue.
     """
 
-    def __init__(self, gpu_ids=None, verbose=True):
+    def __init__(self, gpu_ids=None, verbose=True, workers_per_gpu=1):
         """
         Initialize GPU scheduler.
 
         Args:
             gpu_ids: List of GPU IDs to use. If None, uses all available GPUs.
             verbose: Whether to print scheduling information.
+            workers_per_gpu: Number of worker processes per GPU. Set higher for 
+                           high-VRAM GPUs (e.g., 2-4 for A6000 Pro with 48GB).
         """
         if gpu_ids is None:
             # Use all available GPUs
@@ -34,11 +36,14 @@ class GPUScheduler:
 
         self.gpu_ids = gpu_ids
         self.verbose = verbose
+        self.workers_per_gpu = workers_per_gpu
 
         if not self.gpu_ids:
             print("WARNING: No GPUs available. Will run on CPU sequentially.")
         elif self.verbose:
+            total_workers = len(self.gpu_ids) * self.workers_per_gpu
             print(f"GPU Scheduler initialized with GPUs: {self.gpu_ids}")
+            print(f"  Workers per GPU: {self.workers_per_gpu} (Total workers: {total_workers})")
 
     def _worker(self, gpu_id, task_queue, result_queue, worker_func):
         """
@@ -129,22 +134,24 @@ class GPUScheduler:
         for i, task_args in enumerate(tasks):
             task_queue.put((i, task_args))
 
-        # Add poison pills (one per worker)
-        for _ in self.gpu_ids:
+        # Add poison pills (one per worker = workers_per_gpu * num_gpus)
+        total_workers = len(self.gpu_ids) * self.workers_per_gpu
+        for _ in range(total_workers):
             task_queue.put(None)
 
-        # Start worker processes
+        # Start worker processes (multiple workers per GPU)
         processes = []
         for gpu_id in self.gpu_ids:
-            p = mp.Process(
-                target=self._worker,
-                args=(gpu_id, task_queue, result_queue, worker_func)
-            )
-            p.start()
-            processes.append(p)
+            for worker_idx in range(self.workers_per_gpu):
+                p = mp.Process(
+                    target=self._worker,
+                    args=(gpu_id, task_queue, result_queue, worker_func)
+                )
+                p.start()
+                processes.append(p)
 
         if self.verbose:
-            print(f"\nStarted {len(processes)} workers for {num_tasks} tasks")
+            print(f"\nStarted {len(processes)} workers ({self.workers_per_gpu} per GPU) for {num_tasks} tasks")
             print("=" * 80)
 
         # Collect results

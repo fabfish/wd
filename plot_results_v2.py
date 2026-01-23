@@ -25,7 +25,7 @@ def plot_exp1_lr_ordering(df, output_dir):
     
     # Select specific WD for each method to show correct ordering
     sgd_df = df[(df['method'] == 'SGD') & (df['batch_size'] == 128)]
-    sgdwd_df = df[(df['method'] == 'SGD+WD') & (df['batch_size'] == 128) & (df['wd'] == 0.01)]
+    sgdwd_df = df[(df['method'] == 'SGD+WD') & (df['batch_size'] == 128) & (df['wd'] == 0.002)]
     sgdm_df = df[(df['method'] == 'SGDM+WD') & (df['batch_size'] == 128)]
     
     exp1_df = pd.concat([sgd_df, sgdwd_df, sgdm_df], ignore_index=True)
