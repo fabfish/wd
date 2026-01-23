@@ -18,6 +18,7 @@ import argparse
 import csv
 import json
 import os
+import sys
 import time
 from itertools import product
 from pathlib import Path
@@ -40,7 +41,7 @@ from gpu_scheduler import GPUScheduler, parse_gpu_ids
 from logger import get_logger
 
 
-def get_cifar100_loaders(batch_size=128, num_workers=2):
+def get_cifar100_loaders(batch_size=128, num_workers=0):
     """Load CIFAR-100 dataset with standard augmentation"""
     transform_train = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
@@ -69,7 +70,11 @@ def train_epoch_with_acc(model, train_loader, optimizer, scheduler, device, use_
     correct = 0
     total_samples = 0
 
-    for inputs, targets in train_loader:
+    # Use tqdm with position=0, leave=True for multiprocessing compatibility
+    pbar = tqdm(train_loader, desc="Training", leave=False, 
+                file=sys.stdout, dynamic_ncols=True)
+    
+    for inputs, targets in pbar:
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
 
@@ -90,6 +95,12 @@ def train_epoch_with_acc(model, train_loader, optimizer, scheduler, device, use_
         _, predicted = outputs.max(1)
         correct += predicted.eq(targets).sum().item()
         total_samples += inputs.size(0)
+        
+        # Update progress bar with current stats
+        pbar.set_postfix({
+            'loss': f'{total_loss/total_samples:.4f}',
+            'acc': f'{100.0*correct/total_samples:.1f}%'
+        })
 
     if scheduler is not None:
         scheduler.step()
@@ -151,8 +162,8 @@ def train_model_with_history(model, train_loader, test_loader, optimizer, schedu
             'test_acc': test_acc
         })
 
-        if (epoch + 1) % 20 == 0:
-            print(f"  Epoch {epoch+1}/{epochs} | Train: {train_acc:.2f}% | Test: {test_acc:.2f}%")
+        if (epoch + 1) % 10 == 0:
+            print(f"  Epoch {epoch+1}/{epochs} | Train: {train_acc:.2f}% | Test: {test_acc:.2f}%", flush=True)
 
     final_record = history[-1]
     result = {
@@ -179,7 +190,7 @@ def run_single_experiment_worker(batch_size, lr, wd, momentum, epochs, seed, use
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=wd)
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
 
-    print(f"Running: BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}")
+    print(f"Running: BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}", flush=True)
 
     result, history = train_model_with_history(
         model, train_loader, test_loader, optimizer, scheduler,
@@ -319,7 +330,8 @@ def check_and_display_results(output_file, history_dir=None):
 
 
 def run_batch_size_comparison(gpu_ids, epochs=100, seed=42, use_amp=True,
-                               history_dir=None, output_file=None, logger=None):
+                               history_dir=None, output_file=None, logger=None,
+                               workers_per_gpu=1):
     """
     Run batch size comparison experiments for BS=32 and BS=128.
     Supports checkpoint/resume: skips already completed experiments.
@@ -383,7 +395,7 @@ def run_batch_size_comparison(gpu_ids, epochs=100, seed=42, use_amp=True,
             save_single_result(result, output_file, logger)
 
     # Use GPU scheduler for multi-GPU parallel execution
-    scheduler = GPUScheduler(gpu_ids=gpu_ids, verbose=True)
+    scheduler = GPUScheduler(gpu_ids=gpu_ids, workers_per_gpu=workers_per_gpu, verbose=True)
     start_time = time.time()
     results = scheduler.run_tasks(tasks, run_single_experiment_worker, on_complete=on_task_complete)
     elapsed_time = time.time() - start_time
@@ -442,6 +454,7 @@ def main():
     parser.add_argument('--history_dir', type=str, default='outputs/history/v3_supplementary')
     parser.add_argument('--use_amp', action='store_true', default=True)
     parser.add_argument('--gpus', type=str, default=None, help='GPU IDs to use, e.g., "0,1" or "all"')
+    parser.add_argument('--workers_per_gpu', type=int, default=6, help='Number of workers per GPU (default: 6)')
     parser.add_argument('--no_log', action='store_true')
     parser.add_argument('--check', action='store_true', help='仅检查并显示现有结果，不运行实验')
     args = parser.parse_args()
@@ -479,7 +492,8 @@ def main():
         gpu_ids, args.epochs, args.seed, args.use_amp,
         history_dir=args.history_dir,
         output_file=args.output,  # Enable incremental saving
-        logger=logger
+        logger=logger,
+        workers_per_gpu=args.workers_per_gpu
     )
     elapsed_time = time.time() - start_time
 
