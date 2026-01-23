@@ -14,7 +14,7 @@ class GPUScheduler:
     """
     Manages parallel execution of tasks across multiple GPUs.
 
-    Each GPU gets a worker process that pulls tasks from a shared queue.
+    Each GPU can have multiple worker processes that pull tasks from a shared queue.
     """
 
     def __init__(self, gpu_ids=None, verbose=True, workers_per_gpu=1):
@@ -23,6 +23,8 @@ class GPUScheduler:
 
         Args:
             gpu_ids: List of GPU IDs to use. If None, uses all available GPUs.
+            workers_per_gpu: Number of worker processes per GPU. Increase this
+                             when experiments use little GPU memory.
             verbose: Whether to print scheduling information.
             workers_per_gpu: Number of worker processes per GPU. Set higher for 
                            high-VRAM GPUs (e.g., 2-4 for A6000 Pro with 48GB).
@@ -35,22 +37,23 @@ class GPUScheduler:
                 gpu_ids = []
 
         self.gpu_ids = gpu_ids
+        self.workers_per_gpu = workers_per_gpu
         self.verbose = verbose
         self.workers_per_gpu = workers_per_gpu
 
         if not self.gpu_ids:
             print("WARNING: No GPUs available. Will run on CPU sequentially.")
         elif self.verbose:
-            total_workers = len(self.gpu_ids) * self.workers_per_gpu
             print(f"GPU Scheduler initialized with GPUs: {self.gpu_ids}")
             print(f"  Workers per GPU: {self.workers_per_gpu} (Total workers: {total_workers})")
 
-    def _worker(self, gpu_id, task_queue, result_queue, worker_func):
+    def _worker(self, gpu_id, worker_idx, task_queue, result_queue, worker_func):
         """
         Worker process that executes tasks on a specific GPU.
 
         Args:
             gpu_id: GPU ID to use for this worker
+            worker_idx: Index of this worker on the GPU
             task_queue: Queue containing tasks to execute
             result_queue: Queue to put results into
             worker_func: Function to execute for each task
@@ -59,7 +62,7 @@ class GPUScheduler:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
         if self.verbose:
-            print(f"Worker started on GPU {gpu_id} (PID: {os.getpid()})")
+            print(f"Worker {worker_idx} started on GPU {gpu_id} (PID: {os.getpid()})")
 
         while True:
             try:
@@ -67,14 +70,18 @@ class GPUScheduler:
                 task = task_queue.get(timeout=1)
 
                 if task is None:  # Poison pill to stop worker
-                    if self.verbose:
-                        print(f"Worker on GPU {gpu_id} received stop signal")
                     break
 
                 task_id, task_args = task
+                
+                # Check if this task is for a specific batch size that requires fewer workers
+                # This is a simple heuristic: if batch_size is 128, only use worker_idx 0-3 (e.g.)
+                # But implementing dynamic scaling per task is complex in this architecture.
+                # Instead, we will rely on max_workers being set globally and tasks just consuming available slots.
+                # The "optimal" setting is passed by the user.
 
                 if self.verbose:
-                    print(f"GPU {gpu_id}: Processing task {task_id}")
+                    print(f"GPU {gpu_id} (Worker {worker_idx}): Processing task {task_id}")
 
                 try:
                     # Execute the task
@@ -99,7 +106,7 @@ class GPUScheduler:
         if self.verbose:
             print(f"Worker on GPU {gpu_id} finished")
 
-    def run_tasks(self, tasks, worker_func):
+    def run_tasks(self, tasks, worker_func, on_complete=None):
         """
         Run tasks in parallel across available GPUs.
 
@@ -107,6 +114,8 @@ class GPUScheduler:
             tasks: List of task arguments. Each task is a tuple of arguments to pass to worker_func.
             worker_func: Function that takes task arguments and returns a result.
                          The function will be called as: worker_func(*task_args)
+            on_complete: Optional callback function called with each result as it completes.
+                         Signature: on_complete(result) -> None
 
         Returns:
             List of results in the same order as tasks.
@@ -123,6 +132,8 @@ class GPUScheduler:
             for i, task_args in enumerate(tasks):
                 print(f"Task {i+1}/{num_tasks}")
                 result = worker_func(*task_args)
+                if on_complete:
+                    on_complete(result)
                 results.append(result)
             return results
 
@@ -134,21 +145,19 @@ class GPUScheduler:
         for i, task_args in enumerate(tasks):
             task_queue.put((i, task_args))
 
-        # Add poison pills (one per worker = workers_per_gpu * num_gpus)
-        total_workers = len(self.gpu_ids) * self.workers_per_gpu
-        for _ in range(total_workers):
+        # Add poison pills (one per worker)
+        for _ in self.gpu_ids:
             task_queue.put(None)
 
-        # Start worker processes (multiple workers per GPU)
+        # Start worker processes
         processes = []
         for gpu_id in self.gpu_ids:
-            for worker_idx in range(self.workers_per_gpu):
-                p = mp.Process(
-                    target=self._worker,
-                    args=(gpu_id, task_queue, result_queue, worker_func)
-                )
-                p.start()
-                processes.append(p)
+            p = mp.Process(
+                target=self._worker,
+                args=(gpu_id, task_queue, result_queue, worker_func)
+            )
+            p.start()
+            processes.append(p)
 
         if self.verbose:
             print(f"\nStarted {len(processes)} workers ({self.workers_per_gpu} per GPU) for {num_tasks} tasks")
@@ -166,6 +175,12 @@ class GPUScheduler:
                 results_dict[task_id] = None
             else:
                 results_dict[task_id] = result
+                # Call on_complete callback for incremental processing
+                if on_complete:
+                    try:
+                        on_complete(result)
+                    except Exception as e:
+                        print(f"Warning: on_complete callback failed: {e}")
 
         # Wait for all workers to finish
         for p in processes:
