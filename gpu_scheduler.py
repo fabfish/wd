@@ -40,16 +40,16 @@ class GPUScheduler:
 
         if not self.gpu_ids:
             print("WARNING: No GPUs available. Will run on CPU sequentially.")
-        elif self.verbose:
-            total_workers = len(self.gpu_ids) * workers_per_gpu
-            print(f"GPU Scheduler initialized with GPUs: {self.gpu_ids} ({workers_per_gpu} workers/GPU, {total_workers} total)")
+        if self.verbose:
+            print(f"GPU Scheduler initialized with GPUs: {self.gpu_ids}")
 
-    def _worker(self, gpu_id, task_queue, result_queue, worker_func):
+    def _worker(self, gpu_id, worker_idx, task_queue, result_queue, worker_func):
         """
         Worker process that executes tasks on a specific GPU.
 
         Args:
             gpu_id: GPU ID to use for this worker
+            worker_idx: Index of this worker on the GPU
             task_queue: Queue containing tasks to execute
             result_queue: Queue to put results into
             worker_func: Function to execute for each task
@@ -58,7 +58,7 @@ class GPUScheduler:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
         if self.verbose:
-            print(f"Worker started on GPU {gpu_id} (PID: {os.getpid()})")
+            print(f"Worker {worker_idx} started on GPU {gpu_id} (PID: {os.getpid()})")
 
         while True:
             try:
@@ -66,14 +66,18 @@ class GPUScheduler:
                 task = task_queue.get(timeout=1)
 
                 if task is None:  # Poison pill to stop worker
-                    if self.verbose:
-                        print(f"Worker on GPU {gpu_id} received stop signal")
                     break
 
                 task_id, task_args = task
+                
+                # Check if this task is for a specific batch size that requires fewer workers
+                # This is a simple heuristic: if batch_size is 128, only use worker_idx 0-3 (e.g.)
+                # But implementing dynamic scaling per task is complex in this architecture.
+                # Instead, we will rely on max_workers being set globally and tasks just consuming available slots.
+                # The "optimal" setting is passed by the user.
 
                 if self.verbose:
-                    print(f"GPU {gpu_id}: Processing task {task_id}")
+                    print(f"GPU {gpu_id} (Worker {worker_idx}): Processing task {task_id}")
 
                 try:
                     # Execute the task
@@ -150,7 +154,7 @@ class GPUScheduler:
             for worker_idx in range(self.workers_per_gpu):
                 p = mp.Process(
                     target=self._worker,
-                    args=(gpu_id, task_queue, result_queue, worker_func)
+                    args=(gpu_id, worker_idx, task_queue, result_queue, worker_func)
                 )
                 p.start()
                 processes.append(p)
