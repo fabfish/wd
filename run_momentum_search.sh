@@ -14,7 +14,7 @@ echo ""
 echo "Using 2 workers per GPU (for A6000 Pro 48GB)"
 echo "=========================================="
 
-python3 run_momentum_search.py --gpus all --epochs 100 --workers-per-gpu 10
+python3 run_momentum_search.py --gpus 0,1 --epochs 100 --workers-per-gpu 10 --log-interval 25
 
 echo ""
 echo "Results saved to: outputs/results/momentum_search.csv"

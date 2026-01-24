@@ -11,6 +11,7 @@ import csv
 import os
 import time
 from pathlib import Path
+import threading
 
 import torch
 import torch.optim as optim
@@ -22,6 +23,9 @@ from models import resnet18
 from utils import set_seed, train_model
 from gpu_scheduler import GPUScheduler, parse_gpu_ids
 from logger import get_logger
+
+# Thread-safe lock for incremental CSV writing
+csv_lock = threading.Lock()
 
 
 def get_cifar100_loaders(batch_size=128, num_workers=2):
@@ -43,7 +47,7 @@ def get_cifar100_loaders(batch_size=128, num_workers=2):
     return train_loader, test_loader
 
 
-def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, seed, use_amp, save_checkpoints=False):
+def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, seed, use_amp, save_checkpoints=False, log_interval=10):
     """Worker function for running a single experiment."""
     torch.backends.cudnn.benchmark = True
     set_seed(seed)
@@ -59,7 +63,7 @@ def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, s
 
     best_test_acc, final_test_acc, final_train_loss = train_model(
         model, train_loader, test_loader, optimizer, scheduler,
-        device, epochs=epochs, use_amp=use_amp
+        device, epochs=epochs, use_amp=use_amp, log_interval=log_interval
     )
 
     return {
@@ -74,7 +78,7 @@ def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, s
     }
 
 
-def run_momentum_search(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None, workers_per_gpu=1):
+def run_momentum_search(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None, workers_per_gpu=1, log_interval=10, output_file=None):
     """
     搜索 SGDM+WD 的最佳 momentum 值
     
@@ -103,7 +107,7 @@ def run_momentum_search(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None,
     tasks = []
     for momentum in momentums:
         for lr in lrs:
-            task = ("SGDM+WD", batch_size, lr, wd, momentum, epochs, seed, use_amp, False)
+            task = ("SGDM+WD", batch_size, lr, wd, momentum, epochs, seed, use_amp, False, log_interval)
             tasks.append(task)
 
     total_runs = len(tasks)
@@ -114,11 +118,18 @@ def run_momentum_search(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None,
         logger.info(f"  Momentums: {momentums}")
         logger.info(f"  (momentum=0.9 already in sgdm_extended.csv)")
 
+    # Create incremental save callback
+    def save_result_incrementally(result):
+        if result is not None and output_file:
+            save_single_result(result, output_file)
+            if logger:
+                logger.info(f"  Saved: LR={result['lr']}, Mom={result['momentum']}, Acc={result['best_test_acc']:.2f}%")
+
     # Use GPU scheduler for multi-GPU parallel execution
     # For A6000 Pro (48GB), can run 2-4 experiments per GPU
-    scheduler = GPUScheduler(gpu_ids=gpu_ids, verbose=True, workers_per_gpu=workers_per_gpu)
+    scheduler = GPUScheduler(gpu_ids=gpu_ids, verbose=False, workers_per_gpu=workers_per_gpu)
     start_time = time.time()
-    results = scheduler.run_tasks(tasks, run_single_experiment_worker)
+    results = scheduler.run_tasks(tasks, run_single_experiment_worker, on_complete=save_result_incrementally)
     elapsed_time = time.time() - start_time
 
     if logger:
@@ -146,8 +157,27 @@ def run_momentum_search(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None,
     return results
 
 
+def save_single_result(result, output_file):
+    """Save a single result to CSV file (thread-safe incremental save)"""
+    if result is None:
+        return
+
+    fieldnames = ['method', 'batch_size', 'lr', 'wd', 'momentum',
+                  'final_test_acc', 'final_train_loss', 'best_test_acc']
+
+    with csv_lock:
+        file_exists = os.path.exists(output_file)
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+
+        with open(output_file, 'a', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(result)
+
+
 def save_results(results, output_file, logger=None):
-    """Save results to CSV file"""
+    """Save all results to CSV file (batch save, deprecated in favor of incremental)"""
     if not results:
         return
 
@@ -177,6 +207,7 @@ def main():
     parser.add_argument('--use_amp', action='store_true', default=True)
     parser.add_argument('--gpus', type=str, default=None, help='GPU IDs to use, e.g., "0,1" or "all"')
     parser.add_argument('--workers-per-gpu', type=int, default=2, help='Workers per GPU (default 2 for A6000 Pro)')
+    parser.add_argument('--log-interval', type=int, default=10, help='Log every N epochs (default 10)')
     parser.add_argument('--no_log', action='store_true')
     args = parser.parse_args()
 
@@ -198,13 +229,19 @@ def main():
         'GPUs': gpu_ids if gpu_ids else 'all' if args.gpus == 'all' else 'CPU',
         'Weight Decay': 0.002,
         'Momentums': [0.5, 0.7, 0.8, 0.95, 0.99],
+        'Log Interval': args.log_interval,
     })
 
     start_time = time.time()
-    results = run_momentum_search(gpu_ids, args.epochs, args.seed, args.use_amp, logger, args.workers_per_gpu)
+    results = run_momentum_search(
+        gpu_ids, args.epochs, args.seed, args.use_amp, logger, args.workers_per_gpu,
+        log_interval=args.log_interval, output_file=args.output
+    )
     elapsed_time = time.time() - start_time
 
-    save_results(results, args.output, logger)
+    # Note: Results are already saved incrementally, so save_results is now optional
+    # save_results(results, args.output, logger)
+    logger.info(f"All results saved to {args.output}")
 
     successful = sum(1 for r in results if r is not None)
     logger.log_experiment_end(successful, len(results), elapsed_time)

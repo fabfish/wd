@@ -17,7 +17,7 @@ class GPUScheduler:
     Each GPU can have multiple worker processes that pull tasks from a shared queue.
     """
 
-    def __init__(self, gpu_ids=None, verbose=True, workers_per_gpu=1):
+    def __init__(self, gpu_ids=None, verbose=False, workers_per_gpu=1):
         """
         Initialize GPU scheduler.
 
@@ -157,7 +157,7 @@ class GPUScheduler:
             for worker_idx in range(self.workers_per_gpu):
                 p = mp.Process(
                     target=self._worker,
-                    args=(gpu_id, task_queue, result_queue, worker_func)
+                    args=(gpu_id, worker_idx, task_queue, result_queue, worker_func)
                 )
                 p.start()
                 processes.append(p)

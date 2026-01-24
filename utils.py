@@ -35,7 +35,7 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, use_amp=True)
     total_loss = 0.0
     total_samples = 0
 
-    pbar = tqdm(train_loader, desc="Training", leave=False)
+    pbar = tqdm(train_loader, desc="Training", leave=False, disable=True)  # Disabled for speed
     for inputs, targets in pbar:
         inputs, targets = inputs.to(device), targets.to(device)
 
@@ -101,9 +101,12 @@ def evaluate(model, test_loader, device):
 
 
 def train_model(model, train_loader, test_loader, optimizer, scheduler,
-                device, epochs=100, use_amp=True):
+                device, epochs=100, use_amp=True, log_interval=10):
     """
     Complete training loop.
+
+    Args:
+        log_interval: Log every N epochs (default 10). Set to 1 for verbose logging.
 
     Returns:
         best_test_acc: Best test accuracy achieved
@@ -125,8 +128,10 @@ def train_model(model, train_loader, test_loader, optimizer, scheduler,
             final_test_acc = test_acc
             final_train_loss = train_loss
 
-        print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.4f} | "
-              f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Best Acc: {best_test_acc:.2f}%")
+        # Only log at intervals or at the end
+        if (epoch + 1) % log_interval == 0 or epoch == epochs - 1:
+            print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.4f} | "
+                  f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Best Acc: {best_test_acc:.2f}%")
 
     return best_test_acc, final_test_acc, final_train_loss
 
@@ -185,7 +190,7 @@ def load_checkpoint(filepath, model, optimizer=None, scheduler=None):
 
 def train_model_with_checkpoints(model, train_loader, test_loader, optimizer, scheduler,
                                    device, epochs=100, use_amp=True, save_best=True,
-                                   checkpoint_dir=None, run_id="run", logger=None):
+                                   checkpoint_dir=None, run_id="run", logger=None, log_interval=10):
     """
     Complete training loop with checkpoint saving and logging support.
 
@@ -202,6 +207,7 @@ def train_model_with_checkpoints(model, train_loader, test_loader, optimizer, sc
         checkpoint_dir: Directory to save checkpoints (default: outputs/checkpoints)
         run_id: Identifier for this run
         logger: Optional logger instance
+        log_interval: Log every N epochs (default 10). Set to 1 for verbose logging.
 
     Returns:
         best_test_acc: Best test accuracy achieved
@@ -224,17 +230,19 @@ def train_model_with_checkpoints(model, train_loader, test_loader, optimizer, sc
         train_loss = train_epoch(model, train_loader, optimizer, scheduler, device, use_amp)
         test_acc, test_loss = evaluate(model, test_loader, device)
 
-        # Log metrics
-        if logger:
-            logger.log_metrics(epoch + 1, {
-                'train_loss': train_loss,
-                'test_loss': test_loss,
-                'test_acc': test_acc,
-                'best_acc': best_test_acc
-            })
-        else:
-            print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.4f} | "
-                  f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Best Acc: {best_test_acc:.2f}%")
+        # Log metrics at intervals or at the end
+        should_log = (epoch + 1) % log_interval == 0 or epoch == epochs - 1
+        if should_log:
+            if logger:
+                logger.log_metrics(epoch + 1, {
+                    'train_loss': train_loss,
+                    'test_loss': test_loss,
+                    'test_acc': test_acc,
+                    'best_acc': best_test_acc
+                })
+            else:
+                print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.4f} | "
+                      f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Best Acc: {best_test_acc:.2f}%")
 
         # Save best checkpoint
         if test_acc > best_test_acc:
