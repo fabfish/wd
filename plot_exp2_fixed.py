@@ -114,13 +114,17 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     - All English labels
     """
     # Filter SGDM data with batch_size=128
-    exp2_df = df[(df['method'] == 'SGDM') & (df['batch_size'] == 128)].copy()
+    exp2_df_all = df[(df['method'] == 'SGDM') & (df['batch_size'] == 128)].copy()
+    
+    # For plots 1 and 2: use only original data (wd >= 0.0001, lr >= 0.01)
+    # This excludes the new supplement data with smaller wd and lr values
+    exp2_df = exp2_df_all[(exp2_df_all['wd'] >= 0.0001) & (exp2_df_all['lr'] >= 0.01)].copy()
 
     if exp2_df.empty:
         print("No data for Experiment 2")
         return
 
-    # Create pivot table
+    # Create pivot table for heatmap (using original data only)
     pivot = exp2_df.pivot_table(
         values='best_test_acc',
         index='wd',
@@ -281,11 +285,11 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     ax2.set_xlim(left=0)
     ax2.set_ylim(bottom=0)
 
-    # Plot 3: Accuracy vs eta*lambda
+    # Plot 3: Accuracy vs eta*lambda (using ALL data including supplement)
     ax3 = axes[2]
-    exp2_df['eta_lambda'] = exp2_df['lr'] * exp2_df['wd']
+    exp2_df_all['eta_lambda'] = exp2_df_all['lr'] * exp2_df_all['wd']
 
-    ax3.scatter(exp2_df['eta_lambda'], exp2_df['best_test_acc'],
+    ax3.scatter(exp2_df_all['eta_lambda'], exp2_df_all['best_test_acc'],
                 alpha=0.7, s=60, c='steelblue')
 
     ax3.set_xscale('log')
@@ -297,7 +301,7 @@ def plot_exp2_heatmap_fixed(df, output_dir):
 
     # Add light green background region for points with accuracy >= 75.5
     high_acc_threshold = 75.5
-    high_acc_points = exp2_df[exp2_df['best_test_acc'] >= high_acc_threshold]
+    high_acc_points = exp2_df_all[exp2_df_all['best_test_acc'] >= high_acc_threshold]
     if not high_acc_points.empty:
         # Use exact x range of high accuracy points (no margin)
         box_x_min = high_acc_points['eta_lambda'].min()
@@ -341,9 +345,9 @@ def plot_exp2_heatmap_fixed(df, output_dir):
         ax3.axvline(x=box_x_min, color='darkgreen', linewidth=2.5, linestyle='-', zorder=2)
         ax3.axvline(x=box_x_max, color='darkgreen', linewidth=2.5, linestyle='-', zorder=2)
 
-    # Mark optimal point
-    best_idx = exp2_df['best_test_acc'].idxmax()
-    best_row = exp2_df.loc[best_idx]
+    # Mark optimal point (from all data)
+    best_idx = exp2_df_all['best_test_acc'].idxmax()
+    best_row = exp2_df_all.loc[best_idx]
     ax3.scatter([best_row['eta_lambda']], [best_row['best_test_acc']],
                 s=200, c='red', marker='*', zorder=5,
                 label=f'Best: η={best_row["lr"]}, λ={best_row["wd"]}')
