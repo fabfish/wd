@@ -236,7 +236,7 @@ def main():
     ax.set_ylabel('Test Accuracy (%)', fontsize=18, fontweight='bold')
     
     # Two-line title
-    ax.set_title('Optimal LR Ordering: SGDM+WD < SGD+WD < SGD\nOptimal Performance: SGDM+WD > SGD+WD > SGD', fontweight='bold', fontsize=20, pad=20)
+    ax.set_title('Optimal Performance: SGDM+WD > SGD+WD > SGD', fontweight='bold', fontsize=20, pad=20)
     
     ax.grid(True, alpha=0.3)
     

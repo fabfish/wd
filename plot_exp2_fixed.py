@@ -287,12 +287,49 @@ def plot_exp2_heatmap_fixed(df, output_dir):
 
     # Plot 3: Accuracy vs eta*lambda (using ALL data including supplement)
     ax3 = axes[2]
-    exp2_df_all['eta_lambda'] = exp2_df_all['lr'] * exp2_df_all['wd']
+    
+    # Define transformation function for x-axis compression
+    def transform_x(x_arr):
+        """
+        Compress range [10^-8, 10^-5] into visual width of 1 decade.
+        Standard log scale for x >= 10^-5.
+        Mapping:
+          log(10^-5) = -5  -> -5
+          log(10^-8) = -8  -> -6
+        Formula for x < 10^-5:
+          x_new = -5 + (log10(x) - (-5)) / 3
+        """
+        log_x = np.log10(np.array(x_arr))
+        x_new = log_x.copy()
+        
+        # Mask for compressed region (x < 10^-5)
+        mask = log_x < -5
+        if np.any(mask):
+            x_new[mask] = -5 + (log_x[mask] + 5) / 3
+            
+        return x_new
 
-    ax3.scatter(exp2_df_all['eta_lambda'], exp2_df_all['best_test_acc'],
+    # Calculate eta_lambda for all data
+    exp2_df_all['eta_lambda'] = exp2_df_all['lr'] * exp2_df_all['wd']
+    
+    # Transform x coordinates
+    x_transformed = transform_x(exp2_df_all['eta_lambda'])
+    
+    ax3.scatter(x_transformed, exp2_df_all['best_test_acc'],
                 alpha=0.7, s=60, c='steelblue')
 
-    ax3.set_xscale('log')
+    # Custom x-axis ticks and labels
+    # Major ticks: 10^-8, 10^-5, 10^-4, 10^-3, 10^-2
+    # Transformed positions: -6, -5, -4, -3, -2
+    major_ticks = [-6, -5, -4, -3, -2]
+    major_labels = ['$10^{-8}$', '$10^{-5}$', '$10^{-4}$', '$10^{-3}$', '$10^{-2}$']
+    
+    ax3.set_xticks(major_ticks)
+    ax3.set_xticklabels(major_labels)
+    
+    # Add separating line at 10^-5 (visual indicator of scale change)
+    ax3.axvline(x=-5, color='gray', linestyle=':', alpha=0.5)
+    
     ax3.set_xlabel('η × λ', fontsize=12)
     ax3.set_ylabel('Test Accuracy (%)', fontsize=12)
     ax3.set_title('Accuracy vs η×λ\n(Verifying λ∝1/η: constant η×λ)', fontsize=14, fontweight='bold')
@@ -304,8 +341,12 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     high_acc_points = exp2_df_all[exp2_df_all['best_test_acc'] >= high_acc_threshold]
     if not high_acc_points.empty:
         # Use exact x range of high accuracy points (no margin)
-        box_x_min = high_acc_points['eta_lambda'].min()
-        box_x_max = high_acc_points['eta_lambda'].max()
+        # Apply transformation to min/max
+        raw_min = high_acc_points['eta_lambda'].min()
+        raw_max = high_acc_points['eta_lambda'].max()
+        
+        box_x_min = transform_x([raw_min])[0]
+        box_x_max = transform_x([raw_max])[0]
 
         from matplotlib.patches import Rectangle
 
@@ -348,7 +389,10 @@ def plot_exp2_heatmap_fixed(df, output_dir):
     # Mark optimal point (from all data)
     best_idx = exp2_df_all['best_test_acc'].idxmax()
     best_row = exp2_df_all.loc[best_idx]
-    ax3.scatter([best_row['eta_lambda']], [best_row['best_test_acc']],
+    
+    best_x = transform_x([best_row['eta_lambda']])[0]
+    
+    ax3.scatter([best_x], [best_row['best_test_acc']],
                 s=200, c='red', marker='*', zorder=5,
                 label=f'Best: η={best_row["lr"]}, λ={best_row["wd"]}')
     ax3.legend(fontsize=10)

@@ -24,9 +24,9 @@ from collections import defaultdict
 
 # Set style
 plt.style.use('seaborn-v0_8-whitegrid')
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.titlesize'] = 12
-plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.titlesize'] = 14
+plt.rcParams['axes.labelsize'] = 15
 plt.rcParams['figure.dpi'] = 150
 
 
@@ -115,15 +115,20 @@ def plot_training_curves(ax_loss, ax_acc, histories, title_prefix, legend_label_
     ax_loss.set_xlabel('Epoch')
     ax_loss.set_ylabel('Train Loss')
     ax_loss.set_title(f'{title_prefix} - Train Loss')
-    ax_loss.legend(fontsize=8, loc='upper right')
+    ax_loss.legend(fontsize=10, loc='upper right')
+    ax_loss.grid(True, linestyle='--', alpha=0.5)
+    ax_loss.set_xlim(left=0)
+    ax_loss.set_ylim(bottom=0)
 
     ax_acc.set_xlabel('Epoch')
     ax_acc.set_ylabel('Test Acc (%)')
     ax_acc.set_title(f'{title_prefix} - Test Accuracy')
-    ax_acc.legend(fontsize=8, loc='lower right')
+    ax_acc.legend(fontsize=10, loc='lower right')
+    ax_acc.grid(True, linestyle='--', alpha=0.5)
+    ax_acc.set_xlim(left=0)
 
 
-def plot_heatmap_improved(ax, df, bs, title, cax=None):
+def plot_heatmap_improved(ax, df, bs, title, cax=None, show_ylabel=True):
     """
     Plot improved heatmap of best test accuracy for given batch size.
     - Smooth interpolation
@@ -182,12 +187,13 @@ def plot_heatmap_improved(ax, df, bs, title, cax=None):
 
     # Set tick positions and labels
     ax.set_xticks(np.arange(len(pivot.columns)) + 0.5)
-    ax.set_xticklabels([f'{x:.3g}' for x in pivot.columns], rotation=45, ha='right', fontsize=8)
+    ax.set_xticklabels([f'{x:.3g}' for x in pivot.columns], rotation=45, ha='right', fontsize=10)
     ax.set_yticks(np.arange(len(pivot.index)) + 0.5)
-    ax.set_yticklabels([f'{y:.0e}' for y in pivot.index], fontsize=8)
+    ax.set_yticklabels([f'{y:.0e}' for y in pivot.index], fontsize=10)
 
     ax.set_xlabel('Learning Rate (η)')
-    ax.set_ylabel('Weight Decay (λ)')
+    if show_ylabel:
+        ax.set_ylabel('Weight Decay (λ)')
     ax.set_title(title)
 
     # Add text annotations at cell centers
@@ -198,7 +204,7 @@ def plot_heatmap_improved(ax, df, bs, title, cax=None):
                 # Use black/white based on value
                 color = 'white' if val < 60 else 'black'
                 ax.text(j + 0.5, i + 0.5, f'{val:.1f}',
-                        ha='center', va='center', color=color, fontsize=7, fontweight='bold')
+                        ha='center', va='center', color=color, fontsize=9, fontweight='bold')
 
     # Mark maximum with blue rectangle
     max_val = pivot.values[~np.isnan(pivot.values)].max()
@@ -226,7 +232,7 @@ def create_3x2_visualization(all_data, results_df, output_path):
     optimal_lrs = {32: 0.02, 128: 0.05}    # Optimal LR per batch size
 
     # Create grid: 3 rows × 4 columns + space for colorbar
-    gs = fig.add_gridspec(3, 5, hspace=0.35, wspace=0.35, width_ratios=[1, 1, 1, 1, 0.05])
+    gs = fig.add_gridspec(3, 5, hspace=0.35, wspace=0.25, width_ratios=[1, 1, 1, 1, 0.05])
 
     heatmap_ims = []
 
@@ -242,18 +248,19 @@ def create_3x2_visualization(all_data, results_df, output_path):
             ax_loss = fig.add_subplot(gs[0, col_idx * 2])
             ax_acc = fig.add_subplot(gs[0, col_idx * 2 + 1])
             plot_training_curves(ax_loss, ax_acc, row1_data,
-                                 f'BS={bs}, λ={fixed_wd:.0e}',
+                                 f'λ={fixed_wd:.0e}',
                                  legend_label_key='lr',
                                  legend_format=lambda x: f'η={x}')
         else:
             ax = fig.add_subplot(gs[0, col_idx * 2: col_idx * 2 + 2])
-            ax.text(0.5, 0.5, f'No data for BS={bs}, λ={fixed_wd:.0e}',
+            ax.text(0.5, 0.5, f'No data for λ={fixed_wd:.0e}',
                     ha='center', va='center', transform=ax.transAxes)
-            ax.set_title(f'BS={bs} - Fixed λ')
+            ax.set_title(f'Fixed λ')
 
         # ========== Row 2: Heatmap ==========
         ax_hm = fig.add_subplot(gs[1, col_idx * 2: col_idx * 2 + 2])
-        im = plot_heatmap_improved(ax_hm, results_df, bs, f'BS={bs} - Best Test Accuracy (%)')
+        show_ylabel = (col_idx == 0)
+        im = plot_heatmap_improved(ax_hm, results_df, bs, 'Best Test Accuracy (%)', show_ylabel=show_ylabel)
         if im is not None:
             heatmap_ims.append(im)
 
@@ -265,29 +272,29 @@ def create_3x2_visualization(all_data, results_df, output_path):
             ax_loss = fig.add_subplot(gs[2, col_idx * 2])
             ax_acc = fig.add_subplot(gs[2, col_idx * 2 + 1])
             plot_training_curves(ax_loss, ax_acc, row3_data,
-                                 f'BS={bs}, η={fixed_lr}',
+                                 f'η={fixed_lr}',
                                  legend_label_key='wd',
                                  legend_format=lambda x: f'λ={x:.0e}')
         else:
             ax = fig.add_subplot(gs[2, col_idx * 2: col_idx * 2 + 2])
-            ax.text(0.5, 0.5, f'No data for BS={bs}, η={fixed_lr}',
+            ax.text(0.5, 0.5, f'No data for η={fixed_lr}',
                     ha='center', va='center', transform=ax.transAxes)
-            ax.set_title(f'BS={bs} - Fixed η')
+            ax.set_title(f'Fixed η')
 
     # Add shared colorbar for heatmaps
     if heatmap_ims:
         cbar_ax = fig.add_subplot(gs[1, 4])
         cbar = fig.colorbar(heatmap_ims[0], cax=cbar_ax)
-        cbar.set_label('Test Accuracy (%)', fontsize=11)
+        cbar.set_label('Test Accuracy (%)', fontsize=12)
 
     # Add column titles (reduced whitespace)
-    fig.text(0.27, 0.94, 'Batch Size = 32', ha='center', va='top', fontsize=14, fontweight='bold')
-    fig.text(0.72, 0.94, 'Batch Size = 128', ha='center', va='top', fontsize=14, fontweight='bold')
+    fig.text(0.27, 0.94, 'Batch Size = 32', ha='center', va='top', fontsize=16, fontweight='bold')
+    fig.text(0.72, 0.94, 'Batch Size = 128', ha='center', va='top', fontsize=16, fontweight='bold')
 
     # Add row titles
-    fig.text(0.02, 0.83, 'Row 1:\nFixed λ\n(optimal)\nVarying η', ha='center', va='center', fontsize=9, rotation=0)
-    fig.text(0.02, 0.50, 'Row 2:\nOptimal\n(η, λ)', ha='center', va='center', fontsize=9, rotation=0)
-    fig.text(0.02, 0.17, 'Row 3:\nFixed η\n(optimal)\nVarying λ', ha='center', va='center', fontsize=9, rotation=0)
+    fig.text(0.04, 0.83, 'Fixed λ', ha='center', va='center', fontsize=16, rotation=0, fontweight='bold')
+    fig.text(0.04, 0.50, 'Optimal\n(η, λ)', ha='center', va='center', fontsize=16, rotation=0, fontweight='bold')
+    fig.text(0.04, 0.17, 'Fixed η', ha='center', va='center', fontsize=16, rotation=0, fontweight='bold')
 
     # Main title
     # fig.suptitle('V3 Supplementary: Batch Size Scaling Analysis\n(LR scaling: BS32→BS128 requires 2.5x higher LR)',

@@ -1,0 +1,213 @@
+"""
+Plot v4 for exp1 LR ordering using all available data + SGDM (no WD).
+Goal: Demonstrate trend η_SGD > η_SGDM > η_SGD+WD > η_SGDM+WD
+"""
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
+
+def main():
+    output_dir = Path('outputs/plots')
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Load Data
+    # ----------------
+    results_dir = Path('outputs/results')
+    
+    # SGD (Baseline)
+    df_sgd = pd.read_csv(results_dir / 'results_v2.csv')
+    sgd_curve = df_sgd[(df_sgd['method'] == 'SGD') & (df_sgd['batch_size'] == 128)].sort_values('lr')
+    
+    # SGD+WD (Old + New)
+    df_sgdwd_old = pd.read_csv(results_dir / 'three_methods_comparison.csv')
+    df_sgdwd_supp = pd.read_csv(results_dir / 'sgdwd_supplement.csv')
+    df_new = pd.read_csv(results_dir / 'wd_shift_search.csv')
+    
+    # Construct "Best Middle" SGD+WD
+    # We use wd=0.005 if available and valid
+    sgdwd_005 = df_new[(df_new['method'] == 'SGD+WD') & (df_new['wd'] == 0.005)].sort_values('lr')
+    sgdwd_010 = df_new[(df_new['method'] == 'SGD+WD') & (df_new['wd'] == 0.01)].sort_values('lr')
+    
+    # Load LR Extension for SGD+WD
+    extension_file = results_dir / 'lr_extension.csv'
+    if extension_file.exists():
+        df_ext = pd.read_csv(extension_file)
+        ext_sgdwd = df_ext[(df_ext['method'] == 'SGD+WD') & (df_ext['wd'] == 0.005)]
+        if len(ext_sgdwd) > 0:
+            sgdwd_005 = pd.concat([sgdwd_005, ext_sgdwd]).sort_values('lr').drop_duplicates('lr')
+            
+    # SGDM (no WD) - NEW
+    sgdm_no_wd_file = results_dir / 'sgdm_no_wd.csv'
+    sgdm_no_wd_curve = None
+    if sgdm_no_wd_file.exists():
+        df_sgdm_no_wd = pd.read_csv(sgdm_no_wd_file)
+        if len(df_sgdm_no_wd) > 0:
+            # Drop duplicates (keep last) and sort
+            sgdm_no_wd_curve = df_sgdm_no_wd.drop_duplicates('lr', keep='last').sort_values('lr')
+            print(f"Loaded {len(sgdm_no_wd_curve)} points for SGDM (no WD)")
+    else:
+        print("Warning: sgdm_no_wd.csv not found")
+
+    # SGDM+WD (New Refined)
+    sgdm_new = df_new[df_new['method'] == 'SGDM+WD']
+    
+    # Selection Logic
+    # ---------------
+    
+    # 1. SGD
+    # Fixed
+    
+    # 2. SGDM (no WD)
+    # Use whatever we have
+    
+    # 3. SGD+WD
+    # Prefer wd=0.005 if peak < 0.3
+    selected_sgdwd = sgdwd_005
+    selected_sgdwd_name = 'SGD+WD (wd=0.005)'
+    if len(selected_sgdwd) == 0:
+        # Fallback
+        # replicate v3 fallback logic if needed, but assuming 0.005 exists now
+        pass
+
+    # 4. SGDM+WD
+    selected_sgdm = None
+    selected_sgdm_name = 'SGDM+WD'
+    if len(sgdm_new) > 0:
+        best_sgdm_idx = sgdm_new['best_test_acc'].idxmax()
+        best_wd = sgdm_new.loc[best_sgdm_idx, 'wd']
+        best_mom = sgdm_new.loc[best_sgdm_idx, 'momentum']
+        selected_sgdm = sgdm_new[(sgdm_new['wd'] == best_wd) & (sgdm_new['momentum'] == best_mom)].sort_values('lr')
+        selected_sgdm_name = f"SGDM+WD (wd={best_wd}, m={best_mom})"
+    
+    # Plotting
+    # --------
+    fig, ax = plt.subplots(figsize=(8, 9)) # Slightly wider/taller
+    
+    # Color Scheme
+    # We want 4 blues/purples?
+    # SGD (Lightest) -> SGDM -> SGD+WD -> SGDM+WD (Darkest)
+    
+    colors = [
+        '#90CAF9', # SGD - Light Blue
+        '#64B5F6', # SGDM - Mid Light Blue
+        '#1E88E5', # SGD+WD - Mid Dark Blue
+        '#0D47A1'  # SGDM+WD - Dark Blue
+    ]
+    markers = ['o', 'D', 's', '^']
+    
+    curves_to_plot = []
+    
+    # 1. SGD
+    curves_to_plot.append({
+        'name': 'SGD',
+        'df': sgd_curve,
+        'color': colors[0],
+        'marker': markers[0]
+    })
+    
+    # 2. SGDM (no WD)
+    if sgdm_no_wd_curve is not None:
+        curves_to_plot.append({
+            'name': 'SGDM (no WD)',
+            'df': sgdm_no_wd_curve,
+            'color': colors[1],
+            'marker': markers[1]
+        })
+        
+    # 3. SGD+WD
+    if len(selected_sgdwd) > 0:
+        curves_to_plot.append({
+            'name': selected_sgdwd_name,
+            'df': selected_sgdwd,
+            'color': colors[2],
+            'marker': markers[2]
+        })
+        
+    # 4. SGDM+WD
+    if selected_sgdm is not None:
+         curves_to_plot.append({
+            'name': selected_sgdm_name,
+            'df': selected_sgdm,
+            'color': colors[3],
+            'marker': markers[3]
+        })
+    
+    star_color = '#D50000' # Red
+    
+    # Helper for visual mapping if needed (0.5 -> 0.4 compressed?)
+    # v3 mapped 0.5 -> 0.4.
+    def map_lr(lr):
+        return 0.4 if lr >= 0.5 else lr
+
+    for item in curves_to_plot:
+        item['df'] = item['df'].reset_index(drop=True) # FIX: Reset index
+        df = item['df']
+        name = item['name']
+        color = item['color']
+        marker = item['marker']
+        
+        if df is not None and len(df) > 0:
+             # Convert lr to float just in case
+            df['lr'] = df['lr'].astype(float)
+            x_vals = df['lr'].apply(map_lr)
+            y_vals = df['best_test_acc']
+            
+            # Curve
+            ax.plot(x_vals, y_vals, marker=marker, label=name, color=color, lw=4.0, ms=12, alpha=0.9)
+            
+            # Optimal Point
+            if len(df) >= 3: # Only mark optimal if we have enough points
+                best_idx = df['best_test_acc'].idxmax()
+                best = df.loc[best_idx]
+                best_visual_lr = map_lr(best['lr'])
+                
+                # Star
+                ax.scatter([best_visual_lr], [best['best_test_acc']], s=400, c=star_color, marker='*', edgecolors='white', linewidth=1.5, zorder=10)
+                
+                # Bar
+                y_base = 69
+                ax.vlines(x=best_visual_lr, ymin=y_base, ymax=best['best_test_acc'], colors=color, linestyles='-', lw=15, alpha=0.2, zorder=1)
+                
+                # Text
+                # slightly offset to avoid overlap
+                # if multiple peaks are close, this might get messy.
+                # Just plot it for now.
+                ax.text(best_visual_lr, best['best_test_acc'] + 0.3,
+                        f"LR:{best['lr']}\n{best['best_test_acc']:.1f}%",
+                        ha='center', va='bottom', fontsize=11, fontweight='bold', color=color)
+
+    # Legends
+    from matplotlib.lines import Line2D
+    
+    # Curve Legend
+    curve_handles = []
+    for item in curves_to_plot:
+         h = Line2D([], [], color=item['color'], marker=item['marker'], linestyle='-', linewidth=4.0, markersize=12, label=item['name'])
+         curve_handles.append(h)
+    
+    # Improve legend position
+    ax.legend(handles=curve_handles, loc='best', fontsize=14, framealpha=0.95)
+    
+    ax.set_xlabel('Learning Rate', fontsize=16, fontweight='bold')
+    ax.set_ylabel('Test Accuracy (%)', fontsize=16, fontweight='bold')
+    ax.set_title('Evolution: SGD > SGDM > SGD+WD > SGDM+WD', fontweight='bold', fontsize=16, pad=20)
+    
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(69, 81)
+    
+    # X-axis
+    ax.set_xlim(0.0, 0.45)
+    visual_ticks = [0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4]
+    tick_labels = ['0.0', '0.05', '0.1', '0.15', '0.2', '0.3', '0.5']
+    ax.set_xticks(visual_ticks)
+    ax.set_xticklabels(tick_labels)
+    ax.tick_params(labelsize=14)
+
+    plt.tight_layout()
+    output_path = output_dir / 'exp1_lr_ordering_v4.png'
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    print(f"\nSaved plot to {output_path}")
+
+if __name__ == '__main__':
+    main()
