@@ -107,19 +107,36 @@ def main():
     selected_sgdwd_name = 'SGD+WD (wd=0.005)'
 
     # 4. SGDM+WD
+    # Prioritize curves with at least 4 points
     selected_sgdm = None
     selected_sgdm_name = 'SGDM+WD'
+    
     if len(sgdm_new) > 0:
-        best_sgdm_idx = sgdm_new['best_test_acc'].idxmax()
-        best_wd = sgdm_new.loc[best_sgdm_idx, 'wd']
-        best_mom = sgdm_new.loc[best_sgdm_idx, 'momentum']
-        selected_sgdm = sgdm_new[(sgdm_new['wd'] == best_wd) & (sgdm_new['momentum'] == best_mom)].sort_values('lr')
-        # Ensure sufficient points
-        if len(selected_sgdm) < 3:
-             # Try to find more points for this config?
-             # Or just use what we have
-             pass
-        selected_sgdm_name = f"SGDM+WD (wd={best_wd}, m={best_mom})"
+        # Sort by accuracy descending
+        sorted_indices = sgdm_new['best_test_acc'].sort_values(ascending=False).index
+        
+        for idx in sorted_indices:
+            row = sgdm_new.loc[idx]
+            wd = row['wd']
+            mom = row['momentum']
+            
+            curve = sgdm_new[(sgdm_new['wd'] == wd) & (sgdm_new['momentum'] == mom)].sort_values('lr')
+            
+            # Check length - want at least 4 points for a good curve
+            if len(curve) >= 4:
+                selected_sgdm = curve
+                selected_sgdm_name = f"SGDM+WD (wd={wd}, m={mom})"
+                print(f"Selected SGDM+WD: {selected_sgdm_name} with {len(curve)} points (Max Acc: {row['best_test_acc']:.2f}%)")
+                break
+        
+        if selected_sgdm is None:
+             # Fallback to absolute best
+             best_idx = sgdm_new['best_test_acc'].idxmax()
+             best_wd = sgdm_new.loc[best_idx, 'wd']
+             best_mom = sgdm_new.loc[best_idx, 'momentum']
+             selected_sgdm = sgdm_new[(sgdm_new['wd'] == best_wd) & (sgdm_new['momentum'] == best_mom)].sort_values('lr')
+             selected_sgdm_name = f"SGDM+WD (wd={best_wd}, m={best_mom})"
+             print(f"Fallback SGDM+WD: {selected_sgdm_name} (Points: {len(selected_sgdm)})")
     
     # Plotting
     # --------
@@ -173,34 +190,32 @@ def main():
                 best = df.loc[best_idx]
                 best_visual_lr = map_lr(best['lr'])
                 
-                # Check for overlapping bars
-                # If best_visual_lr is close to already plotted one, offset slightly?
-                # Actually, transparency handles it okay, but let's shift text.
-                
-                # Star
+                # Plot Star
                 ax.scatter([best_visual_lr], [best['best_test_acc']], s=400, c=star_color, marker='*', edgecolors='white', linewidth=1.5, zorder=10)
                 
-                # Bar
+                # Plot Vertical Bar - Handle Overlaps
+                # Logic: If we already have a bar at this X, offset the new one slightly?
+                # Or just don't plot it if it's not the "Focus" curve?
+                # Let's slightly offset X for visual clarity if needed.
+                
                 y_base = 69
-                # If we have multiple bars at 0.4 (original 0.5), shift them slightly?
-                bar_x = best_visual_lr
+                offset = 0
+                if best_visual_lr in plotted_lrs:
+                    # Offset by small amount based on count
+                    count = plotted_lrs.count(best_visual_lr)
+                    offset = 0.008 * (1 if count % 2 == 0 else -1) * ((count // 2) + 1)
                 
-                # Check overlap at 0.4
-                if bar_x == 0.4 and 0.4 in plotted_lrs:
-                     # Already have a bar here. Don't plot another thick one, or make it thinner?
-                     # Let's just plot it, alpha transparency helps.
-                     pass
+                plotted_lrs.append(best_visual_lr)
                 
-                ax.vlines(x=bar_x, ymin=y_base, ymax=best['best_test_acc'], colors=color, linestyles='-', lw=15, alpha=0.2, zorder=1)
+                bar_x = best_visual_lr + offset
                 
-                plotted_lrs.append(bar_x)
+                ax.vlines(x=bar_x, ymin=y_base, ymax=best['best_test_acc'], colors=color, linestyles='-', lw=6, alpha=0.4, zorder=1) # Thinner, more transparent
 
                 # Text
-                # Use offset based on iteration to avoid text collision?
                 text_y = best['best_test_acc'] + 0.3
                 ax.text(bar_x, text_y,
                         f"LR:{best['lr']}\n{best['best_test_acc']:.1f}%",
-                        ha='center', va='bottom', fontsize=11, fontweight='bold', color=color)
+                        ha='center', va='bottom', fontsize=10, fontweight='bold', color=color)
 
     # Legends
     from matplotlib.lines import Line2D
