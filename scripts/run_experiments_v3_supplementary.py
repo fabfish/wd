@@ -35,10 +35,10 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from models import resnet18
-from utils import set_seed
-from gpu_scheduler import GPUScheduler, parse_gpu_ids
-from logger import get_logger
+from wd_core.models import resnet18
+from wd_core.utils import set_seed
+from wd_core.gpu_scheduler import GPUScheduler, parse_gpu_ids
+from wd_core.logger import get_logger
 
 
 def get_cifar100_loaders(batch_size=128, num_workers=0):

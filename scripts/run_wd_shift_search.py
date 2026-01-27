@@ -20,10 +20,10 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-from models import resnet18
-from utils import set_seed, train_model
-from gpu_scheduler import GPUScheduler, parse_gpu_ids
-from logger import get_logger
+from wd_core.models import resnet18
+from wd_core.utils import set_seed, train_model
+from wd_core.gpu_scheduler import GPUScheduler, parse_gpu_ids
+from wd_core.logger import get_logger
 
 # Thread-safe lock for incremental CSV writing
 csv_lock = threading.Lock()

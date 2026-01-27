@@ -10,9 +10,10 @@ import os
 import time
 from itertools import product
 import torch
-from run_three_methods_comparison import run_single_experiment_worker
-from gpu_scheduler import GPUScheduler, parse_gpu_ids
-from logger import get_logger
+from wd_core.models import resnet18
+from wd_core.utils import set_seed, train_model
+from wd_core.gpu_scheduler import GPUScheduler, parse_gpu_ids
+from wd_core.logger import get_logger
 
 def run_sgdm_search_low(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None):
     if logger:

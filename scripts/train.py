@@ -8,8 +8,8 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-from models import resnet18
-from utils import set_seed, train_model
+from wd_core.models import resnet18
+from wd_core.utils import set_seed, train_model
 
 
 def get_cifar100_loaders(batch_size=128, num_workers=4):
