@@ -85,3 +85,5 @@ tensorboard/
 .claude/
 .specstory/
 .cursorrules
+
+docs/paper
