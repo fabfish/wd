@@ -354,15 +354,17 @@ def draw_diagonal_stroke(ax, low_points, high_points, ellipse_width_log=0.25, el
 # Plotting Functions
 # =============================================================================
 
-def plot_overview_gray(ax, df, title_suffix, selection_box=None, selected_mask=None):
+def plot_overview_gray(ax, df, title_suffix, selection_box=None, selected_mask=None, exclude_mask=None):
     """Plot overview scatter (left panels): mostly gray, with colored overlay for selected points."""
 
     if selected_mask is None:
         selected_mask = np.zeros(len(df), dtype=bool)
+    if exclude_mask is None:
+        exclude_mask = np.zeros(len(df), dtype=bool)
 
-    # Base layer: unified gray points
-    small_df = df[df['BS_Type'] == 'small']
-    large_df = df[df['BS_Type'] == 'large']
+    # Base layer: unified gray points (excluding filtered points)
+    small_df = df[(df['BS_Type'] == 'small') & ~exclude_mask]
+    large_df = df[(df['BS_Type'] == 'large') & ~exclude_mask]
 
     ax.scatter(small_df['LR_x_WD'], small_df['Accuracy'],
                marker='P', s=45, facecolors='#bbbbbb', edgecolors='#777777',
@@ -371,8 +373,8 @@ def plot_overview_gray(ax, df, title_suffix, selection_box=None, selected_mask=N
                marker='o', s=38, facecolors='#9a9a9a', edgecolors='#666666',
                linewidths=0.8, zorder=3)
 
-    # Overlay: only selected points in red/blue (same markers)
-    sel_df = df[selected_mask]
+    # Overlay: only selected points in red/blue (same markers, also excluding filtered)
+    sel_df = df[selected_mask & ~exclude_mask]
     sel_small = sel_df[sel_df['BS_Type'] == 'small']
     sel_large = sel_df[sel_df['BS_Type'] == 'large']
 
@@ -519,11 +521,11 @@ def plot_0shot_detail(ax, df, fig=None):
                 intensity = 0.5
             # Red series: lighter to darker based on accuracy
             color = plt.cm.Reds(0.35 + 0.55 * intensity)
-            ax.scatter(x, y, marker='P', s=160, facecolors=color, 
-                      edgecolors='#cc6666', linewidths=1.0, zorder=10)
+            ax.scatter(x, y, marker='P', s=110, facecolors=color, 
+                      edgecolors='#cc6666', linewidths=0.8, zorder=10)
             # Add label with lr×wd rotated (bottom-left to top-right direction)
             label_text = f'{lr:.0e}×{wd:.0e}'.replace('e-0', 'e-').replace('e+0', 'e+')
-            ax.text(x, y, label_text, fontsize=5.5, rotation=45, 
+            ax.text(x, y, label_text, fontsize=6.5, rotation=45, 
                    ha='left', va='bottom', color='#333333', zorder=11)
     
     # Large batch: blue series (deeper = higher acc) - use filled circle marker
@@ -535,11 +537,11 @@ def plot_0shot_detail(ax, df, fig=None):
             else:
                 intensity = 0.5
             color = plt.cm.Blues(0.35 + 0.55 * intensity)
-            ax.scatter(x, y, marker='o', s=150, facecolors=color,
-                      edgecolors='#6666cc', linewidths=1.0, zorder=10)
+            ax.scatter(x, y, marker='o', s=100, facecolors=color,
+                      edgecolors='#6666cc', linewidths=0.8, zorder=10)
             # Add label with lr×wd rotated (bottom-left to top-right direction)
             label_text = f'{lr:.0e}×{wd:.0e}'.replace('e-0', 'e-').replace('e+0', 'e+')
-            ax.text(x, y, label_text, fontsize=5.5, rotation=45, 
+            ax.text(x, y, label_text, fontsize=6.5, rotation=45, 
                    ha='left', va='bottom', color='#333333', zorder=11)
     
     # Styling - full box on all four sides
@@ -642,21 +644,21 @@ def plot_8shot_detail(ax, df):
     for idx, row in small_df.iterrows():
         x, y = row['LR_x_WD'], row['Accuracy']
         lr, wd = row['LR'], row['WD']
-        ax.scatter(x, y, marker='P', s=130, facecolors='#e74c3c', edgecolors='#cc6666',
-                  linewidths=1.0, zorder=10, label='Small batch' if idx == small_df.index[0] else '')
+        ax.scatter(x, y, marker='P', s=90, facecolors='#e74c3c', edgecolors='#cc6666',
+                  linewidths=0.8, zorder=10, label='Small batch' if idx == small_df.index[0] else '')
         # Add label with lr×wd rotated (bottom-left to top-right direction)
         label_text = f'{lr:.0e}×{wd:.0e}'.replace('e-0', 'e-').replace('e+0', 'e+')
-        ax.text(x, y, label_text, fontsize=5.5, rotation=45, 
+        ax.text(x, y, label_text, fontsize=6.5, rotation=45, 
                ha='left', va='bottom', color='#333333', zorder=11)
     
     for idx, row in large_df.iterrows():
         x, y = row['LR_x_WD'], row['Accuracy']
         lr, wd = row['LR'], row['WD']
-        ax.scatter(x, y, marker='o', s=120, facecolors='#3498db', edgecolors='#6699cc',
-                  linewidths=1.0, zorder=10, label='Large batch' if idx == large_df.index[0] else '')
+        ax.scatter(x, y, marker='o', s=85, facecolors='#3498db', edgecolors='#6699cc',
+                  linewidths=0.8, zorder=10, label='Large batch' if idx == large_df.index[0] else '')
         # Add label with lr×wd rotated (bottom-left to top-right direction)
         label_text = f'{lr:.0e}×{wd:.0e}'.replace('e-0', 'e-').replace('e+0', 'e+')
-        ax.text(x, y, label_text, fontsize=5.5, rotation=45, 
+        ax.text(x, y, label_text, fontsize=6.5, rotation=45, 
                ha='left', va='bottom', color='#333333', zorder=11)
     
     # Styling - full box on all four sides
@@ -722,13 +724,45 @@ def main():
     sel8 = ((df_8shot['Accuracy'] >= 0.10) & (df_8shot['Accuracy'] <= 0.14) &
             (df_8shot['LR_x_WD'] >= 1e-6) & (df_8shot['LR_x_WD'] <= 1e-4)).values
 
+    # Build exclusion masks for left panels
+    # Top-left (0-shot): exclude large circles with lr*wd < 10^-5 AND lr < 0.25
+    #                    exclude small crosses with lr*wd >= 10^-5 AND acc < 0.3
+    #                    exclude small crosses in top-right corner of selection box with lr*wd > 2e-5
+    exclude_0shot = np.zeros(len(df_0shot), dtype=bool)
+    exclude_0shot |= ((df_0shot['BS_Type'] == 'large') & 
+                      (df_0shot['LR_x_WD'] < 1e-5) & 
+                      (df_0shot['LR'].astype(float) < 0.25))
+    exclude_0shot |= ((df_0shot['BS_Type'] == 'small') & 
+                      (df_0shot['LR_x_WD'] >= 1e-5) & 
+                      (df_0shot['Accuracy'] < 0.3))
+    # Exclude small crosses in top-right corner of selection box with lr*wd > 2e-5
+    exclude_0shot |= ((df_0shot['BS_Type'] == 'small') & 
+                      (df_0shot['LR_x_WD'] > 2e-5))
+    
+    # Bottom-left (8-shot): exclude all points with acc > 0.15
+    #                       exclude small crosses with acc < 0.10
+    #                       exclude large circles with lr*wd < 10^-5 and x > left box edge (8e-7)
+    #                       BUT keep lr=5e-4, wd=1e-2 (lr*wd=5e-6)
+    exclude_8shot = np.zeros(len(df_8shot), dtype=bool)
+    exclude_8shot |= (df_8shot['Accuracy'] > 0.15)
+    exclude_8shot |= ((df_8shot['BS_Type'] == 'small') & 
+                      (df_8shot['Accuracy'] < 0.10))
+    # Exclude large circles with lr*wd < 10^-5 and x > left box edge, except 5e-4*1e-2
+    exclude_8shot |= ((df_8shot['BS_Type'] == 'large') & 
+                      (df_8shot['LR_x_WD'] < 1e-5) & 
+                      (df_8shot['LR_x_WD'] > 8e-7) &
+                      ~(np.isclose(df_8shot['LR'].astype(float), 5e-4, rtol=0.01) & 
+                        np.isclose(df_8shot['WD'].astype(float), 1e-2, rtol=0.01)))
+    
     # Plot left panels with selection boxes showing the analysis region
     selection_0shot = (5e-7, 8e-5, 0.28, 0.58)
-    plot_overview_gray(ax_left_top, df_0shot, '0-shot', selection_box=selection_0shot, selected_mask=sel0)
+    plot_overview_gray(ax_left_top, df_0shot, '0-shot', selection_box=selection_0shot, 
+                       selected_mask=sel0, exclude_mask=exclude_0shot)
     
     # Selection box for 8-shot: acc 0.10-0.14, x: 1e-6 to 1e-4
     selection_8shot = (8e-7, 1.2e-4, 0.095, 0.145)
-    plot_overview_gray(ax_left_bottom, df_8shot, '8-shot', selection_box=selection_8shot, selected_mask=sel8)
+    plot_overview_gray(ax_left_bottom, df_8shot, '8-shot', selection_box=selection_8shot, 
+                       selected_mask=sel8, exclude_mask=exclude_8shot)
     
     # Left-top: log y-axis
     ax_left_top.set_yscale('log')
