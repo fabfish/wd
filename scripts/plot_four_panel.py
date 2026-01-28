@@ -151,9 +151,9 @@ def draw_stadium_simple(ax, points, padding_x=0.15, padding_y=0.02,
     height = max_y - min_y
     radius = height / 2
     
-    # Semicircle radius in log space should match half the height visually
-    # We need to scale it properly
-    cap_radius_log = padding_x * 0.8  # radius of semicircle in log-x units
+    # Semicircle radius in log-x space
+    # Make caps rounder
+    cap_radius_log = 0.12 + padding_x * 0.5  # rounder caps
     
     # Create stadium path
     n_arc = 50
@@ -227,103 +227,93 @@ def draw_stadium_simple(ax, points, padding_x=0.15, padding_y=0.02,
             [outline_y[-1], outline_y[0]], color='#555555', linewidth=1.5, alpha=0.7, zorder=zorder+1)
 
 
-def draw_diagonal_ellipse(ax, points, pad_x=0.35, pad_y=0.04, color_start='#ffcccc', color_end='#cc0000', 
-                          alpha=0.35, zorder=0):
+def draw_diagonal_stroke(ax, low_points, high_points, ellipse_width_log=0.25, ellipse_height_y=0.03,
+                         color_start='#ffcccc', color_end='#cc0000', alpha=0.35, zorder=0):
     """
-    Draw diagonal gradient using overlapping ellipses for a "painted/smudged" effect.
+    Draw a diagonal stroke - an ellipse moving along a straight line from low to high points.
+    Uniform ellipse size throughout (not varying).
     
-    points: list of (x, y) tuples in data coordinates
+    low_points: list of (x, y) tuples for the lower group
+    high_points: list of (x, y) tuples for the upper group
     """
-    xs = [p[0] for p in points]
-    ys = [p[1] for p in points]
+    # Calculate centers of low and high groups
+    low_xs = [p[0] for p in low_points]
+    low_ys = [p[1] for p in low_points]
+    high_xs = [p[0] for p in high_points]
+    high_ys = [p[1] for p in high_points]
     
-    # Sort by y (lower to upper)
-    sort_idx = np.argsort(ys)
-    xs_sorted = [xs[i] for i in sort_idx]
-    ys_sorted = [ys[i] for i in sort_idx]
+    # Centers in log space
+    low_center_log_x = np.mean([np.log10(x) for x in low_xs])
+    low_center_y = np.mean(low_ys)
+    high_center_log_x = np.mean([np.log10(x) for x in high_xs])
+    high_center_y = np.mean(high_ys)
     
-    # Get bounds
-    log_xs = [np.log10(x) for x in xs_sorted]
-    min_log_x, max_log_x = min(log_xs), max(log_xs)
-    min_y, max_y = min(ys_sorted), max(ys_sorted)
+    # Start and end positions
+    start_log_x, start_y = low_center_log_x, low_center_y
+    end_log_x, end_y = high_center_log_x, high_center_y
     
-    # Extend bounds with padding
-    ext_min_log_x = min_log_x - pad_x
-    ext_max_log_x = max_log_x + pad_x
-    ext_min_y = min_y - pad_y
-    ext_max_y = max_y + pad_y
+    # Distance
+    dx_log = end_log_x - start_log_x
+    dy = end_y - start_y
     
-    # Dimensions
-    dx_log = ext_max_log_x - ext_min_log_x
-    dy = ext_max_y - ext_min_y
-    
-    # Create gradient fill using multiple overlapping ellipses along the diagonal
+    # Create gradient stroke using overlapping ellipses of UNIFORM size
     n_layers = 50
     cmap = LinearSegmentedColormap.from_list('custom', [color_start, color_end])
-    
-    # Each ellipse width/height
-    ellipse_width_log = dx_log * 0.5  # width of each small ellipse
-    ellipse_height = dy * 0.4  # height of each small ellipse
     
     for i in range(n_layers):
         t = i / (n_layers - 1) if n_layers > 1 else 0.5
         
-        # Position along the diagonal (from lower-left to upper-right)
-        layer_log_x = ext_min_log_x + t * dx_log
-        layer_y = ext_min_y + t * dy
+        # Position along the stroke
+        layer_log_x = start_log_x + t * dx_log
+        layer_y = start_y + t * dy
         
         color = cmap(t)
         
-        # Create ellipse
-        n_pts = 40
+        # Create ellipse - uniform size
+        n_pts = 50
         theta = np.linspace(0, 2*np.pi, n_pts)
         
         ellipse_log_x = layer_log_x + (ellipse_width_log/2) * np.cos(theta)
-        ellipse_y = layer_y + (ellipse_height/2) * np.sin(theta)
+        ellipse_y = layer_y + (ellipse_height_y/2) * np.sin(theta)
         
         # Convert x from log to linear
         ellipse_x = 10**ellipse_log_x
         
-        ax.fill(ellipse_x, ellipse_y, color=color, alpha=alpha*0.7, 
+        ax.fill(ellipse_x, ellipse_y, color=color, alpha=alpha*0.6, 
                 zorder=zorder, edgecolor='none')
-    
-    # Draw overall ellipse outline
-    center_log_x = (ext_min_log_x + ext_max_log_x) / 2
-    center_y = (ext_min_y + ext_max_y) / 2
-    a_log_x = dx_log / 2
-    b_y = dy / 2
-    
-    n_outline = 100
-    theta = np.linspace(0, 2*np.pi, n_outline)
-    outline_log_x = center_log_x + a_log_x * np.cos(theta)
-    outline_y = center_y + b_y * np.sin(theta)
-    outline_x = 10**outline_log_x
-    
-    ax.plot(outline_x, outline_y, color='#555555', linewidth=1.2, alpha=0.6, zorder=zorder+1)
 
 
 # =============================================================================
 # Plotting Functions
 # =============================================================================
 
-def plot_overview_gray(ax, df, title_suffix):
-    """Plot gray overview scatter (left panels)."""
+def plot_overview_gray(ax, df, title_suffix, selection_box=None):
+    """Plot gray overview scatter (left panels) with optional selection box."""
     
     # Markers: small=cross (hollow), large=circle
     small_df = df[df['BS_Type'] == 'small']
     large_df = df[df['BS_Type'] == 'large']
     
-    # Plot small batch as hollow crosses
+    # Plot small batch - red colored in selection area, gray otherwise
     ax.scatter(small_df['LR_x_WD'], small_df['Accuracy'], 
-               marker='P', s=60, facecolors='none', edgecolors='#666666', 
-               linewidths=1.5, zorder=5, label='small')
+               marker='P', s=50, facecolors='#dd6666', edgecolors='#aa4444', 
+               linewidths=1, zorder=5, label='small')
     
-    # Plot large batch as circles
+    # Plot large batch - blue colored
     ax.scatter(large_df['LR_x_WD'], large_df['Accuracy'], 
-               marker='o', s=50, facecolors='#888888', edgecolors='#444444',
+               marker='o', s=40, facecolors='#6688cc', edgecolors='#4466aa',
                linewidths=0.8, zorder=5, label='large')
     
     ax.set_xscale('log')
+    
+    # Draw selection box if provided
+    if selection_box is not None:
+        x_min, x_max, y_min_box, y_max_box = selection_box
+        from matplotlib.patches import Rectangle
+        rect = Rectangle((x_min, y_min_box), x_max - x_min, y_max_box - y_min_box,
+                         fill=False, edgecolor='#333333', linewidth=2.5, 
+                         linestyle='-', zorder=10)
+        ax.add_patch(rect)
     
     # Minimal axes
     ax.spines['top'].set_visible(False)
@@ -332,16 +322,11 @@ def plot_overview_gray(ax, df, title_suffix):
     ax.spines['bottom'].set_linewidth(0.8)
     
     # Simplified ticks
-    ax.tick_params(axis='both', which='major', labelsize=8, length=3)
+    ax.tick_params(axis='both', which='major', labelsize=7, length=3)
     ax.tick_params(axis='both', which='minor', length=2)
     
-    # Set y limits to nice integers
-    y_min = np.floor(df['Accuracy'].min() * 20) / 20
-    y_max = np.ceil(df['Accuracy'].max() * 20) / 20
-    ax.set_ylim(y_min, y_max)
-    
     # Minimal labels
-    ax.set_ylabel('Acc', fontsize=9)
+    ax.set_ylabel('Acc', fontsize=8)
     ax.set_xlabel('')
     
     # Remove grid
@@ -401,29 +386,39 @@ def plot_0shot_detail(ax, df, fig=None):
     high_acc_large = [p for p in large_points if p[1] >= 0.4]
     
     # Draw stadium shapes (background first, lower zorder)
-    # 1. Horizontal stadium for low acc group (red-white-blue)
+    # 1. Horizontal stadium for low acc group (red-white-blue) - more precise, tighter
     low_group_points = [(p[0], p[1]) for p in low_acc_small + low_acc_large]
     if len(low_group_points) >= 2:
-        draw_stadium_simple(ax, low_group_points, padding_x=0.3, padding_y=0.025,
+        draw_stadium_simple(ax, low_group_points, padding_x=0.18, padding_y=0.018,
                            color_left='#ffdddd', color_right='#ddeeff', alpha=0.45, zorder=1)
     
-    # 2. Horizontal stadium for high acc group (red-white-blue)
+    # 2. Horizontal stadium for high acc group (red-white-blue) - more precise, tighter
     high_group_points = [(p[0], p[1]) for p in high_acc_small + high_acc_large]
     if len(high_group_points) >= 2:
-        draw_stadium_simple(ax, high_group_points, padding_x=0.3, padding_y=0.025,
+        draw_stadium_simple(ax, high_group_points, padding_x=0.18, padding_y=0.018,
                            color_left='#ffdddd', color_right='#ddeeff', alpha=0.45, zorder=1)
     
-    # 3. Diagonal ellipse for small batch points (shallow red to deep red)
-    all_small = [(p[0], p[1]) for p in small_points]
-    if len(all_small) >= 2:
-        draw_diagonal_ellipse(ax, all_small, pad_x=0.5, pad_y=0.06, 
-                             color_start='#ffe8e8', color_end='#dd2222', alpha=0.4, zorder=2)
+    # 3. Diagonal stroke for small batch points
+    # Colors should match the heatmap - lighter for lower acc, darker for higher acc
+    low_small = [(p[0], p[1]) for p in low_acc_small]
+    high_small = [(p[0], p[1]) for p in high_acc_small]
+    if len(low_small) >= 1 and len(high_small) >= 1:
+        # Use same colormap as points
+        low_color = plt.cm.Reds(0.35 + 0.55 * 0)  # low acc color
+        high_color = plt.cm.Reds(0.35 + 0.55 * 1)  # high acc color
+        draw_diagonal_stroke(ax, low_small, high_small, 
+                            ellipse_width_log=0.55, ellipse_height_y=0.055,
+                            color_start=low_color, color_end=high_color, alpha=0.45, zorder=2)
     
-    # 4. Diagonal ellipse for large batch points (shallow blue to deep blue)
-    all_large = [(p[0], p[1]) for p in large_points]
-    if len(all_large) >= 2:
-        draw_diagonal_ellipse(ax, all_large, pad_x=0.5, pad_y=0.06,
-                             color_start='#e8f0ff', color_end='#2255dd', alpha=0.4, zorder=2)
+    # 4. Diagonal stroke for large batch points
+    low_large = [(p[0], p[1]) for p in low_acc_large]
+    high_large = [(p[0], p[1]) for p in high_acc_large]
+    if len(low_large) >= 1 and len(high_large) >= 1:
+        low_color = plt.cm.Blues(0.35 + 0.55 * 0)
+        high_color = plt.cm.Blues(0.35 + 0.55 * 1)
+        draw_diagonal_stroke(ax, low_large, high_large,
+                            ellipse_width_log=0.55, ellipse_height_y=0.055,
+                            color_start=low_color, color_end=high_color, alpha=0.45, zorder=2)
     
     # Plot points with heatmap coloring
     # Lighter edge colors for better heatmap visibility
@@ -481,13 +476,14 @@ def plot_0shot_detail(ax, df, fig=None):
     ]
     ax.legend(handles=legend_elements, loc='upper left', fontsize=9, framealpha=0.9)
     
-    # Add two colorbars for accuracy heatmap (red for small, blue for large)
+    # Add two colorbars for accuracy heatmap INSIDE the plot
+    # Red on left, Blue on right, more separated
     if fig is not None:
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes
         
-        # Red colorbar for small batch (positioned at right side)
-        cax_red = inset_axes(ax, width="2%", height="25%", loc='center right',
-                             bbox_to_anchor=(0.12, 0, 1, 1), bbox_transform=ax.transAxes)
+        # Red colorbar for small batch (left)
+        cax_red = inset_axes(ax, width="2.5%", height="28%", loc='lower right',
+                             bbox_to_anchor=(-0.10, 0.05, 1, 1), bbox_transform=ax.transAxes)
         sm_red = plt.cm.ScalarMappable(cmap=plt.cm.Reds, 
                                         norm=plt.Normalize(vmin=global_min_acc, vmax=global_max_acc))
         sm_red.set_array([])
@@ -495,9 +491,9 @@ def plot_0shot_detail(ax, df, fig=None):
         cbar_red.ax.tick_params(labelsize=6)
         cbar_red.ax.set_title('Small', fontsize=7, pad=2)
         
-        # Blue colorbar for large batch (next to red)
-        cax_blue = inset_axes(ax, width="2%", height="25%", loc='center right',
-                              bbox_to_anchor=(0.06, 0, 1, 1), bbox_transform=ax.transAxes)
+        # Blue colorbar for large batch (right, more separated)
+        cax_blue = inset_axes(ax, width="2.5%", height="28%", loc='lower right',
+                              bbox_to_anchor=(-0.02, 0.05, 1, 1), bbox_transform=ax.transAxes)
         sm_blue = plt.cm.ScalarMappable(cmap=plt.cm.Blues, 
                                          norm=plt.Normalize(vmin=global_min_acc, vmax=global_max_acc))
         sm_blue.set_array([])
@@ -518,6 +514,7 @@ def plot_8shot_detail(ax, df):
     selected_df = df[mask].copy()
     
     ax.set_xscale('log')
+    # Keep linear y-axis (log doesn't work well with stadium drawing)
     
     small_df = selected_df[selected_df['BS_Type'] == 'small']
     large_df = selected_df[selected_df['BS_Type'] == 'large']
@@ -527,10 +524,10 @@ def plot_8shot_detail(ax, df):
                   for _, row in selected_df.iterrows()]
     
     # Draw one big stadium shape (red-white-blue gradient)
-    # Very flat - minimal padding_y for compressed appearance
+    # padding_y=0.003 for internal spacing, rounder ends
     if len(all_points) >= 2:
-        draw_stadium_simple(ax, all_points, padding_x=0.5, padding_y=0.003,
-                           color_left='#ffe0e0', color_right='#e0e8ff', alpha=0.5, zorder=1)
+        draw_stadium_simple(ax, all_points, padding_x=0.15, padding_y=0.003,
+                           color_left='#ffcccc', color_right='#ccd8ff', alpha=0.55, zorder=1)
     
     # Plot points - small batch: red cross, large batch: blue circle
     ax.scatter(small_df['LR_x_WD'], small_df['Accuracy'],
@@ -544,25 +541,19 @@ def plot_8shot_detail(ax, df):
     # Styling
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.tick_params(axis='both', which='major', labelsize=10)
+    ax.tick_params(axis='both', which='major', labelsize=9)
     
-    ax.set_xlabel('LR × WD', fontsize=11)
-    ax.set_ylabel('Accuracy', fontsize=11)
+    ax.set_xlabel('LR × WD', fontsize=10)
+    ax.set_ylabel('Accuracy', fontsize=10)
     ax.set_title('8-shot: Same Accuracy Requires Higher LR×WD for Large Batch', 
-                 fontsize=12, fontweight='bold', pad=10)
+                 fontsize=10, fontweight='bold', pad=8)
     
-    ax.legend(loc='upper right', fontsize=9, framealpha=0.9)
+    ax.legend(loc='upper right', fontsize=8, framealpha=0.9)
     ax.grid(True, alpha=0.25, linestyle='--', color='#dddddd')
     
-    # Set axis limits - expand y-range so stadium doesn't fill everything
-    if len(selected_df) > 0:
-        x_min = selected_df['LR_x_WD'].min() / 3
-        x_max = selected_df['LR_x_WD'].max() * 3
-        # Expand y limits significantly beyond data range
-        y_min = 0.08
-        y_max = 0.16
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
+    # Set axis limits - wider x to show stadium caps, tight y
+    ax.set_xlim(5e-7, 2e-4)
+    ax.set_ylim(0.095, 0.145)
 
 
 # =============================================================================
@@ -574,14 +565,13 @@ def main():
     df_0shot, df_8shot = load_data()
     
     # Create figure with custom layout
-    # Left column very narrow, right column wide
-    # Left panels are flattened (short height)
-    fig = plt.figure(figsize=(14, 7))
+    # Left column narrow, right column even narrower
+    fig = plt.figure(figsize=(10, 7))
     
-    # Grid with compressed left panels
-    gs = fig.add_gridspec(2, 2, width_ratios=[1, 4], height_ratios=[1, 1],
-                          left=0.04, right=0.95, top=0.93, bottom=0.09,
-                          wspace=0.12, hspace=0.30)
+    # Grid - right panels narrower, left panels shorter
+    gs = fig.add_gridspec(2, 2, width_ratios=[1, 2], height_ratios=[1, 1],
+                          left=0.07, right=0.92, top=0.93, bottom=0.09,
+                          wspace=0.20, hspace=0.25)
     
     # Create axes
     ax_left_top = fig.add_subplot(gs[0, 0])     # 0-shot overview (gray)
@@ -589,32 +579,36 @@ def main():
     ax_right_top = fig.add_subplot(gs[0, 1])    # 0-shot detail
     ax_right_bottom = fig.add_subplot(gs[1, 1]) # 8-shot detail
     
-    # Plot left panels (gray overviews) - compressed appearance
-    plot_overview_gray(ax_left_top, df_0shot, '0-shot')
-    plot_overview_gray(ax_left_bottom, df_8shot, '8-shot')
+    # Plot left panels with selection boxes showing the analysis region
+    # Selection box for 0-shot: area containing the 6 selected points
+    selection_0shot = (5e-7, 8e-5, 0.28, 0.58)
+    plot_overview_gray(ax_left_top, df_0shot, '0-shot', selection_box=selection_0shot)
     
-    # Heavily compress left panels' y-range for "flattened" look
-    ax_left_top.set_ylim(0.15, 0.60)
-    ax_left_bottom.set_ylim(0.02, 0.20)
+    # Selection box for 8-shot: acc 0.10-0.14, x: 1e-6 to 1e-4
+    selection_8shot = (8e-7, 1.2e-4, 0.095, 0.145)
+    plot_overview_gray(ax_left_bottom, df_8shot, '8-shot', selection_box=selection_8shot)
     
-    # Limit x-axis range
+    # Left-top: log y-axis
+    ax_left_top.set_yscale('log')
+    ax_left_top.set_ylim(0.18, 0.60)
     ax_left_top.set_xlim(1e-7, 2e-4)
+    
+    # Left-bottom: normal y-axis, compressed
+    ax_left_bottom.set_ylim(0.04, 0.19)
     ax_left_bottom.set_xlim(1e-7, 2e-4)
     
     # Add small labels
-    ax_left_top.set_title('0-shot', fontsize=9, pad=3, color='#666666')
-    ax_left_bottom.set_title('8-shot', fontsize=9, pad=3, color='#666666')
-    ax_left_bottom.set_xlabel('LR×WD', fontsize=8, color='#777777')
+    ax_left_top.set_title('0-shot', fontsize=9, pad=3, color='#555555')
+    ax_left_bottom.set_title('8-shot', fontsize=9, pad=3, color='#555555')
+    ax_left_bottom.set_xlabel('LR×WD', fontsize=8, color='#666666')
     ax_left_top.set_xlabel('')
     
-    # Make left panels look more muted
+    # Make left panels styling
     for ax in [ax_left_top, ax_left_bottom]:
-        ax.spines['left'].set_color('#bbbbbb')
-        ax.spines['bottom'].set_color('#bbbbbb')
-        ax.tick_params(colors='#888888', labelsize=7)
-        ax.set_ylabel('Acc', fontsize=8, color='#777777')
-        # Reduce number of y-ticks
-        ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+        ax.spines['left'].set_color('#999999')
+        ax.spines['bottom'].set_color('#999999')
+        ax.tick_params(colors='#666666', labelsize=7)
+        ax.set_ylabel('Acc', fontsize=8, color='#666666')
     
     # Plot right panels (detailed analysis)
     plot_0shot_detail(ax_right_top, df_0shot, fig)
