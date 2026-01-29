@@ -867,13 +867,19 @@ def main():
                  line_bot_bottom, line_bot_top, line_bot_left, line_bot_right]:
         fig.add_artist(line)
     
-    # Save figure
+    # Save figure - high-DPI PNG and vector PDF for clarity
     output_dir = "outputs/plots"
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "four_panel_analysis.png")
     
-    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
-    print(f"Saved: {output_path}")
+    # High-DPI PNG (300 dpi for print/screen clarity)
+    png_path = os.path.join(output_dir, "four_panel_analysis.png")
+    plt.savefig(png_path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"Saved: {png_path}")
+    
+    # Vector PDF (infinite resolution, best for papers/presentation)
+    pdf_path = os.path.join(output_dir, "four_panel_analysis.pdf")
+    plt.savefig(pdf_path, format='pdf', bbox_inches='tight', facecolor='white')
+    print(f"Saved: {pdf_path}")
     
     plt.close()
 
