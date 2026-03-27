@@ -284,12 +284,7 @@ def plot_exp2_scaling_curves(
         metric_label = "Test Error (1 - acc)"
         metric_title = "Same curves: test error (min aligns with max acc)"
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.8), sharex=True)
-    if not isinstance(axes, np.ndarray):
-        axes = np.array([axes])
-
-    ax_acc = axes[0]
-    ax_loss = axes[1]
+    fig, ax_acc = plt.subplots(1, 1, figsize=(6.2, 6.2))
 
     # Drop rows missing left-metric for plotting optima/lines
     exp2_plot = exp2[np.isfinite(pd.to_numeric(exp2[acc_col], errors="coerce"))].copy()
@@ -325,47 +320,11 @@ def plot_exp2_scaling_curves(
             [float(best_row[acc_col])],
             s=55,
             marker="*",
-            color=color,
-            edgecolors="black",
-            linewidths=0.6,
+            facecolors="white",
+            edgecolors="red",
+            linewidths=1.0,
             zorder=5,
         )
-
-        sub_metric = sub[np.isfinite(sub[metric_col])].copy()
-        if len(sub_metric) >= 1:
-            sub_metric = sub_metric.sort_values("eta_lambda")
-            if len(sub_metric) >= 2:
-                ax_loss.plot(
-                    sub_metric["eta_lambda"],
-                    sub_metric[metric_col],
-                    marker="o",
-                    linewidth=1.8,
-                    markersize=4.5,
-                    alpha=0.9,
-                    color=color,
-                    label=label,
-                )
-            else:
-                ax_loss.scatter(
-                    sub_metric["eta_lambda"],
-                    sub_metric[metric_col],
-                    s=35,
-                    color=color,
-                    alpha=0.9,
-                    label=label,
-                )
-
-            min_row = sub_metric.loc[sub_metric[metric_col].idxmin()]
-            ax_loss.scatter(
-                [min_row["eta_lambda"]],
-                [min_row[metric_col]],
-                s=70,
-                marker="*",
-                color=color,
-                edgecolors="black",
-                linewidths=0.6,
-                zorder=6,
-            )
 
     y_acc_all = pd.to_numeric(exp2_plot[acc_col], errors="coerce")
     global_best = exp2_plot.loc[y_acc_all.idxmax()]
@@ -382,6 +341,7 @@ def plot_exp2_scaling_curves(
         ax_acc.set_ylabel("Best Test Accuracy (%)", fontsize=12)
     ax_acc.set_title("Exp2: Curves vs η×λ (one curve per λ)", fontsize=13, fontweight="bold")
     ax_acc.grid(True, which="both", alpha=0.25)
+    ax_acc.minorticks_off()
 
     x_min = float(exp2_plot["eta_lambda"].min())
     x_max = float(exp2_plot["eta_lambda"].max())
@@ -389,95 +349,13 @@ def plot_exp2_scaling_curves(
     if xticks:
         ax_acc.set_xticks(xticks)
 
-    ax_loss.set_xscale("log")
-    ax_loss.set_xlabel("η × λ", fontsize=12)
-    ax_loss.set_ylabel(metric_label, fontsize=12)
-    ax_loss.set_title(metric_title, fontsize=13, fontweight="bold")
-    ax_loss.grid(True, which="both", alpha=0.25)
-    if xticks:
-        ax_loss.set_xticks(xticks)
-
-    loss_vals = exp2_plot[np.isfinite(exp2_plot[metric_col])][metric_col].values
-    if loss_vals.size:
-        y_min = float(np.nanmin(loss_vals))
-        y_max = float(np.nanmax(loss_vals))
-    else:
-        y_min, y_max = 0.0, 1.0
-
-    if metric_col == "best_val_loss":
-        if y_max <= y_min:
-            y_max = y_min + 1e-3
-        pad = max(0.01, 0.2 * (y_max - y_min))
-        ax_loss.set_ylim(bottom=y_min - pad, top=y_max + 5 * pad)
-        ax_loss.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, pos: f"{v:.2f}"))
-    else:
-        y0 = 0.2
-        k = 5.0
-        if y_max <= y_min:
-            y_max = y_min + 1e-3
-
-        logpart = float(np.log10(1.0 + max(0.0, y_max - y0) * k)) if y_max > y0 else 0.0
-        expand = (0.7 / 0.3) * logpart / y0 if logpart > 0 else 1.0
-        expand = float(np.clip(expand, 1.0, 25.0))
-
-        def _y_transform(y):
-            y = np.asarray(y, dtype=float)
-            y = np.maximum(y, 0.0)
-            out = y * expand
-            mask = y > y0
-            if np.any(mask):
-                out[mask] = y0 * expand + np.log10(1.0 + (y[mask] - y0) * k)
-            return out
-
-        def _y_inverse(yp):
-            yp = np.asarray(yp, dtype=float)
-            out = yp / expand
-            cutoff = y0 * expand
-            mask = yp > cutoff
-            if np.any(mask):
-                out[mask] = y0 + (10.0 ** (yp[mask] - cutoff) - 1.0) / k
-            return out
-
-        try:
-            from matplotlib.scale import FuncScale
-
-            ax_loss.set_yscale(FuncScale(ax_loss, (_y_transform, _y_inverse)))
-        except Exception:
-            ax_loss.set_yscale("symlog", linthresh=0.2, linscale=2.0)
-
-        ax_loss.set_ylim(bottom=_y_transform([0.0])[0], top=_y_transform([y_max])[0] * 1.05)
-
-        candidate_ticks = [0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8]
-        candidate_ticks = [t for t in candidate_ticks if t <= y_max]
-        if candidate_ticks:
-            ax_loss.set_yticks(_y_transform(candidate_ticks))
-            ax_loss.set_yticklabels([f"{t:g}" for t in candidate_ticks])
-
-        loss_visible = exp2_plot[np.isfinite(exp2_plot[metric_col])].copy()
-        if not loss_visible.empty:
-            gmin = loss_visible.loc[loss_visible[metric_col].idxmin()]
-            x_gmin = float(gmin["eta_lambda"])
-            y_gmin = float(gmin[metric_col])
-            ax_loss.axvline(x_gmin, color="black", linestyle="--", linewidth=1.2, alpha=0.7)
-            ax_loss.scatter([x_gmin], [y_gmin], s=140, marker="*", color="red", zorder=7)
-            ax_loss.text(
-                x_gmin,
-                min(0.98, y_gmin + 0.08),
-                "min",
-                ha="center",
-                va="bottom",
-                fontsize=9,
-                color="black",
-                bbox=dict(boxstyle="round,pad=0.2", facecolor="white", alpha=0.8, linewidth=0.0),
-            )
-
     handles, labels_leg = ax_acc.get_legend_handles_labels()
     if handles:
         ax_acc.legend(
             handles,
             labels_leg,
             fontsize=8,
-            ncol=2,
+            ncol=1,
             loc="center left",
             bbox_to_anchor=(1.02, 0.5),
             frameon=True,
