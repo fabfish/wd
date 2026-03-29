@@ -1,5 +1,5 @@
 """
-ResNet-18 model for CIFAR-100 classification.
+Models for CIFAR-100 classification: ResNet-18 and VGG-16.
 """
 import torch
 import torch.nn as nn
@@ -80,3 +80,54 @@ class ResNet(nn.Module):
 def resnet18(num_classes=100):
     """Returns a ResNet-18 model for CIFAR-100"""
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
+
+
+cfg_vgg = {
+    'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
+}
+
+
+class VGG(nn.Module):
+    """VGG architecture adapted for CIFAR (32x32 input, smaller FC layers)"""
+
+    def __init__(self, vgg_name, num_classes=100):
+        super(VGG, self).__init__()
+        self.features = self._make_layers(cfg_vgg[vgg_name])
+        self.classifier = nn.Linear(512, num_classes)
+
+    def _make_layers(self, cfg):
+        layers = []
+        in_channels = 3
+        for x in cfg:
+            if x == 'M':
+                layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+            else:
+                layers.append(nn.Conv2d(in_channels, x, kernel_size=3, padding=1, bias=False))
+                layers.append(nn.BatchNorm2d(x))
+                layers.append(nn.ReLU(inplace=True))
+                in_channels = x
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        out = self.features(x)
+        out = F.avg_pool2d(out, out.size(2))
+        out = out.view(out.size(0), -1)
+        out = self.classifier(out)
+        return out
+
+
+def vgg16(num_classes=100):
+    """Returns a VGG-16 model for CIFAR-100"""
+    return VGG('VGG16', num_classes=num_classes)
+
+
+def get_model(model_name, num_classes=100):
+    """Factory function to get model by name"""
+    models = {
+        'resnet18': resnet18,
+        'vgg16': vgg16,
+    }
+    if model_name not in models:
+        raise ValueError(f"Unknown model: {model_name}. Available: {list(models.keys())}")
+    return models[model_name](num_classes=num_classes)
