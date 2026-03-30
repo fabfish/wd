@@ -56,20 +56,20 @@ def get_cifar100_loaders(batch_size=128, num_workers=2):
     return train_loader, test_loader
 
 
-def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, seed, use_amp):
+def run_single_experiment_worker(model_name, method, batch_size, lr, wd, momentum, epochs, seed, use_amp):
     torch.backends.cudnn.benchmark = True
     set_seed(seed)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     train_loader, test_loader = get_cifar100_loaders(batch_size, num_workers=2)
-    model = get_model(MODEL_NAME, num_classes=100).to(device)
+    model = get_model(model_name, num_classes=100).to(device)
 
     optimizer = optim.SGD(
         model.parameters(), lr=lr, momentum=momentum, weight_decay=wd
     )
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
 
-    print(f"[{MODEL_NAME}] {method} | BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}")
+    print(f"[{model_name}] {method} | BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}")
 
     best_test_acc, final_test_acc, final_train_loss = train_model(
         model, train_loader, test_loader, optimizer, scheduler,
@@ -103,7 +103,7 @@ def experiment_set_1(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None):
 
     tasks = []
     for (method, momentum, wd), lr in product(conditions, lr_values):
-        tasks.append((method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
+        tasks.append((MODEL_NAME, method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
 
     if logger:
         logger.info(f"Total experiments: {len(tasks)}, GPUs: {gpu_ids}")
@@ -129,7 +129,7 @@ def experiment_set_2(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None):
 
     tasks = []
     for lr, wd in product(lr_values, wd_values):
-        tasks.append((method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
+        tasks.append((MODEL_NAME, method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
 
     if logger:
         logger.info(f"Total experiments: {len(tasks)}, GPUs: {gpu_ids}")
@@ -157,7 +157,7 @@ def experiment_set_3(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None):
     tasks = []
     for batch_size, wd in product(batch_sizes, wd_values):
         lr = base_lr * (batch_size / base_batch_size)
-        tasks.append((method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
+        tasks.append((MODEL_NAME, method, batch_size, lr, wd, momentum, epochs, seed, use_amp))
 
     if logger:
         logger.info(f"Total experiments: {len(tasks)}, GPUs: {gpu_ids}")
@@ -192,7 +192,7 @@ def main():
     global MODEL_NAME
 
     parser = argparse.ArgumentParser(description='Rebuttal experiments with multi-model/seed support')
-    parser.add_argument('--model', type=str, default='resnet18', choices=['resnet18', 'vgg16'],
+    parser.add_argument('--model', type=str, default='resnet18', choices=['resnet18', 'resnet50', 'vgg16'],
                         help='Model architecture')
     parser.add_argument('--experiment', type=int, choices=[1, 2, 3], required=True,
                         help='Which experiment set to run')
