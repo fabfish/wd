@@ -10,14 +10,16 @@
 
 ### Response Plan
 
-| Phase | Model | Seed | Experiments | Runs | Est. Time |
-|-------|-------|------|-------------|------|-----------|
-| Baseline (done) | ResNet-18 | 42 | Exp 1/2/3 | 83 | — |
-| Phase 1 | ResNet-18 | 123 | Exp 1/2/3 | 83 | ~5.5h |
-| Phase 2 | VGG-16 | 42 | Exp 1/2/3 | 83 | ~5.5h |
-| Phase 3 (optional) | VGG-16 | 123 | Exp 1/2/3 | 83 | ~5.5h |
+| Phase | Model | Seed | Experiments | Runs | Est. Time | Status |
+|-------|-------|------|-------------|------|-----------|--------|
+| Baseline (done) | ResNet-18 | 42 | Exp 1/2/3 | 83 | — | ✅ |
+| Phase 1 | ResNet-18 | 123 | Exp 1/2/3 | 83 | ~5.5h | ✅ |
+| Phase 2 | VGG-16 | 42 | Exp 1/2/3 | 83 | ~5.5h | ✅ (ran as ResNet-18 Run 2) |
+| Phase 3 (optional) | VGG-16 | 123 | Exp 1/2/3 | 83 | ~5.5h | ✅ (ran as ResNet-18 Run 2) |
+| Phase 4 | ResNet-50 | 42 | Exp 1/2/3 | 83 | ~9h | ✅ |
+| Phase 5 | ResNet-50 | 123 | Exp 1/2/3 | 83 | ~9h | ✅ |
 
-**Hardware**: 3x NVIDIA A6000 Pro (48GB), 1 worker per GPU
+**Hardware**: 3x NVIDIA A6000 Pro (48GB) for ResNet-18; 8x GPU (49GB) with 4 workers/GPU for ResNet-50
 
 ### Experiment Details
 
@@ -33,6 +35,15 @@
 Results are saved in `rebuttal/results/` with naming convention:
 - `results_{model}_seed{seed}.csv`
 
+### Reports
+
+| Report | Content |
+|--------|---------|
+| [`phase1_report.md`](phase1_report.md) | ResNet-18 2-seed reproducibility (seed=42 vs 123) |
+| [`phase2_3_report.md`](phase2_3_report.md) | ResNet-18 Run 1 vs Run 2 (4 data points) |
+| [`resnet18_4run_report.md`](resnet18_4run_report.md) | ResNet-18 combined 4-run report (N=4) |
+| [`resnet50_report.md`](resnet50_report.md) | **ResNet-50 cross-architecture validation (2 seeds)** |
+
 ### Usage
 
 ```bash
@@ -45,4 +56,10 @@ python rebuttal/run_rebuttal.py --model resnet18 --seed 123 --experiment 3 --gpu
 python rebuttal/run_rebuttal.py --model vgg16 --seed 42 --experiment 1 --gpus 0,1,2
 python rebuttal/run_rebuttal.py --model vgg16 --seed 42 --experiment 2 --gpus 0,1,2
 python rebuttal/run_rebuttal.py --model vgg16 --seed 42 --experiment 3 --gpus 0,1,2
+
+# Phase 4-5: ResNet-50 (8-GPU, 4 workers/GPU)
+nohup bash -c 'for SEED in 42 123; do for EXP in 1 2 3; do \
+  python3 rebuttal/run_rebuttal.py --model resnet50 --experiment $EXP \
+    --seed $SEED --gpus all --epochs 100 --workers_per_gpu 4; \
+done; done' > rebuttal/resnet50.log 2>&1 &
 ```
