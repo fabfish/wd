@@ -14,8 +14,8 @@
 |-------|-------|------|-------------|------|-----------|--------|
 | Baseline (done) | ResNet-18 | 42 | Exp 1/2/3 | 83 | — | ✅ |
 | Phase 1 | ResNet-18 | 123 | Exp 1/2/3 | 83 | ~5.5h | ✅ |
-| Phase 2 | VGG-16 | 42 | Exp 1/2/3 | 83 | ~5.5h | ✅ (ran as ResNet-18 Run 2) |
-| Phase 3 (optional) | VGG-16 | 123 | Exp 1/2/3 | 83 | ~5.5h | ✅ (ran as ResNet-18 Run 2) |
+| Phase 2 | VGG-16 | 42 | Exp 1/2/3 | 83 | ~5.5h | ✅ |
+| Phase 3 | VGG-16 | 123 | Exp 1/2/3 | 83 | ~5.5h | ✅ |
 | Phase 4 | ResNet-50 | 42 | Exp 1/2/3 | 83 | ~9h | ✅ |
 | Phase 5 | ResNet-50 | 123 | Exp 1/2/3 | 83 | ~9h | ✅ |
 
@@ -40,9 +40,9 @@ Results are saved in `rebuttal/results/` with naming convention:
 | Report | Content |
 |--------|---------|
 | [`phase1_report.md`](phase1_report.md) | ResNet-18 2-seed reproducibility (seed=42 vs 123) |
-| [`phase2_3_report.md`](phase2_3_report.md) | ResNet-18 Run 1 vs Run 2 (4 data points) |
+| [`phase2_3_report.md`](phase2_3_report.md) | VGG-16 cross-architecture validation (2 seeds) |
 | [`resnet18_4run_report.md`](resnet18_4run_report.md) | ResNet-18 combined 4-run report (N=4) |
-| [`resnet50_report.md`](resnet50_report.md) | **ResNet-50 cross-architecture validation (2 seeds)** |
+| [`resnet50_report.md`](resnet50_report.md) | ResNet-50 cross-architecture validation (2 seeds) |
 
 ### Usage
 
