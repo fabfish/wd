@@ -272,10 +272,10 @@ def plot_exp3_per_arch(all_data):
         ax.set_title(arch, fontweight='bold')
         ax.legend(fontsize=8, loc='lower left')
 
-    fig.suptitle(r'Figure 5: Batch Size Scaling with Linear LR Rule ($\star$ = optimal $\lambda^*$)',
+    fig.suptitle(r'Figure 3: Batch Size Scaling with Linear LR Rule',
                  fontsize=13, fontweight='bold', y=1.02)
     fig.tight_layout()
-    fig.savefig(OUT / 'fig5_exp3_batch_scaling.png')
+    fig.savefig(OUT / 'fig3_exp3_batch_scaling.png')
     plt.close(fig)
     print('Saved fig5_exp3_batch_scaling')
 
