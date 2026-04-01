@@ -68,16 +68,37 @@ def load_all():
     return result
 
 
-def mean_std_df(dfs, filt_fn):
+def mean_std_df(dfs, filt_fn, metric='best_test_acc'):
     """Given list of DataFrames, filter each, group by key columns, return mean/std."""
-    filtered = [filt_fn(df) for df in dfs]
+    filtered = [filt_fn(df) for df in dfs if metric in df.columns]
+    if not filtered:
+        return pd.DataFrame()
     combined = pd.concat(filtered, ignore_index=True)
     if combined.empty:
         return combined
     group_cols = [c for c in ['method', 'batch_size', 'lr', 'wd', 'momentum'] if c in combined.columns]
-    agg = combined.groupby(group_cols)['best_test_acc'].agg(['mean', 'std', 'count']).reset_index()
+    agg = combined.groupby(group_cols)[metric].agg(['mean', 'std', 'count']).reset_index()
     agg['std'] = agg['std'].fillna(0)
     return agg
+
+
+def load_ext_data():
+    """Load extended Exp2 data (with final_test_loss) for ResNet-18."""
+    base = Path('.')
+    paths = [
+        base / 'rebuttal/results/results_resnet18_seed42_exp2_ext.csv',
+        base / 'rebuttal/results/results_resnet18_seed42_exp2_ext2.csv',
+        base / 'rebuttal/results/results_resnet18_seed123_exp2_ext.csv',
+    ]
+    dfs = []
+    for p in paths:
+        if p.exists():
+            df = pd.read_csv(p)
+            df['wd'] = df['wd'].astype(float)
+            df['lr'] = df['lr'].astype(float)
+            df['momentum'] = df['momentum'].astype(float)
+            dfs.append(df)
+    return dfs
 
 
 # ── Exp 1: Stability Boundary Ordering ──────────────────────────────────────
@@ -230,6 +251,79 @@ def plot_exp2_optimal_wd(all_data):
     print('Saved fig4_exp2_optimal_wd_vs_lr')
 
 
+EXT_LRS = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]
+EXT_WDS = [1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2]
+
+
+def filt_exp2_ext(df):
+    sub = df[(df['method'].isin(['SGDM', 'SGDM+WD'])) & (df['batch_size'] == 128)].copy()
+    sub = sub[sub['lr'].isin(EXT_LRS) & sub['wd'].isin(EXT_WDS)]
+    return sub
+
+
+def plot_exp2_test_loss_curves(ext_dfs):
+    """Reviewer 9i84: test loss vs η for each λ, extended grid, ResNet-18 only."""
+    fig, ax = plt.subplots(figsize=(7, 5))
+    wd_colors = plt.cm.viridis(np.linspace(0.1, 0.9, len(EXT_WDS)))
+
+    agg = mean_std_df(ext_dfs, filt_exp2_ext, metric='final_test_loss')
+    if agg.empty:
+        print('No ext data available for test loss plot')
+        plt.close(fig)
+        return
+
+    for i, wd in enumerate(EXT_WDS):
+        sub = agg[np.isclose(agg['wd'], wd)].sort_values('lr')
+        if sub.empty:
+            continue
+        ax.plot(sub['lr'], sub['mean'],
+                marker='o', color=wd_colors[i],
+                label=f'$\\lambda$={wd:.0e}', linewidth=1.5, markersize=5)
+
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel(r'Learning Rate $\eta$')
+    ax.set_ylabel('Test Loss')
+    ax.set_title('Test Loss vs. $\\eta$ for Each $\\lambda$ (ResNet-18, SGDM, B=128)',
+                 fontweight='bold')
+    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
+    fig.tight_layout()
+    fig.savefig(OUT / 'response_to_reviewer_9i84.png')
+    plt.close(fig)
+    print('Saved response_to_reviewer_9i84')
+
+
+def plot_exp2_scaling_curves_loss(ext_dfs):
+    """Original format but with test loss y-axis. ResNet-18 only (others lack test loss)."""
+    fig, ax = plt.subplots(figsize=(7, 5))
+    wd_colors = plt.cm.viridis(np.linspace(0.1, 0.9, len(EXP2_WDS)))
+
+    agg = mean_std_df(ext_dfs, filt_exp2, metric='final_test_loss')
+    if agg.empty:
+        print('No data for scaling curves loss')
+        plt.close(fig)
+        return
+
+    for i, wd in enumerate(EXP2_WDS):
+        sub = agg[np.isclose(agg['wd'], wd)].sort_values('lr')
+        if sub.empty:
+            continue
+        ax.plot(sub['lr'], sub['mean'],
+                marker='o', color=wd_colors[i],
+                label=f'$\\lambda$={wd:.0e}', linewidth=1.5, markersize=5)
+
+    ax.set_xscale('log')
+    ax.set_xlabel(r'Learning Rate $\eta$')
+    ax.set_ylabel('Test Loss')
+    ax.set_title(r'Test Loss vs. $\eta$ for Each $\lambda$ (ResNet-18, SGDM, B=128)',
+                 fontweight='bold')
+    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
+    fig.tight_layout()
+    fig.savefig(OUT / 'exp2_scaling_curves_loss.png')
+    plt.close(fig)
+    print('Saved exp2_scaling_curves_loss')
+
+
 # ── Exp 3: Batch Size Scaling ───────────────────────────────────────────────
 EXP3_BS = [64, 128, 256, 512]
 EXP3_LR_MAP = {64: 0.05, 128: 0.1, 256: 0.2, 512: 0.4}
@@ -315,6 +409,43 @@ def plot_exp3_optimal_wd(all_data):
     print('Saved fig6_exp3_optimal_wd_vs_bs')
 
 
+# ── Exp 3: λ*×η vs Batch Size ────────────────────────────────────────────────
+def plot_exp3_lambda_eta_product(all_data):
+    """Show that optimal λ*×η increases with batch size."""
+    fig, ax = plt.subplots(figsize=(6, 4))
+
+    for arch, dfs in all_data.items():
+        agg = mean_std_df(dfs, filt_exp3)
+        if agg.empty:
+            continue
+        products = []
+        for bs in EXP3_BS:
+            lr = EXP3_LR_MAP[bs]
+            sub = agg[(agg['batch_size'] == bs) & np.isclose(agg['lr'], lr)]
+            if not sub.empty:
+                best_idx = sub['mean'].idxmax()
+                opt_wd = sub.loc[best_idx, 'wd']
+                products.append((bs, opt_wd * lr))
+        if products:
+            bss, prods = zip(*products)
+            ax.plot(bss, prods, marker='o', label=arch, linewidth=2, markersize=7,
+                    color=ARCH_COLORS[arch])
+
+    ax.set_xscale('log', base=2)
+    ax.set_yscale('log')
+    ax.set_xlabel('Batch Size B')
+    ax.set_ylabel(r'$\lambda \times \eta$')
+    ax.set_title(r'$\lambda \times \eta$ Increases with Batch Size',
+                 fontweight='bold')
+    ax.set_xticks(EXP3_BS)
+    ax.set_xticklabels([str(b) for b in EXP3_BS])
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(OUT / 'fig4_exp3_lambda_eta_product.png')
+    plt.close(fig)
+    print('Saved fig4_exp3_lambda_eta_product')
+
+
 # ── Markdown tables ──────────────────────────────────────────────────────────
 def generate_markdown_tables(all_data):
     """Write all summary tables to a single markdown file."""
@@ -386,5 +517,11 @@ if __name__ == '__main__':
     plot_exp2_optimal_wd(all_data)
     plot_exp3_per_arch(all_data)
     plot_exp3_optimal_wd(all_data)
+    plot_exp3_lambda_eta_product(all_data)
     generate_markdown_tables(all_data)
+
+    ext_dfs = load_ext_data()
+    print(f'Extended Exp2 data: {len(ext_dfs)} files loaded')
+    plot_exp2_test_loss_curves(ext_dfs)
+
     print(f'\nAll figures saved to {OUT.resolve()}')

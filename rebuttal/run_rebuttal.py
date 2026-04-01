@@ -71,7 +71,7 @@ def run_single_experiment_worker(model_name, method, batch_size, lr, wd, momentu
 
     print(f"[{model_name}] {method} | BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}")
 
-    best_test_acc, final_test_acc, final_train_loss = train_model(
+    best_test_acc, final_test_acc, final_train_loss, final_test_loss = train_model(
         model, train_loader, test_loader, optimizer, scheduler,
         device, epochs=epochs, use_amp=use_amp
     )
@@ -84,7 +84,8 @@ def run_single_experiment_worker(model_name, method, batch_size, lr, wd, momentu
         'momentum': momentum,
         'final_test_acc': final_test_acc,
         'final_train_loss': final_train_loss,
-        'best_test_acc': best_test_acc
+        'best_test_acc': best_test_acc,
+        'final_test_loss': final_test_loss
     }
 
 
@@ -124,8 +125,8 @@ def experiment_set_2(gpu_ids, epochs=100, seed=42, use_amp=True, logger=None):
     batch_size = 128
     momentum = 0.9
     method = 'SGDM'
-    lr_values = [0.01, 0.05, 0.1, 0.2, 0.3]
-    wd_values = [1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2]
+    lr_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]
+    wd_values = [1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2]
 
     tasks = []
     for lr, wd in product(lr_values, wd_values):
@@ -174,7 +175,8 @@ def save_results(results, output_file, logger=None):
     if not results:
         return
     fieldnames = ['method', 'batch_size', 'lr', 'wd', 'momentum',
-                  'final_test_acc', 'final_train_loss', 'best_test_acc']
+                  'final_test_acc', 'final_train_loss', 'best_test_acc',
+                  'final_test_loss']
     file_exists = os.path.exists(output_file)
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, 'a', newline='') as f:
@@ -203,6 +205,8 @@ def main():
     parser.add_argument('--use_amp', action='store_true', default=True)
     parser.add_argument('--workers_per_gpu', type=int, default=1,
                         help='Number of parallel workers per GPU (increase for low-utilization models)')
+    parser.add_argument('--suffix', type=str, default='',
+                        help='Suffix appended to output filename (e.g. "_ext" -> results_resnet18_seed42_ext.csv)')
     args = parser.parse_args()
 
     global WORKERS_PER_GPU
@@ -217,7 +221,7 @@ def main():
         gpu_ids = []
 
     output_dir = Path(__file__).resolve().parent / 'results'
-    output_file = output_dir / f'results_{args.model}_seed{args.seed}.csv'
+    output_file = output_dir / f'results_{args.model}_seed{args.seed}{args.suffix}.csv'
 
     logger = get_logger(f"rebuttal_{args.model}_s{args.seed}_exp{args.experiment}")
     logger.info(f"Model: {args.model} | Seed: {args.seed} | Experiment: {args.experiment}")
