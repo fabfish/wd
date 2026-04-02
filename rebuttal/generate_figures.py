@@ -269,7 +269,7 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
     combined = pd.concat([filt_exp2_all(df) for df in ext_dfs if 'final_test_loss' in df.columns],
                          ignore_index=True)
     if combined.empty:
-        print('No ext data for scaling curves loss plot')
+        print('No ext data for response_to_reviewer_9i84 plot')
         return
 
     combined = combined.dropna(subset=['final_test_loss'])
