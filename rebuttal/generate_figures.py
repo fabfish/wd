@@ -252,16 +252,9 @@ def plot_exp2_optimal_wd(all_data):
     print('Saved fig4_exp2_optimal_wd_vs_lr')
 
 
-EXT_LRS = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]
 EXT_WDS = [1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2]
 SUPP_LRS = [0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
             0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.5, 2.5, 3.0, 5.0]
-
-
-def filt_exp2_ext(df):
-    sub = df[(df['method'].isin(['SGDM', 'SGDM+WD'])) & (df['batch_size'] == 128)].copy()
-    sub = sub[sub['lr'].isin(EXT_LRS) & sub['wd'].isin(EXT_WDS)]
-    return sub
 
 
 def filt_exp2_all(df):
@@ -271,40 +264,8 @@ def filt_exp2_all(df):
     return sub
 
 
-def plot_exp2_test_loss_curves(ext_dfs):
-    """Reviewer 9i84: test loss vs η for each λ, extended grid, ResNet-18 only."""
-    fig, ax = plt.subplots(figsize=(7, 5))
-    wd_colors = plt.cm.viridis(np.linspace(0.1, 0.9, len(EXT_WDS)))
-
-    agg = mean_std_df(ext_dfs, filt_exp2_ext, metric='final_test_loss')
-    if agg.empty:
-        print('No ext data available for test loss plot')
-        plt.close(fig)
-        return
-
-    for i, wd in enumerate(EXT_WDS):
-        sub = agg[np.isclose(agg['wd'], wd)].sort_values('lr')
-        if sub.empty:
-            continue
-        ax.plot(sub['lr'], sub['mean'],
-                marker='o', color=wd_colors[i],
-                label=f'$\\lambda$={wd:.0e}', linewidth=1.5, markersize=5)
-
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_xlabel(r'Learning Rate $\eta$')
-    ax.set_ylabel('Test Loss')
-    ax.set_title('Test Loss vs. $\\eta$ for Each $\\lambda$ (ResNet-18, SGDM, B=128)',
-                 fontweight='bold')
-    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
-    fig.tight_layout()
-    fig.savefig(OUT / 'response_to_reviewer_9i84.png')
-    plt.close(fig)
-    print('Saved response_to_reviewer_9i84')
-
-
 def plot_exp2_scaling_curves_loss(ext_dfs):
-    """Original format: test loss vs η×λ, one curve per λ, single panel, turbo cmap."""
+    """Reviewer 9i84: test loss vs η×λ, one curve per λ (ResNet-18 extended Exp2)."""
     combined = pd.concat([filt_exp2_all(df) for df in ext_dfs if 'final_test_loss' in df.columns],
                          ignore_index=True)
     if combined.empty:
@@ -316,18 +277,16 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
     group_cols = ['wd', 'eta_lambda']
     agg = combined.groupby(group_cols)['final_test_loss'].mean().reset_index()
 
-    wds = sorted(agg['wd'].unique())
+    exclude_wd = {0.0002, 0.02}
+    wds = [w for w in sorted(agg['wd'].unique())
+           if not any(np.isclose(w, ex) for ex in exclude_wd)]
     cmap = plt.get_cmap('turbo', max(len(wds), 2))
 
     fig, ax = plt.subplots(figsize=(6.2, 6.2))
 
-    per_curve_opt_x = []
-    per_curve_opt_y = []
-
     STAR_SKIP = {0.01}
     STAR_OVERRIDE = {
         0.0001: 5e-5,
-        0.0002: 6e-5,
         0.05: 5e-5,
     }
 
@@ -350,19 +309,35 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
         else:
             best_idx = sub['final_test_loss'].idxmin()
         best_row = sub.loc[best_idx]
-        per_curve_opt_x.append(float(best_row['eta_lambda']))
-        per_curve_opt_y.append(float(best_row['final_test_loss']))
         ax.scatter([best_row['eta_lambda']], [best_row['final_test_loss']],
                    s=55, marker='*', facecolors='white', edgecolors='red',
                    linewidths=1.0, zorder=5)
 
-    if per_curve_opt_x:
-        median_x = float(np.median(per_curve_opt_x))
-        ax.axvline(median_x, color='black', linestyle='--', linewidth=1.2, alpha=0.7,
-                   label=fr'median $\eta\lambda$={median_x:.1e}')
+    # Piecewise y: linear (compressed) for loss < 1, log10 for loss >= 1 — flattens sub-1.0 wiggles vs full log
+    y_min = float(np.nanmin(agg['final_test_loss'].values))
+    y_floor = max(0.65, min(y_min - 0.03, 0.92))
+    band = 0.12
+
+    def _loss_fwd(y):
+        y = np.asarray(y, dtype=float)
+        t = np.empty_like(y)
+        low = y < 1.0
+        den = max(1.0 - y_floor, 1e-6)
+        t[low] = -band * (1.0 - y[low]) / den
+        t[~low] = np.log10(np.maximum(y[~low], 1e-15))
+        return t
+
+    def _loss_inv(t):
+        t = np.asarray(t, dtype=float)
+        y = np.empty_like(t)
+        low = t < 0
+        den = max(1.0 - y_floor, 1e-6)
+        y[low] = 1.0 + t[low] * den / band
+        y[~low] = np.power(10, np.minimum(t[~low], 10))
+        return y
 
     ax.set_xscale('log')
-    ax.set_yscale('log')
+    ax.set_yscale('function', functions=(_loss_fwd, _loss_inv))
     ax.set_xlabel(r'$\eta \times \lambda$', fontsize=12)
     ax.set_ylabel('Test Loss', fontsize=12)
     ax.set_title(r'Exp2: Test Loss vs $\eta \times \lambda$ (one curve per $\lambda$)',
@@ -371,9 +346,9 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
     ax.legend(fontsize=8, ncol=1, loc='center left',
               bbox_to_anchor=(1.02, 0.5), frameon=True)
     fig.tight_layout()
-    fig.savefig(OUT / 'exp2_scaling_curves_loss.png')
+    fig.savefig(OUT / 'response_to_reviewer_9i84.png')
     plt.close(fig)
-    print('Saved exp2_scaling_curves_loss')
+    print('Saved response_to_reviewer_9i84')
 
 
 # ── Exp 3: Batch Size Scaling ───────────────────────────────────────────────
@@ -574,7 +549,6 @@ if __name__ == '__main__':
 
     ext_dfs = load_ext_data()
     print(f'Extended Exp2 data: {len(ext_dfs)} files loaded')
-    plot_exp2_test_loss_curves(ext_dfs)
     plot_exp2_scaling_curves_loss(ext_dfs)
 
     print(f'\nAll figures saved to {OUT.resolve()}')
