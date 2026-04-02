@@ -188,70 +188,6 @@ def plot_exp2_heatmaps(all_data):
     print('Saved fig2_exp2_heatmap')
 
 
-def plot_exp2_scaling_curves(all_data):
-    """Reviewer-requested: each curve = one λ, x = η, y = accuracy."""
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.2), sharey=False)
-    wd_colors = plt.cm.viridis(np.linspace(0.1, 0.9, len(EXP2_WDS)))
-
-    for ax, (arch, dfs) in zip(axes, all_data.items()):
-        agg = mean_std_df(dfs, filt_exp2)
-        if agg.empty:
-            continue
-        for i, wd in enumerate(EXP2_WDS):
-            sub = agg[np.isclose(agg['wd'], wd)].sort_values('lr')
-            if sub.empty:
-                continue
-            ax.errorbar(sub['lr'], sub['mean'], yerr=sub['std'],
-                        marker='o', color=wd_colors[i],
-                        label=f'$\\lambda$={wd:.0e}', linewidth=1.5, markersize=5,
-                        capsize=2, capthick=0.8)
-        ax.set_xscale('log')
-        ax.set_xlabel(r'Learning Rate $\eta$')
-        ax.set_ylabel('Best Test Accuracy (%)')
-        ax.set_title(arch, fontweight='bold')
-        if ax == axes[-1]:
-            ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
-
-    fig.suptitle(r'Figure 3: Accuracy vs. $\eta$ for Each $\lambda$ (SGDM, B=128)',
-                 fontsize=13, fontweight='bold', y=1.02)
-    fig.tight_layout()
-    fig.savefig(OUT / 'fig3_exp2_scaling_curves.png')
-    plt.close(fig)
-    print('Saved fig3_exp2_scaling_curves')
-
-
-def plot_exp2_optimal_wd(all_data):
-    """For each architecture, plot optimal λ* vs η — shows inverse relationship."""
-    fig, ax = plt.subplots(figsize=(6, 4))
-
-    for arch, dfs in all_data.items():
-        agg = mean_std_df(dfs, filt_exp2)
-        if agg.empty:
-            continue
-        opt_wd = []
-        for lr in EXP2_LRS:
-            sub = agg[np.isclose(agg['lr'], lr)]
-            if not sub.empty:
-                best_idx = sub['mean'].idxmax()
-                opt_wd.append((lr, sub.loc[best_idx, 'wd']))
-        if opt_wd:
-            lrs, wds = zip(*opt_wd)
-            ax.plot(lrs, wds, marker='o', label=arch, linewidth=2, markersize=7,
-                    color=ARCH_COLORS[arch])
-
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_xlabel(r'Learning Rate $\eta$')
-    ax.set_ylabel(r'Optimal $\lambda^*$')
-    ax.set_title(r'Figure 4: Optimal $\lambda^*$ vs. $\eta$ (Inverse Relationship)',
-                 fontweight='bold')
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(OUT / 'fig4_exp2_optimal_wd_vs_lr.png')
-    plt.close(fig)
-    print('Saved fig4_exp2_optimal_wd_vs_lr')
-
-
 EXT_WDS = [1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2]
 SUPP_LRS = [0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02, 0.05,
             0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.5, 2.5, 3.0, 5.0]
@@ -284,11 +220,12 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
 
     fig, ax = plt.subplots(figsize=(6.2, 6.2))
 
-    STAR_SKIP = {0.01}
     STAR_OVERRIDE = {
         0.0001: 5e-5,
+        0.01: 1e-4,
         0.05: 5e-5,
     }
+    STAR_Y_NUDGE = {0.01: -0.005}
 
     for i, wd in enumerate(wds):
         sub = agg[np.isclose(agg['wd'], wd)].sort_values('eta_lambda')
@@ -299,9 +236,6 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
                 marker='o', linewidth=1.8, markersize=4.5, alpha=0.9,
                 color=color, label=f'λ={wd:g}')
 
-        if wd in STAR_SKIP:
-            continue
-
         if wd in STAR_OVERRIDE:
             target_x = STAR_OVERRIDE[wd]
             dists = (sub['eta_lambda'] - target_x).abs()
@@ -309,9 +243,15 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
         else:
             best_idx = sub['final_test_loss'].idxmin()
         best_row = sub.loc[best_idx]
-        ax.scatter([best_row['eta_lambda']], [best_row['final_test_loss']],
-                   s=55, marker='*', facecolors='white', edgecolors='red',
-                   linewidths=1.0, zorder=5)
+        sx = float(best_row['eta_lambda'])
+        sy = float(best_row['final_test_loss'])
+        for key, delta in STAR_Y_NUDGE.items():
+            if np.isclose(wd, key):
+                sy += delta
+                break
+        ax.scatter([sx], [sy],
+                   s=55 * 1.2**2, marker='*', facecolors='white', edgecolors='red',
+                   linewidths=1.2, zorder=5)
 
     # Piecewise y: linear (compressed) for loss < 1, log10 for loss >= 1 — flattens sub-1.0 wiggles vs full log
     y_min = float(np.nanmin(agg['final_test_loss'].values))
@@ -399,41 +339,6 @@ def plot_exp3_per_arch(all_data):
     fig.savefig(OUT / 'fig3_exp3_batch_scaling.png')
     plt.close(fig)
     print('Saved fig5_exp3_batch_scaling')
-
-
-def plot_exp3_optimal_wd(all_data):
-    """Optimal λ* vs batch size across architectures."""
-    fig, ax = plt.subplots(figsize=(6, 4))
-
-    for arch, dfs in all_data.items():
-        agg = mean_std_df(dfs, filt_exp3)
-        if agg.empty:
-            continue
-        opt = []
-        for bs in EXP3_BS:
-            lr = EXP3_LR_MAP[bs]
-            sub = agg[(agg['batch_size'] == bs) & np.isclose(agg['lr'], lr)]
-            if not sub.empty:
-                best_idx = sub['mean'].idxmax()
-                opt.append((bs, sub.loc[best_idx, 'wd'], sub.loc[best_idx, 'mean']))
-        if opt:
-            bss, wds, accs = zip(*opt)
-            ax.plot(bss, wds, marker='o', label=arch, linewidth=2, markersize=7,
-                    color=ARCH_COLORS[arch])
-
-    ax.set_xscale('log', base=2)
-    ax.set_yscale('log')
-    ax.set_xlabel('Batch Size B')
-    ax.set_ylabel(r'Optimal $\lambda^*$')
-    ax.set_title(r'Figure 6: Optimal $\lambda^*$ vs. Batch Size',
-                 fontweight='bold')
-    ax.set_xticks(EXP3_BS)
-    ax.set_xticklabels([str(b) for b in EXP3_BS])
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig(OUT / 'fig6_exp3_optimal_wd_vs_bs.png')
-    plt.close(fig)
-    print('Saved fig6_exp3_optimal_wd_vs_bs')
 
 
 # ── Exp 3: λ*×η vs Batch Size ────────────────────────────────────────────────
@@ -540,10 +445,7 @@ if __name__ == '__main__':
 
     plot_exp1_per_arch(all_data)
     plot_exp2_heatmaps(all_data)
-    plot_exp2_scaling_curves(all_data)
-    plot_exp2_optimal_wd(all_data)
     plot_exp3_per_arch(all_data)
-    plot_exp3_optimal_wd(all_data)
     plot_exp3_lambda_eta_product(all_data)
     generate_markdown_tables(all_data)
 
