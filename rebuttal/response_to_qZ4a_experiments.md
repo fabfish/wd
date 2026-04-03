@@ -1,0 +1,21 @@
+**Setup.** All experiments use CIFAR-100 (100 classes, 50K training / 10K test images) with standard data augmentation (random crop, horizontal flip). We evaluate three architectures spanning different design families: ResNet-18 (11.2M parameters), VGG-16 (14.8M, no residual connections), and ResNet-50 (23.5M, deeper residual). All models are trained for 100 epochs with CosineAnnealingLR and automatic mixed precision. Each configuration is run with 2 random seeds (42, 123); for ResNet-18, we additionally perform 4 independent runs to further verify stability. Results are reported as mean $\pm$ half-range.
+
+We conduct three experiment sets:
+
+- *Exp 1 (Stability boundary ordering)*: 3 optimizer variants (SGD, SGD+WD with $\lambda=5\times10^{-4}$, SGDM+WD with $\mu=0.9, \lambda=5\times10^{-4}$) $\times$ 8 learning rates $\eta \in \{0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0\}$ = 24 configurations per architecture.
+- *Exp 2 ($\eta$–$\lambda$ interaction)*: SGDM ($\mu=0.9$), $B=128$, 5 learning rates $\eta \in \{0.01, 0.05, 0.1, 0.2, 0.3\}$ $\times$ 7 weight decay values $\lambda \in \{10^{-4}, 2\times10^{-4}, 5\times10^{-4}, 10^{-3}, 2\times10^{-3}, 5\times10^{-3}, 10^{-2}\}$ = 35 configurations per architecture.
+- *Exp 3 (Batch size scaling)*: SGDM ($\mu=0.9$), 4 batch sizes $B \in \{64, 128, 256, 512\}$ with linear LR rule $\eta = 0.1 \times (B/128)$, $\times$ 6 weight decay values $\lambda \in \{10^{-4}$ to $5\times10^{-3}\}$ = 24 configurations per architecture.
+
+Total: $(24+35+24) \times 3$ architectures $\times\ 2$ seeds $= 498$ core runs, plus ResNet-18 repeat runs, totaling approximately **640 independent training runs**. Full results are available at our anonymous repository.
+
+**Observations.**
+
+*Exp 1*: Across all three architectures, SGD and SGDM+WD peak at $\eta^*=0.1$, while SGD+WD peaks at $\eta^* \in [0.5, 1.0]$. SGD+WD maintains a wide stable high-performance region (e.g., >76.5% for ResNet-50 across $\eta \in [0.5, 1.0]$), whereas SGDM+WD diverges at $\eta \geq 0.5$. This confirms the stability boundary ordering: SGD+WD (widest) > SGD > SGDM+WD (tightest). Notably, VGG-16, lacking skip connections, exhibits a tighter overall boundary than ResNets, consistent with a larger Lipschitz constant $L$.
+
+*Exp 2*: The $\eta$–$\lambda$ heatmaps display a clear anti-diagonal pattern on all three architectures: as $\eta$ increases from 0.01 to 0.3, the optimal $\lambda^*$ decreases from $5\times10^{-3}$ to $[2\times10^{-4}, 5\times10^{-4}]$, consistent with the theoretical prediction $\eta(1+\lambda) < 2/L$. At $\eta=0.2$, all 8 independent runs (ResNet-18 $\times$ 4, VGG-16 $\times$ 2, ResNet-50 $\times$ 2) unanimously select $\lambda^*=5\times10^{-4}$. The half-range in the stable region is consistently below 0.5%.
+
+*Exp 3*: Under the linear LR scaling rule, the optimal $\lambda^* \in [5\times10^{-4}, 10^{-3}]$ for all batch sizes across all three architectures. At $B=64$ and $B=512$, the consensus across all 8 runs is $\lambda^*=10^{-3}$. Peak accuracy degrades gracefully with batch size (e.g., ResNet-50: 77.38% at $B=64$ to 74.96% at $B=512$), and at $B=512$ the training operates near the stability boundary with seed-dependent divergence at certain $\lambda$ values.
+
+Additionally, we extended Exp 2 with 7 different $\lambda$ values ranging from $10^{-4}$ to $5\times10^{-2}$ over a broader learning rate range ($\eta \in [0.0002, 5.0]$), using test loss as the metric. When plotting test loss against $\eta \times \lambda$, the optimal $\eta \times \lambda$ for 5 out of 7 curves concentrates within a narrow range around $10^{-4}$, directly supporting the scaling law $\lambda\eta \approx \text{const}$.
+
+**Conclusion.** Across 3 architecturally diverse models (residual vs. non-residual, shallow vs. deep) and ~640 independent runs, all three theoretical predictions are consistently confirmed: (1) the stability boundary ordering SGD+WD > SGD > SGDM+WD, (2) the inverse $\eta$–$\lambda$ relationship, and (3) the batch size–weight decay coupling under linear LR scaling. Results are robust to random seed variation (half-range <0.5% in stable regions) and generalize beyond a single architecture, providing strong empirical evidence that the theory is predictive.
