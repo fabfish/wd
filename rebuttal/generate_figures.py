@@ -222,10 +222,10 @@ def plot_exp2_scaling_curves_loss(ext_dfs):
 
     STAR_OVERRIDE = {
         0.0001: 5e-5,
-        0.01: 1e-4,
+        0.01: 2e-4,
         0.05: 5e-5,
     }
-    STAR_Y_NUDGE = {0.01: -0.005}
+    STAR_Y_NUDGE = {}
 
     for i, wd in enumerate(wds):
         sub = agg[np.isclose(agg['wd'], wd)].sort_values('eta_lambda')
