@@ -59,6 +59,11 @@ outputs/logs/
 # Checkpoints
 outputs/checkpoints/
 
+# mlp_wd subproject -- mirror the same rules
+mlp_wd/outputs/logs/
+mlp_wd/outputs/checkpoints/
+mlp_wd/outputs/**/*.lock
+
 # OS
 .DS_Store
 Thumbs.db
