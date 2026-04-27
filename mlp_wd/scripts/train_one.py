@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--dataset", default="cifar10", choices=["cifar10", "mnist"])
     parser.add_argument("--num_layers", type=int, default=3)
     parser.add_argument("--hidden_dim", type=int, default=512)
+    parser.add_argument("--use_bn", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.05)
     parser.add_argument("--wd", type=float, default=1e-3)
@@ -48,6 +49,7 @@ def main() -> None:
         dataset=args.dataset,
         hidden_dim=args.hidden_dim,
         num_layers=args.num_layers,
+        use_bn=bool(args.use_bn),
         history_dir=args.history_dir,
         run_tag=f"single_{args.method}_lr{args.lr}_wd{args.wd}_m{args.momentum}",
         log_every=args.log_every,

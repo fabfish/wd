@@ -20,7 +20,7 @@ from .utils import save_history_json, set_seed, train_model_with_history
 
 
 CSV_FIELDS = [
-    "method", "dataset", "num_layers", "hidden_dim",
+    "method", "dataset", "num_layers", "hidden_dim", "use_bn",
     "batch_size", "lr", "wd", "momentum", "epochs", "seed",
     "final_train_loss", "final_train_acc",
     "final_test_loss", "final_test_acc",
@@ -40,6 +40,7 @@ def run_single_experiment(
     dataset: str = "cifar10",
     hidden_dim: int = 512,
     num_layers: int = 3,
+    use_bn: bool = False,
     history_dir: str | None = None,
     run_tag: str = "",
     log_every: int = 0,
@@ -52,15 +53,17 @@ def run_single_experiment(
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     train_loader, test_loader = get_loaders(dataset, batch_size=batch_size, num_workers=num_workers)
-    model = build_mlp_for_dataset(dataset, hidden_dim=hidden_dim, num_layers=num_layers).to(device)
+    model = build_mlp_for_dataset(
+        dataset, hidden_dim=hidden_dim, num_layers=num_layers, use_bn=use_bn,
+    ).to(device)
 
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=wd)
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
 
     print(
         f"[{run_tag or method}] BS={batch_size} LR={lr} WD={wd} mom={momentum} "
-        f"layers={num_layers} hidden={hidden_dim} epochs={epochs} ds={dataset} "
-        f"grad_clip={grad_clip}",
+        f"layers={num_layers} hidden={hidden_dim} bn={int(use_bn)} "
+        f"epochs={epochs} ds={dataset} grad_clip={grad_clip}",
         flush=True,
     )
 
@@ -74,6 +77,7 @@ def run_single_experiment(
         cfg = {
             "method": method, "dataset": dataset,
             "num_layers": num_layers, "hidden_dim": hidden_dim,
+            "use_bn": int(use_bn),
             "batch_size": batch_size, "lr": lr, "wd": wd,
             "momentum": momentum, "epochs": epochs, "seed": seed,
         }
@@ -86,6 +90,7 @@ def run_single_experiment(
         "dataset": dataset,
         "num_layers": num_layers,
         "hidden_dim": hidden_dim,
+        "use_bn": int(use_bn),
         "batch_size": batch_size,
         "lr": lr,
         "wd": wd,
@@ -106,18 +111,20 @@ def run_single_experiment(
 
 def get_run_key(record: dict[str, Any]) -> str:
     """Stable identifier for resume / dedup."""
+    bn_flag = int(record.get("use_bn", 0) or 0)
     return (
         f"m{record['method']}|ds{record['dataset']}|L{record['num_layers']}|H{record['hidden_dim']}|"
-        f"B{record['batch_size']}|lr{record['lr']}|wd{record['wd']}|mom{record['momentum']}|"
-        f"E{record['epochs']}|s{record['seed']}"
+        f"BN{bn_flag}|B{record['batch_size']}|lr{record['lr']}|wd{record['wd']}|"
+        f"mom{record['momentum']}|E{record['epochs']}|s{record['seed']}"
     )
 
 
 def get_task_key(method: str, dataset: str, num_layers: int, hidden_dim: int,
                   batch_size: int, lr: float, wd: float, momentum: float,
-                  epochs: int, seed: int) -> str:
+                  epochs: int, seed: int, use_bn: bool = False) -> str:
     return get_run_key({
         "method": method, "dataset": dataset, "num_layers": num_layers,
-        "hidden_dim": hidden_dim, "batch_size": batch_size, "lr": lr, "wd": wd,
+        "hidden_dim": hidden_dim, "use_bn": int(use_bn),
+        "batch_size": batch_size, "lr": lr, "wd": wd,
         "momentum": momentum, "epochs": epochs, "seed": seed,
     })

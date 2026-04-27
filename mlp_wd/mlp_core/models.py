@@ -10,7 +10,7 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
-    """Plain ReLU MLP.
+    """ReLU MLP, optionally with BatchNorm.
 
     Args:
         in_features: size of flattened input (CIFAR-10: 3072, MNIST: 784).
@@ -18,6 +18,12 @@ class MLP(nn.Module):
         num_layers: total number of Linear layers (>= 2). num_layers=3 means
             input -> hidden -> hidden -> output (2 hidden layers, ReLU between).
         num_classes: output classes.
+        use_bn: if True, insert BatchNorm1d after every hidden Linear (before
+            the ReLU). Brings the network into the (approximately) scale-
+            invariant regime where the eta x lambda scaling law holds: at
+            stationarity the implicit dynamics depend on the product, not on
+            eta or lambda separately. This is what makes the per-lambda
+            minima align in the reference figure.
     """
 
     def __init__(
@@ -26,6 +32,7 @@ class MLP(nn.Module):
         hidden_dim: int = 512,
         num_layers: int = 3,
         num_classes: int = 10,
+        use_bn: bool = False,
     ) -> None:
         super().__init__()
         if num_layers < 2:
@@ -36,6 +43,8 @@ class MLP(nn.Module):
         for i in range(num_layers):
             layers.append(nn.Linear(dims[i], dims[i + 1]))
             if i < num_layers - 1:
+                if use_bn:
+                    layers.append(nn.BatchNorm1d(dims[i + 1]))
                 layers.append(nn.ReLU(inplace=True))
         self.net = nn.Sequential(*layers)
 
@@ -43,6 +52,7 @@ class MLP(nn.Module):
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
         self.num_classes = num_classes
+        self.use_bn = use_bn
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
@@ -53,13 +63,14 @@ def build_mlp_for_dataset(
     *,
     hidden_dim: int = 512,
     num_layers: int = 3,
+    use_bn: bool = False,
 ) -> MLP:
     """Convenience factory keyed by dataset name."""
     dataset = dataset.lower()
     if dataset == "cifar10":
         return MLP(in_features=3 * 32 * 32, hidden_dim=hidden_dim,
-                   num_layers=num_layers, num_classes=10)
+                   num_layers=num_layers, num_classes=10, use_bn=use_bn)
     if dataset == "mnist":
         return MLP(in_features=28 * 28, hidden_dim=hidden_dim,
-                   num_layers=num_layers, num_classes=10)
+                   num_layers=num_layers, num_classes=10, use_bn=use_bn)
     raise ValueError(f"Unknown dataset: {dataset!r}")

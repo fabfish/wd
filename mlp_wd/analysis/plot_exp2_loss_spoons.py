@@ -24,6 +24,7 @@ def plot_spoons(
     y_log: bool = False,
     cap_diverged_to: float | None = None,
 ) -> None:
+    is_accuracy = "acc" in y_metric.lower()
     df = df.copy()
     df = df[df["wd"] > 0]
     if df.empty:
@@ -60,23 +61,25 @@ def plot_spoons(
             marker="o", linewidth=1.8, markersize=5.0, alpha=0.92,
             color=color, label=fr"$\lambda$={wd:g}",
         )
-        argmin = sub["_y"].idxmin()
-        per_curve_min_x.append(float(sub.loc[argmin, "eta_lambda"]))
-        per_curve_min_y.append(float(sub.loc[argmin, "_y"]))
-        ax.scatter([sub.loc[argmin, "eta_lambda"]], [sub.loc[argmin, "_y"]],
+        argopt = sub["_y"].idxmax() if is_accuracy else sub["_y"].idxmin()
+        per_curve_min_x.append(float(sub.loc[argopt, "eta_lambda"]))
+        per_curve_min_y.append(float(sub.loc[argopt, "_y"]))
+        ax.scatter([sub.loc[argopt, "eta_lambda"]], [sub.loc[argopt, "_y"]],
                    marker="*", s=130, facecolors="white",
                    edgecolors=color, linewidths=1.6, zorder=5)
 
     if per_curve_min_x:
-        i_global = int(np.argmin(per_curve_min_y))
+        i_global = int(np.argmax(per_curve_min_y) if is_accuracy
+                       else np.argmin(per_curve_min_y))
         x_star = per_curve_min_x[i_global]
         y_star = per_curve_min_y[i_global]
         ax.axvline(x_star, color="black", linestyle="--", linewidth=1.2, alpha=0.6)
+        opt_label = "max" if is_accuracy else "min"
         ax.scatter([x_star], [y_star], marker="*", s=260, color="red", zorder=6,
-                   label=fr"global min @ $\eta\lambda$={x_star:.2e}")
+                   label=fr"global {opt_label} @ $\eta\lambda$={x_star:.2e}")
         spread = max(per_curve_min_x) / max(min(per_curve_min_x), 1e-20)
-        print(f"per-lambda minima eta*lambda: {sorted(per_curve_min_x)}")
-        print(f"global min: eta*lambda={x_star:.3e}, {y_metric}={y_star:.4f}, spread(max/min)={spread:.2f}x")
+        print(f"per-lambda {opt_label} eta*lambda: {sorted(per_curve_min_x)}")
+        print(f"global {opt_label}: eta*lambda={x_star:.3e}, {y_metric}={y_star:.4f}, spread(max/min)={spread:.2f}x")
 
     ax.set_xscale("log")
     if y_log:
@@ -104,7 +107,8 @@ def main():
     ap.add_argument("--output", default="mlp_wd/outputs/plots/exp2_loss_spoons.png")
     ap.add_argument("--y_metric", default="final_test_loss",
                     choices=["final_test_loss", "best_test_loss",
-                             "final_train_loss"])
+                             "final_train_loss",
+                             "best_test_acc", "final_test_acc"])
     ap.add_argument("--y_log", action="store_true")
     ap.add_argument("--title_suffix", default="MLP / CIFAR-10, SGDM, BS=128")
     ap.add_argument("--cap_diverged_to", type=float, default=2.302585093,
