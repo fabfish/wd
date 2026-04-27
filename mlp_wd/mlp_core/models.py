@@ -33,6 +33,7 @@ class MLP(nn.Module):
         num_layers: int = 3,
         num_classes: int = 10,
         use_bn: bool = False,
+        norm_output: bool = False,
     ) -> None:
         super().__init__()
         if num_layers < 2:
@@ -46,6 +47,14 @@ class MLP(nn.Module):
                 if use_bn:
                     layers.append(nn.BatchNorm1d(dims[i + 1]))
                 layers.append(nn.ReLU(inplace=True))
+            else:
+                # Last (classifier) Linear. Optional BN here makes the whole
+                # forward pass scale-invariant in this layer's weight too:
+                # gamma/std cancels any global rescale of W_out, so the loss
+                # depends on direction only and the eta*lambda scaling holds
+                # for every Linear layer.
+                if norm_output:
+                    layers.append(nn.BatchNorm1d(dims[i + 1]))
         self.net = nn.Sequential(*layers)
 
         self.in_features = in_features
@@ -53,6 +62,7 @@ class MLP(nn.Module):
         self.num_layers = num_layers
         self.num_classes = num_classes
         self.use_bn = use_bn
+        self.norm_output = norm_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
@@ -64,13 +74,16 @@ def build_mlp_for_dataset(
     hidden_dim: int = 512,
     num_layers: int = 3,
     use_bn: bool = False,
+    norm_output: bool = False,
 ) -> MLP:
     """Convenience factory keyed by dataset name."""
     dataset = dataset.lower()
     if dataset == "cifar10":
         return MLP(in_features=3 * 32 * 32, hidden_dim=hidden_dim,
-                   num_layers=num_layers, num_classes=10, use_bn=use_bn)
+                   num_layers=num_layers, num_classes=10,
+                   use_bn=use_bn, norm_output=norm_output)
     if dataset == "mnist":
         return MLP(in_features=28 * 28, hidden_dim=hidden_dim,
-                   num_layers=num_layers, num_classes=10, use_bn=use_bn)
+                   num_layers=num_layers, num_classes=10,
+                   use_bn=use_bn, norm_output=norm_output)
     raise ValueError(f"Unknown dataset: {dataset!r}")

@@ -14,8 +14,9 @@ from .runner import get_task_key, run_single_experiment
 
 
 def _worker_entry(method, batch_size, lr, wd, momentum, epochs, seed,
-                  dataset, hidden_dim, num_layers, use_bn, history_dir,
-                  run_tag, log_every, num_workers, grad_clip) -> dict[str, Any]:
+                  dataset, hidden_dim, num_layers, use_bn, norm_output,
+                  history_dir, run_tag, log_every, num_workers,
+                  grad_clip) -> dict[str, Any]:
     """Module-level worker so multiprocessing 'spawn' can pickle it."""
     return run_single_experiment(
         method=method,
@@ -29,6 +30,7 @@ def _worker_entry(method, batch_size, lr, wd, momentum, epochs, seed,
         hidden_dim=hidden_dim,
         num_layers=num_layers,
         use_bn=use_bn,
+        norm_output=norm_output,
         history_dir=history_dir,
         run_tag=run_tag,
         log_every=log_every,
@@ -44,6 +46,7 @@ def build_tasks(
     hidden_dim: int,
     num_layers: int,
     use_bn: bool,
+    norm_output: bool,
     history_dir: str | None,
     log_every: int = 0,
     loader_workers: int = 2,
@@ -62,14 +65,14 @@ def build_tasks(
         run_tag = row.get("run_tag", f"{method}_bs{batch_size}_lr{lr}_wd{wd}_m{momentum}")
         tasks.append((
             method, batch_size, lr, wd, momentum, epochs, seed,
-            dataset, hidden_dim, num_layers, use_bn, history_dir, run_tag,
-            log_every, loader_workers, grad_clip,
+            dataset, hidden_dim, num_layers, use_bn, norm_output,
+            history_dir, run_tag, log_every, loader_workers, grad_clip,
         ))
     return tasks
 
 
 def filter_completed(grid_rows, output_file, dataset, hidden_dim, num_layers,
-                     use_bn: bool = False):
+                     use_bn: bool = False, norm_output: bool = False):
     """Remove rows already present in output_file."""
     completed = load_completed_keys(output_file)
     if not completed:
@@ -83,6 +86,7 @@ def filter_completed(grid_rows, output_file, dataset, hidden_dim, num_layers,
             num_layers=num_layers,
             hidden_dim=hidden_dim,
             use_bn=use_bn,
+            norm_output=norm_output,
             batch_size=int(row["batch_size"]),
             lr=float(row["lr"]),
             wd=float(row["wd"]),
@@ -107,6 +111,7 @@ def run_grid(
     num_layers: int,
     gpu_ids,
     use_bn: bool = False,
+    norm_output: bool = False,
     workers_per_gpu: int = 8,
     log_every: int = 0,
     loader_workers: int = 2,
@@ -121,7 +126,8 @@ def run_grid(
 
     pending, skipped = filter_completed(
         grid_rows, output_file, dataset=dataset,
-        hidden_dim=hidden_dim, num_layers=num_layers, use_bn=use_bn,
+        hidden_dim=hidden_dim, num_layers=num_layers,
+        use_bn=use_bn, norm_output=norm_output,
     )
     if verbose:
         print(f"[grid] total={len(list(grid_rows)) if not isinstance(grid_rows, list) else len(grid_rows)} "
@@ -133,7 +139,7 @@ def run_grid(
     tasks = build_tasks(
         pending,
         dataset=dataset, hidden_dim=hidden_dim, num_layers=num_layers,
-        use_bn=use_bn,
+        use_bn=use_bn, norm_output=norm_output,
         history_dir=str(history_dir) if history_dir else None,
         log_every=log_every, loader_workers=loader_workers,
         grad_clip=grad_clip,
