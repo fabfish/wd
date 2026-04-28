@@ -625,33 +625,53 @@ def plot_exp2_focused_smooth(ext_dfs,
         peak_y_mean = float(peaks_y.mean())
         peak_x_mean = float(peaks_x.mean())
 
+        from matplotlib.colors import to_rgb
+
+        def _gradient_strip(grid_centers, center, half_core):
+            """Gaussian envelope: ~1 inside [center±half_core], fading
+            symmetrically to ~0 at the band edges."""
+            half_w = float(grid_centers[-1] - center)  # symmetric extent
+            sigma = max(0.30 * 2 * half_w, 0.03)
+            dist = np.maximum(np.abs(grid_centers - center) - half_core, 0.0)
+            return (np.exp(-(dist ** 2) / (2 * sigma ** 2))) ** 1.5
+
         if show_const_band:
-            ax.axhspan(peak_y_lo - const_band_pad, peak_y_hi + const_band_pad,
-                       color=const_band_color, alpha=const_band_alpha,
-                       linewidth=0, zorder=1)
+            half_core_y = 0.5 * (peak_y_hi - peak_y_lo)
+            half_w_y = half_core_y + const_band_pad
+            n_strip_y = 80
+            ygrid = np.linspace(peak_y_mean - half_w_y,
+                                peak_y_mean + half_w_y, n_strip_y + 1)
+            ymids = 0.5 * (ygrid[:-1] + ygrid[1:])
+            strength_y = _gradient_strip(ymids, peak_y_mean, half_core_y)
+            r, g, b = to_rgb(const_band_color)
+            xs_edge = np.array([view_lo, view_hi])
+            X, Y = np.meshgrid(xs_edge, ygrid)
+            rgba_y = np.zeros((n_strip_y, 1, 4))
+            rgba_y[:, 0, 0] = r
+            rgba_y[:, 0, 1] = g
+            rgba_y[:, 0, 2] = b
+            rgba_y[:, 0, 3] = strength_y * const_band_alpha
+            ax.pcolormesh(X, Y, rgba_y, shading='flat',
+                          zorder=1, rasterized=True)
 
         if show_const_xband:
-            # Pure Gaussian centred at peak_x_mean: deepest in middle,
-            # tapering smoothly to the band edges.
-            x_lo = peak_x_lo - const_xband_pad
-            x_hi = peak_x_hi + const_xband_pad
-            from matplotlib.colors import to_rgb
+            half_core_x = 0.5 * (peak_x_hi - peak_x_lo)
+            half_w_x = half_core_x + const_xband_pad
+            n_strip_x = 120
+            xgrid = np.linspace(peak_x_mean - half_w_x,
+                                peak_x_mean + half_w_x, n_strip_x + 1)
+            xmids = 0.5 * (xgrid[:-1] + xgrid[1:])
+            strength_x = _gradient_strip(xmids, peak_x_mean, half_core_x)
             r, g, b = to_rgb(const_xband_color)
-            n_strip = 120
-            grid = np.linspace(x_lo, x_hi, n_strip + 1)
-            sigma = max(0.30 * (x_hi - x_lo), 0.03)
-            mids = 0.5 * (grid[:-1] + grid[1:])
-            strength = np.exp(-((mids - peak_x_mean) ** 2) / (2 * sigma ** 2))
-            strength = strength ** 1.5
-            xs_edge = np.power(10.0, grid)
-            ys_edge = np.array([ylim[0], ylim[1]])
-            X, Y = np.meshgrid(xs_edge, ys_edge)
-            rgba = np.zeros((1, n_strip, 4))
-            rgba[0, :, 0] = r
-            rgba[0, :, 1] = g
-            rgba[0, :, 2] = b
-            rgba[0, :, 3] = strength * const_xband_alpha
-            ax.pcolormesh(X, Y, rgba, shading='flat',
+            xs_edge_x = np.power(10.0, xgrid)
+            ys_edge_x = np.array([ylim[0], ylim[1]])
+            X, Y = np.meshgrid(xs_edge_x, ys_edge_x)
+            rgba_x = np.zeros((1, n_strip_x, 4))
+            rgba_x[0, :, 0] = r
+            rgba_x[0, :, 1] = g
+            rgba_x[0, :, 2] = b
+            rgba_x[0, :, 3] = strength_x * const_xband_alpha
+            ax.pcolormesh(X, Y, rgba_x, shading='flat',
                           zorder=1, rasterized=True)
 
         if show_optimum_cross:
