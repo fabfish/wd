@@ -474,10 +474,13 @@ def plot_exp2_focused_smooth(ext_dfs,
                              envelope_smooth_sigma=0.18,
                              show_const_band=True,
                              const_band_color='#5da0d3',
-                             const_band_alpha=0.16,
+                             const_band_alpha=0.18,
+                             const_band_pad=0.6,
                              show_const_xband=True,
                              const_xband_color='#d94545',
-                             const_xband_alpha=0.16):
+                             const_xband_alpha=0.22,
+                             const_xband_pad=0.20,
+                             show_optimum_cross=True):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
     - Drops the requested λ values (default: 0.05, 0.0001).
@@ -611,23 +614,54 @@ def plot_exp2_focused_smooth(ext_dfs,
         ax.plot(xs_env, lower, color=envelope_color,
                 linewidth=0.9, alpha=min(1.0, envelope_alpha * 2.2), zorder=2)
 
-    # Horizontal blue band: peak y-values fall in a narrow range across λ.
-    # Vertical red band: peak x positions also fall in a narrow range.
-    # Together they say "the optimum is a 2D point (x*, y*) that is
-    # approximately constant across the λ family".
+    # Horizontal blue band (peak y constant) + vertical red gradient band
+    # (peak x constant) + dashed cross at their centre.
     if (show_const_band or show_const_xband) and len(smoothed_series) >= 2:
         peaks_y = np.array([float(np.max(ys)) for _, ys in smoothed_series])
         peaks_x = np.array([float(lx[int(np.argmax(ys))])
                             for lx, ys in smoothed_series])
+        peak_y_lo, peak_y_hi = float(peaks_y.min()), float(peaks_y.max())
+        peak_x_lo, peak_x_hi = float(peaks_x.min()), float(peaks_x.max())
+        peak_y_mean = float(peaks_y.mean())
+        peak_x_mean = float(peaks_x.mean())
+
         if show_const_band:
-            ax.axhspan(float(peaks_y.min()), float(peaks_y.max()),
+            ax.axhspan(peak_y_lo - const_band_pad, peak_y_hi + const_band_pad,
                        color=const_band_color, alpha=const_band_alpha,
                        linewidth=0, zorder=1)
+
         if show_const_xband:
-            ax.axvspan(float(np.power(10.0, peaks_x.min())),
-                       float(np.power(10.0, peaks_x.max())),
-                       color=const_xband_color, alpha=const_xband_alpha,
-                       linewidth=0, zorder=1)
+            x_lo = peak_x_lo - const_xband_pad
+            x_hi = peak_x_hi + const_xband_pad
+            from matplotlib.colors import to_rgb
+            r, g, b = to_rgb(const_xband_color)
+            n_strip = 80
+            grid = np.linspace(x_lo, x_hi, n_strip + 1)
+            log_center = 0.5 * (peak_x_lo + peak_x_hi)
+            half_core = 0.5 * (peak_x_hi - peak_x_lo) + 0.05
+            sigma = max(const_xband_pad * 0.7, 0.10)
+            mids = 0.5 * (grid[:-1] + grid[1:])
+            dist = np.maximum(np.abs(mids - log_center) - half_core, 0.0)
+            strength = np.exp(-(dist ** 2) / (2 * sigma ** 2))
+            xs_edge = np.power(10.0, grid)
+            ys_edge = np.array([ylim[0], ylim[1]])
+            X, Y = np.meshgrid(xs_edge, ys_edge)
+            rgba = np.zeros((1, n_strip, 4))
+            rgba[0, :, 0] = r
+            rgba[0, :, 1] = g
+            rgba[0, :, 2] = b
+            rgba[0, :, 3] = strength * const_xband_alpha
+            ax.pcolormesh(X, Y, rgba, shading='flat',
+                          zorder=1, rasterized=True)
+
+        if show_optimum_cross:
+            cross_alpha = min(1.0, max(const_band_alpha, const_xband_alpha) * 3.0)
+            ax.axvline(float(np.power(10.0, peak_x_mean)),
+                       color='#3a4a5d', linestyle='--',
+                       linewidth=0.9, alpha=cross_alpha, zorder=2)
+            ax.axhline(peak_y_mean,
+                       color='#3a4a5d', linestyle='--',
+                       linewidth=0.9, alpha=cross_alpha, zorder=2)
 
     ax.set_xscale('log')
     ax.set_xlim(view_lo, view_hi)
