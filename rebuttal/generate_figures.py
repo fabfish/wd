@@ -464,7 +464,7 @@ def plot_exp2_focused_smooth(ext_dfs,
                              exclude_wds=(5e-2, 1e-4),
                              white_lo=5e-5, white_hi=1e-4,
                              gray_alpha=0.12, smooth_n=240,
-                             band_style='middle_red',
+                             band_style='none',
                              band_color='#5da0d3',
                              show_stars=False,
                              smooth_sigma=0.30):
@@ -523,6 +523,8 @@ def plot_exp2_focused_smooth(ext_dfs,
         rgba[0, :, 2] = b
         rgba[0, :, 3] = band_strength
         ax.pcolormesh(X, Y, rgba, shading='flat', zorder=0, rasterized=True)
+    elif band_style == 'none':
+        pass
     else:
         grayscale = np.tile(1.0 - band_strength, (1, 1))
         ax.pcolormesh(X, Y, grayscale, cmap='gray', vmin=0.0, vmax=1.0,
@@ -579,12 +581,16 @@ def plot_exp2_focused_smooth(ext_dfs,
             return rf'10^{{{int(round(e))}}}'
         m, ex = f'{v:.0e}'.split('e')
         return rf'{int(m)}\!\times\!10^{{{int(ex)}}}'
-    band_label = ({'middle_gray': 'gray band',
-                   'middle_red':  'highlight band'}
-                  .get(band_style, 'white band'))
-    ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
-                 rf'({band_label} $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
-                 fontsize=11, fontweight='bold')
+    if band_style == 'none':
+        ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$',
+                     fontsize=11, fontweight='bold')
+    else:
+        band_label = ({'middle_gray': 'gray band',
+                       'middle_red':  'highlight band'}
+                      .get(band_style, 'white band'))
+        ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
+                     rf'({band_label} $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
+                     fontsize=11, fontweight='bold')
     ax.grid(True, which='major', axis='y', alpha=0.20)
     ax.grid(True, which='major', axis='x', alpha=0.15)
     ax.legend(fontsize=8, ncol=1, loc='center left',
