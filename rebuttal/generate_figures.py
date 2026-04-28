@@ -475,11 +475,11 @@ def plot_exp2_focused_smooth(ext_dfs,
                              show_const_band=True,
                              const_band_color='#5da0d3',
                              const_band_alpha=0.18,
-                             const_band_pad=0.6,
+                             const_band_pad=0.20,
                              show_const_xband=True,
                              const_xband_color='#d94545',
-                             const_xband_alpha=0.22,
-                             const_xband_pad=0.20,
+                             const_xband_alpha=0.30,
+                             const_xband_pad=0.08,
                              show_optimum_cross=True):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
@@ -631,18 +631,17 @@ def plot_exp2_focused_smooth(ext_dfs,
                        linewidth=0, zorder=1)
 
         if show_const_xband:
+            # Pure Gaussian centred at peak_x_mean: deepest in middle,
+            # tapering smoothly to the band edges.
             x_lo = peak_x_lo - const_xband_pad
             x_hi = peak_x_hi + const_xband_pad
             from matplotlib.colors import to_rgb
             r, g, b = to_rgb(const_xband_color)
-            n_strip = 80
+            n_strip = 120
             grid = np.linspace(x_lo, x_hi, n_strip + 1)
-            log_center = 0.5 * (peak_x_lo + peak_x_hi)
-            half_core = 0.5 * (peak_x_hi - peak_x_lo) + 0.05
-            sigma = max(const_xband_pad * 0.7, 0.10)
+            sigma = max(0.5 * (x_hi - x_lo), 0.05)
             mids = 0.5 * (grid[:-1] + grid[1:])
-            dist = np.maximum(np.abs(mids - log_center) - half_core, 0.0)
-            strength = np.exp(-(dist ** 2) / (2 * sigma ** 2))
+            strength = np.exp(-((mids - peak_x_mean) ** 2) / (2 * sigma ** 2))
             xs_edge = np.power(10.0, grid)
             ys_edge = np.array([ylim[0], ylim[1]])
             X, Y = np.meshgrid(xs_edge, ys_edge)
@@ -657,9 +656,6 @@ def plot_exp2_focused_smooth(ext_dfs,
         if show_optimum_cross:
             cross_alpha = min(1.0, max(const_band_alpha, const_xband_alpha) * 3.0)
             ax.axvline(float(np.power(10.0, peak_x_mean)),
-                       color='#3a4a5d', linestyle='--',
-                       linewidth=0.9, alpha=cross_alpha, zorder=2)
-            ax.axhline(peak_y_mean,
                        color='#3a4a5d', linestyle='--',
                        linewidth=0.9, alpha=cross_alpha, zorder=2)
 
