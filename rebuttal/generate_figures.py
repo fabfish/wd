@@ -466,17 +466,19 @@ def plot_exp2_focused_smooth(ext_dfs,
                              gray_alpha=0.12, smooth_n=240,
                              band_style='middle_red',
                              band_color='#5da0d3',
-                             show_stars=False):
+                             show_stars=False,
+                             smooth_sigma=0.30):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
-    - Drops the requested λ values (default: 0.05).
-    - Smooths each curve via a PCHIP interpolant on log10(η×λ).
-    - Plots a gray-white-gray horizontal gradient background where the
-      white plateau spans [white_lo, white_hi] (the empirical optimum
-      band), fading to light gray on both sides.
+    - Drops the requested λ values (default: 0.05, 0.0001).
+    - Smooths each curve by replacing y-values with a Gaussian-weighted
+      local average over log10(η×λ) (sigma = ``smooth_sigma`` in log10
+      units). The original x positions are kept and consecutive points
+      are connected with straight line segments.
+    - Plots a horizontal gradient highlight band over [white_lo,
+      white_hi] (the empirical optimum band), fading on both sides.
     - Inverse-error y-axis stretches the 70–80% region.
     """
-    from scipy.interpolate import PchipInterpolator
 
     agg = _focused_data(ext_dfs, lo=data_lo, hi=data_hi, metric=metric)
     if agg.empty:
@@ -526,7 +528,8 @@ def plot_exp2_focused_smooth(ext_dfs,
         ax.pcolormesh(X, Y, grayscale, cmap='gray', vmin=0.0, vmax=1.0,
                       shading='flat', zorder=0, rasterized=True)
 
-    # Per-curve smoothed lines + raw markers.
+    # Per-curve: smooth the y-values themselves (Gaussian on log10(η×λ)),
+    # keep original x positions, connect with straight segments.
     for wd in wds:
         sub = (agg[np.isclose(agg['wd'], wd)]
                .sort_values('eta_lambda')
@@ -542,23 +545,18 @@ def plot_exp2_focused_smooth(ext_dfs,
         y = sub[metric].values
         order = np.argsort(log_x)
         log_x, y = log_x[order], y[order]
-        if len(log_x) >= 4:
-            spline = PchipInterpolator(log_x, y, extrapolate=False)
-            log_x_fine = np.linspace(log_x[0], log_x[-1], smooth_n)
-            y_smooth = spline(log_x_fine)
-            ax.plot(np.power(10.0, log_x_fine), y_smooth,
-                    color=color, linewidth=2.2, alpha=0.95,
-                    label=f'λ={wd:g}', zorder=3)
-            ax.scatter(np.power(10.0, log_x), y, s=22,
-                       color=color, edgecolors='white', linewidth=0.5,
-                       alpha=0.85, zorder=4)
-        else:
-            ax.plot(np.power(10.0, log_x), y,
-                    marker='o', color=color, linewidth=1.8, markersize=4.5,
-                    label=f'λ={wd:g}', zorder=3)
+        # Gaussian-weighted local average in log-x; sigma controls smoothing.
+        diff = log_x[:, None] - log_x[None, :]
+        w = np.exp(-(diff ** 2) / (2 * smooth_sigma ** 2))
+        y_smooth = (w * y[None, :]).sum(axis=1) / w.sum(axis=1)
+        ax.plot(np.power(10.0, log_x), y_smooth,
+                marker='o', linewidth=1.8, markersize=4.5,
+                color=color, alpha=0.95,
+                label=f'λ={wd:g}', zorder=3)
         if show_stars:
-            best_row = sub.loc[sub[metric].idxmax()]
-            ax.scatter([float(best_row['eta_lambda'])], [float(best_row[metric])],
+            i_best = int(np.argmax(y_smooth))
+            ax.scatter([float(np.power(10.0, log_x[i_best]))],
+                       [float(y_smooth[i_best])],
                        s=110, marker='*', facecolors='white', edgecolors='red',
                        linewidths=1.4, zorder=5)
 
