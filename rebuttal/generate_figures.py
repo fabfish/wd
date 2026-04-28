@@ -627,22 +627,20 @@ def plot_exp2_focused_smooth(ext_dfs,
 
         from matplotlib.colors import to_rgb
 
-        def _gradient_strip(grid_centers, center, half_core):
-            """Gaussian envelope: ~1 inside [center±half_core], fading
-            symmetrically to ~0 at the band edges."""
-            half_w = float(grid_centers[-1] - center)  # symmetric extent
-            sigma = max(0.30 * 2 * half_w, 0.03)
-            dist = np.maximum(np.abs(grid_centers - center) - half_core, 0.0)
-            return (np.exp(-(dist ** 2) / (2 * sigma ** 2))) ** 1.5
+        def _gradient_strip(grid_centers, center, half_w):
+            """Pure Gaussian centred at `center` with sigma scaled to
+            half_w. Smooth fade from 1 at the centre to ~0 at ±half_w
+            (no plateau)."""
+            sigma = max(0.55 * half_w, 0.03)
+            return np.exp(-((grid_centers - center) ** 2) / (2 * sigma ** 2)) ** 1.5
 
         if show_const_band:
-            half_core_y = 0.5 * (peak_y_hi - peak_y_lo)
-            half_w_y = half_core_y + const_band_pad
-            n_strip_y = 80
+            half_w_y = 0.5 * (peak_y_hi - peak_y_lo) + const_band_pad
+            n_strip_y = 100
             ygrid = np.linspace(peak_y_mean - half_w_y,
                                 peak_y_mean + half_w_y, n_strip_y + 1)
             ymids = 0.5 * (ygrid[:-1] + ygrid[1:])
-            strength_y = _gradient_strip(ymids, peak_y_mean, half_core_y)
+            strength_y = _gradient_strip(ymids, peak_y_mean, half_w_y)
             r, g, b = to_rgb(const_band_color)
             xs_edge = np.array([view_lo, view_hi])
             X, Y = np.meshgrid(xs_edge, ygrid)
@@ -655,13 +653,12 @@ def plot_exp2_focused_smooth(ext_dfs,
                           zorder=1, rasterized=True)
 
         if show_const_xband:
-            half_core_x = 0.5 * (peak_x_hi - peak_x_lo)
-            half_w_x = half_core_x + const_xband_pad
-            n_strip_x = 120
+            half_w_x = 0.5 * (peak_x_hi - peak_x_lo) + const_xband_pad
+            n_strip_x = 140
             xgrid = np.linspace(peak_x_mean - half_w_x,
                                 peak_x_mean + half_w_x, n_strip_x + 1)
             xmids = 0.5 * (xgrid[:-1] + xgrid[1:])
-            strength_x = _gradient_strip(xmids, peak_x_mean, half_core_x)
+            strength_x = _gradient_strip(xmids, peak_x_mean, half_w_x)
             r, g, b = to_rgb(const_xband_color)
             xs_edge_x = np.power(10.0, xgrid)
             ys_edge_x = np.array([ylim[0], ylim[1]])
