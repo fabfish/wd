@@ -463,9 +463,9 @@ def plot_exp2_focused_smooth(ext_dfs,
                              ylim=(60, 80),
                              exclude_wds=(5e-2, 1e-4),
                              white_lo=5e-5, white_hi=1e-4,
-                             gray_alpha=0.10, smooth_n=240,
+                             gray_alpha=0.12, smooth_n=240,
                              band_style='middle_red',
-                             band_color='#d94545',
+                             band_color='#5da0d3',
                              show_stars=False):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
@@ -582,7 +582,7 @@ def plot_exp2_focused_smooth(ext_dfs,
         m, ex = f'{v:.0e}'.split('e')
         return rf'{int(m)}\!\times\!10^{{{int(ex)}}}'
     band_label = ({'middle_gray': 'gray band',
-                   'middle_red':  'red band'}
+                   'middle_red':  'highlight band'}
                   .get(band_style, 'white band'))
     ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
                  rf'({band_label} $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
