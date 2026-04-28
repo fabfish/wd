@@ -116,6 +116,7 @@ def train_model(model, train_loader, test_loader, optimizer, scheduler,
     best_test_acc = 0.0
     final_test_acc = 0.0
     final_train_loss = 0.0
+    final_test_loss = 0.0
 
     for epoch in range(epochs):
         train_loss = train_epoch(model, train_loader, optimizer, scheduler, device, use_amp)
@@ -127,13 +128,14 @@ def train_model(model, train_loader, test_loader, optimizer, scheduler,
         if epoch == epochs - 1:
             final_test_acc = test_acc
             final_train_loss = train_loss
+            final_test_loss = test_loss
 
         # Only log at intervals or at the end
         if (epoch + 1) % log_interval == 0 or epoch == epochs - 1:
             print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.4f} | "
                   f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}% | Best Acc: {best_test_acc:.2f}%")
 
-    return best_test_acc, final_test_acc, final_train_loss
+    return best_test_acc, final_test_acc, final_train_loss, final_test_loss
 
 
 def save_checkpoint(model, optimizer, scheduler, epoch, metrics, filepath):

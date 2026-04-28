@@ -99,7 +99,7 @@ def main():
     print("="*60 + "\n")
 
     # Train
-    best_test_acc, final_test_acc, final_train_loss = train_model(
+    best_test_acc, final_test_acc, final_train_loss, _ = train_model(
         model, train_loader, test_loader, optimizer, scheduler,
         device, epochs=args.epochs, use_amp=args.use_amp
     )
