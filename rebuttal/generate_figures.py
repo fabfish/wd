@@ -467,7 +467,15 @@ def plot_exp2_focused_smooth(ext_dfs,
                              band_style='none',
                              band_color='#5da0d3',
                              show_stars=False,
-                             smooth_sigma=0.30):
+                             smooth_sigma=0.30,
+                             show_envelope=False,
+                             envelope_color='#7a808a',
+                             envelope_alpha=0.28,
+                             envelope_smooth_sigma=0.18,
+                             show_const_band=True,
+                             const_band_color='#5da0d3',
+                             const_band_alpha=0.16,
+                             const_label_offset=0.15):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
     - Drops the requested λ values (default: 0.05, 0.0001).
@@ -532,6 +540,7 @@ def plot_exp2_focused_smooth(ext_dfs,
 
     # Per-curve: smooth the y-values themselves (Gaussian on log10(η×λ)),
     # keep original x positions, connect with straight segments.
+    smoothed_series = []  # list of (log_x array, y_smooth array) for envelope
     for wd in wds:
         sub = (agg[np.isclose(agg['wd'], wd)]
                .sort_values('eta_lambda')
@@ -551,6 +560,7 @@ def plot_exp2_focused_smooth(ext_dfs,
         diff = log_x[:, None] - log_x[None, :]
         w = np.exp(-(diff ** 2) / (2 * smooth_sigma ** 2))
         y_smooth = (w * y[None, :]).sum(axis=1) / w.sum(axis=1)
+        smoothed_series.append((log_x, y_smooth))
         ax.plot(np.power(10.0, log_x), y_smooth,
                 marker='o', linewidth=1.8, markersize=4.5,
                 color=color, alpha=0.95,
@@ -561,6 +571,63 @@ def plot_exp2_focused_smooth(ext_dfs,
                        [float(y_smooth[i_best])],
                        s=110, marker='*', facecolors='white', edgecolors='red',
                        linewidths=1.4, zorder=5)
+
+    # "Comet/ponytail" envelope: upper/lower bound of the smoothed bundle,
+    # interpolated onto a common log-x grid. The envelope naturally narrows
+    # near the per-curve maxima cluster (~5e-5) because the curves collapse
+    # there, producing the strike-towards effect.
+    if show_envelope and len(smoothed_series) >= 2:
+        log_lo_e = min(s[0][0]  for s in smoothed_series)
+        log_hi_e = max(s[0][-1] for s in smoothed_series)
+        grid = np.linspace(log_lo_e, log_hi_e, 240)
+        stack = np.full((len(smoothed_series), len(grid)), np.nan)
+        for i, (lx, ys) in enumerate(smoothed_series):
+            mask = (grid >= lx[0]) & (grid <= lx[-1])
+            stack[i, mask] = np.interp(grid[mask], lx, ys)
+        # require at least 2 curves to define an envelope at any given x.
+        valid_count = np.sum(~np.isnan(stack), axis=0)
+        keep = valid_count >= 2
+        upper = np.nanmax(stack, axis=0)
+        lower = np.nanmin(stack, axis=0)
+        upper[~keep] = np.nan
+        lower[~keep] = np.nan
+        if envelope_smooth_sigma > 0:
+            for arr in (upper, lower):
+                m = ~np.isnan(arr)
+                if m.sum() >= 2:
+                    g_m = grid[m]
+                    diff_g = g_m[:, None] - g_m[None, :]
+                    w_g = np.exp(-(diff_g ** 2) / (2 * envelope_smooth_sigma ** 2))
+                    w_g /= w_g.sum(axis=1, keepdims=True)
+                    arr[m] = w_g @ arr[m]
+        xs_env = np.power(10.0, grid)
+        ax.fill_between(xs_env, lower, upper,
+                        color=envelope_color, alpha=envelope_alpha,
+                        linewidth=0, zorder=1)
+        ax.plot(xs_env, upper, color=envelope_color,
+                linewidth=0.9, alpha=min(1.0, envelope_alpha * 2.2), zorder=2)
+        ax.plot(xs_env, lower, color=envelope_color,
+                linewidth=0.9, alpha=min(1.0, envelope_alpha * 2.2), zorder=2)
+
+    # Horizontal "constant optimum" band: peaks of all curves sit in a narrow
+    # horizontal range. A dashed line at the mean and a shaded band between
+    # min_peak..max_peak make the "optimum ≈ const across λ" claim instantly
+    # readable.
+    if show_const_band and len(smoothed_series) >= 2:
+        peaks = np.array([float(np.max(ys)) for _, ys in smoothed_series])
+        peak_lo, peak_hi = float(peaks.min()), float(peaks.max())
+        peak_mean = float(peaks.mean())
+        ax.axhspan(peak_lo, peak_hi,
+                   color=const_band_color, alpha=const_band_alpha,
+                   linewidth=0, zorder=1)
+        ax.axhline(peak_mean, color=const_band_color,
+                   linestyle='--', linewidth=1.2,
+                   alpha=min(1.0, const_band_alpha * 4.5), zorder=2)
+        ax.text(view_hi, peak_mean + const_label_offset,
+                rf' optimum $\approx {peak_mean:.1f}\%$  '
+                rf'($\Delta \leq {peak_hi - peak_lo:.1f}\%$)',
+                fontsize=9, color='#3a4a5d',
+                ha='right', va='bottom', zorder=3)
 
     ax.set_xscale('log')
     ax.set_xlim(view_lo, view_hi)
