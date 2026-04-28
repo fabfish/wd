@@ -344,6 +344,21 @@ def _focused_data(ext_dfs, lo=FOCUS_EL_LO, hi=FOCUS_EL_HI,
     return agg
 
 
+def _inverse_error_scale():
+    """Forward: y = -log10(100.5 - acc) -> compresses low acc, stretches high acc.
+    Inverse: acc = 100.5 - 10^(-y)."""
+    offset = 0.5
+
+    def fwd(p):
+        p = np.asarray(p, dtype=float)
+        return -np.log10(np.maximum(100.0 + offset - p, 1e-3))
+
+    def inv(y):
+        y = np.asarray(y, dtype=float)
+        return 100.0 + offset - np.power(10.0, -y)
+    return fwd, inv
+
+
 def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png',
                              metric='final_test_loss', y_label='Test Loss',
                              title_metric='Test Loss', yscale='auto',
@@ -378,18 +393,6 @@ def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png
     y_min = float(np.nanmin(agg[metric].values))
     if yscale == 'auto':
         yscale = 'linear' if higher_is_better else ('log' if y_min < 0.3 else 'piecewise')
-
-    def _inverse_error_scale():
-        # forward: y = -log10(100 - acc + 0.5) -> compresses low acc, stretches high acc
-        # inverse: acc = 100.5 - 10^(-y)
-        offset = 0.5
-        def fwd(p):
-            p = np.asarray(p, dtype=float)
-            return -np.log10(np.maximum(100.0 + offset - p, 1e-3))
-        def inv(y):
-            y = np.asarray(y, dtype=float)
-            return 100.0 + offset - np.power(10.0, -y)
-        return fwd, inv
 
     fig, ax = plt.subplots(figsize=(7.0, 5.6))
     for i, wd in enumerate(wds):
@@ -441,6 +444,135 @@ def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png
                  rf'view $[{_fmt_pow10(view_lo)},\,{_fmt_pow10(view_hi)}]$)',
                  fontsize=11, fontweight='bold')
     ax.grid(True, which='both', alpha=0.25)
+    ax.legend(fontsize=8, ncol=1, loc='center left',
+              bbox_to_anchor=(1.02, 0.5), frameon=True)
+    fig.tight_layout()
+    fig.savefig(OUT / out_name)
+    plt.close(fig)
+    print(f'Saved {out_name}')
+
+
+# ── Variant: smoothed best-acc with peak-band gradient background ──────────
+def plot_exp2_focused_smooth(ext_dfs,
+                             out_name='response_to_reviewer_focused_smooth.png',
+                             metric='best_test_acc',
+                             y_label='Best Test Accuracy (%)',
+                             title_metric='Test Accuracy (best, smoothed)',
+                             data_lo=1e-6, data_hi=1e-3,
+                             view_lo=5e-7, view_hi=5e-3,
+                             ylim=(60, 80),
+                             exclude_wds=(5e-2,),
+                             white_lo=5e-5, white_hi=1e-4,
+                             gray_alpha=0.09, smooth_n=240):
+    """Smooth, "publication-style" version of the best-acc focused plot.
+
+    - Drops the requested λ values (default: 0.05).
+    - Smooths each curve via a PCHIP interpolant on log10(η×λ).
+    - Plots a gray-white-gray horizontal gradient background where the
+      white plateau spans [white_lo, white_hi] (the empirical optimum
+      band), fading to light gray on both sides.
+    - Inverse-error y-axis stretches the 70–80% region.
+    """
+    from scipy.interpolate import PchipInterpolator
+
+    agg = _focused_data(ext_dfs, lo=data_lo, hi=data_hi, metric=metric)
+    if agg.empty:
+        print(f'No ext data for smooth plot ({metric})')
+        return
+    wds = [w for w in sorted(agg['wd'].unique())
+           if any(np.isclose(w, fw) for fw in FOCUS_WDS)
+           and not any(np.isclose(w, ex) for ex in exclude_wds)]
+    cmap = plt.get_cmap('turbo', max(len(FOCUS_WDS), 2))
+    color_idx = {w: i for i, w in enumerate(FOCUS_WDS)}
+
+    fig, ax = plt.subplots(figsize=(7.4, 5.6))
+
+    # Gradient background: gray outside [white_lo, white_hi], white inside.
+    # Implement via a smooth log-x raised-cosine envelope so the transition
+    # is gentle and looks intentional rather than a hard rectangle.
+    log_lo, log_hi = np.log10(view_lo), np.log10(view_hi)
+    log_w_lo, log_w_hi = np.log10(white_lo), np.log10(white_hi)
+    log_center = 0.5 * (log_w_lo + log_w_hi)
+    half_white = 0.5 * (log_w_hi - log_w_lo)
+    fade_decade = 0.7  # how many decades of gradual fade on each side
+    nx = 400
+    log_grid = np.linspace(log_lo, log_hi, nx)
+    dist = np.maximum(np.abs(log_grid - log_center) - half_white, 0.0)
+    intensity = np.clip(1.0 - dist / fade_decade, 0.0, 1.0)
+    gray_strength = (1.0 - intensity) * gray_alpha
+    xs_edge = np.power(10.0, np.concatenate([
+        log_grid - 0.5 * (log_grid[1] - log_grid[0]),
+        log_grid[-1:] + 0.5 * (log_grid[1] - log_grid[0]),
+    ]))
+    ys_edge = np.array([ylim[0], ylim[1]])
+    X, Y = np.meshgrid(xs_edge, ys_edge)
+    grayscale = np.tile(1.0 - gray_strength, (1, 1))
+    ax.pcolormesh(X, Y, grayscale, cmap='gray', vmin=0.0, vmax=1.0,
+                  shading='flat', zorder=0, rasterized=True)
+
+    # Per-curve smoothed lines + raw markers.
+    for wd in wds:
+        sub = (agg[np.isclose(agg['wd'], wd)]
+               .sort_values('eta_lambda')
+               .dropna(subset=[metric]))
+        if len(sub) < 2:
+            continue
+        ci = color_idx.get(
+            next((fw for fw in FOCUS_WDS if np.isclose(wd, fw)), wd),
+            len(FOCUS_WDS) // 2,
+        )
+        color = cmap(ci)
+        log_x = np.log10(sub['eta_lambda'].values)
+        y = sub[metric].values
+        order = np.argsort(log_x)
+        log_x, y = log_x[order], y[order]
+        if len(log_x) >= 4:
+            spline = PchipInterpolator(log_x, y, extrapolate=False)
+            log_x_fine = np.linspace(log_x[0], log_x[-1], smooth_n)
+            y_smooth = spline(log_x_fine)
+            ax.plot(np.power(10.0, log_x_fine), y_smooth,
+                    color=color, linewidth=2.2, alpha=0.95,
+                    label=f'λ={wd:g}', zorder=3)
+            ax.scatter(np.power(10.0, log_x), y, s=22,
+                       color=color, edgecolors='white', linewidth=0.5,
+                       alpha=0.85, zorder=4)
+        else:
+            ax.plot(np.power(10.0, log_x), y,
+                    marker='o', color=color, linewidth=1.8, markersize=4.5,
+                    label=f'λ={wd:g}', zorder=3)
+        best_row = sub.loc[sub[metric].idxmax()]
+        ax.scatter([float(best_row['eta_lambda'])], [float(best_row[metric])],
+                   s=110, marker='*', facecolors='white', edgecolors='red',
+                   linewidths=1.4, zorder=5)
+
+    # Markers for the white plateau boundaries (very subtle).
+    ax.axvline(white_lo, color='black', linestyle=':', alpha=0.25, linewidth=0.7)
+    ax.axvline(white_hi, color='black', linestyle=':', alpha=0.25, linewidth=0.7)
+
+    ax.set_xscale('log')
+    ax.set_xlim(view_lo, view_hi)
+    fwd, inv = _inverse_error_scale()
+    ax.set_yscale('function', functions=(fwd, inv))
+    from matplotlib.ticker import FixedLocator, FixedFormatter
+    candidate = [60, 64, 68, 70, 72, 74, 76, 78, 80]
+    ticks = [t for t in candidate if ylim[0] - 1e-6 <= t <= ylim[1] + 1e-6]
+    ax.yaxis.set_major_locator(FixedLocator(ticks))
+    ax.yaxis.set_major_formatter(FixedFormatter([str(t) for t in ticks]))
+    ax.set_ylim(*ylim)
+    ax.set_xlabel(r'$\eta \times \lambda$', fontsize=12)
+    ax.set_ylabel(y_label, fontsize=12)
+
+    def _fmt_pow10(v):
+        e = np.log10(v)
+        if abs(e - round(e)) < 1e-6:
+            return rf'10^{{{int(round(e))}}}'
+        m, ex = f'{v:.0e}'.split('e')
+        return rf'{int(m)}\!\times\!10^{{{int(ex)}}}'
+    ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
+                 rf'(white band $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
+                 fontsize=11, fontweight='bold')
+    ax.grid(True, which='major', axis='y', alpha=0.20)
+    ax.grid(True, which='major', axis='x', alpha=0.15)
     ax.legend(fontsize=8, ncol=1, loc='center left',
               bbox_to_anchor=(1.02, 0.5), frameon=True)
     fig.tight_layout()
@@ -825,6 +957,13 @@ if __name__ == '__main__':
         data_lo=1e-6, data_hi=1e-3,
         view_lo=5e-7, view_hi=5e-3,
         higher_is_better=True, ylim=(60, 80),
+    )
+    plot_exp2_focused_smooth(
+        ext_dfs,
+        out_name='response_to_reviewer_focused_smooth.png',
+        metric='best_test_acc',
+        y_label='Best Test Accuracy (%)',
+        title_metric='Test Accuracy (best)',
     )
     plot_exp2_focused_index(ext_dfs)
     plot_exp2_focused_collapse(ext_dfs)
