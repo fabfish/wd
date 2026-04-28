@@ -475,7 +475,9 @@ def plot_exp2_focused_smooth(ext_dfs,
                              show_const_band=True,
                              const_band_color='#5da0d3',
                              const_band_alpha=0.16,
-                             const_label_offset=0.15):
+                             show_const_xband=True,
+                             const_xband_color='#d94545',
+                             const_xband_alpha=0.16):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
     - Drops the requested λ values (default: 0.05, 0.0001).
@@ -609,25 +611,23 @@ def plot_exp2_focused_smooth(ext_dfs,
         ax.plot(xs_env, lower, color=envelope_color,
                 linewidth=0.9, alpha=min(1.0, envelope_alpha * 2.2), zorder=2)
 
-    # Horizontal "constant optimum" band: peaks of all curves sit in a narrow
-    # horizontal range. A dashed line at the mean and a shaded band between
-    # min_peak..max_peak make the "optimum ≈ const across λ" claim instantly
-    # readable.
-    if show_const_band and len(smoothed_series) >= 2:
-        peaks = np.array([float(np.max(ys)) for _, ys in smoothed_series])
-        peak_lo, peak_hi = float(peaks.min()), float(peaks.max())
-        peak_mean = float(peaks.mean())
-        ax.axhspan(peak_lo, peak_hi,
-                   color=const_band_color, alpha=const_band_alpha,
-                   linewidth=0, zorder=1)
-        ax.axhline(peak_mean, color=const_band_color,
-                   linestyle='--', linewidth=1.2,
-                   alpha=min(1.0, const_band_alpha * 4.5), zorder=2)
-        ax.text(view_hi, peak_mean + const_label_offset,
-                rf' optimum $\approx {peak_mean:.1f}\%$  '
-                rf'($\Delta \leq {peak_hi - peak_lo:.1f}\%$)',
-                fontsize=9, color='#3a4a5d',
-                ha='right', va='bottom', zorder=3)
+    # Horizontal blue band: peak y-values fall in a narrow range across λ.
+    # Vertical red band: peak x positions also fall in a narrow range.
+    # Together they say "the optimum is a 2D point (x*, y*) that is
+    # approximately constant across the λ family".
+    if (show_const_band or show_const_xband) and len(smoothed_series) >= 2:
+        peaks_y = np.array([float(np.max(ys)) for _, ys in smoothed_series])
+        peaks_x = np.array([float(lx[int(np.argmax(ys))])
+                            for lx, ys in smoothed_series])
+        if show_const_band:
+            ax.axhspan(float(peaks_y.min()), float(peaks_y.max()),
+                       color=const_band_color, alpha=const_band_alpha,
+                       linewidth=0, zorder=1)
+        if show_const_xband:
+            ax.axvspan(float(np.power(10.0, peaks_x.min())),
+                       float(np.power(10.0, peaks_x.max())),
+                       color=const_xband_color, alpha=const_xband_alpha,
+                       linewidth=0, zorder=1)
 
     ax.set_xscale('log')
     ax.set_xlim(view_lo, view_hi)
