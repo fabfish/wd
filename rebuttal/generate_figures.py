@@ -349,7 +349,7 @@ def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png
                              title_metric='Test Loss', yscale='auto',
                              data_lo=None, data_hi=None,
                              view_lo=None, view_hi=None,
-                             higher_is_better=False):
+                             higher_is_better=False, ylim=None):
     """Main focused figure.
 
     - data points: η×λ in [data_lo, data_hi] (defaults to focus band)
@@ -379,6 +379,18 @@ def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png
     if yscale == 'auto':
         yscale = 'linear' if higher_is_better else ('log' if y_min < 0.3 else 'piecewise')
 
+    def _inverse_error_scale():
+        # forward: y = -log10(100 - acc + 0.5) -> compresses low acc, stretches high acc
+        # inverse: acc = 100.5 - 10^(-y)
+        offset = 0.5
+        def fwd(p):
+            p = np.asarray(p, dtype=float)
+            return -np.log10(np.maximum(100.0 + offset - p, 1e-3))
+        def inv(y):
+            y = np.asarray(y, dtype=float)
+            return 100.0 + offset - np.power(10.0, -y)
+        return fwd, inv
+
     fig, ax = plt.subplots(figsize=(7.0, 5.6))
     for i, wd in enumerate(wds):
         sub = agg[np.isclose(agg['wd'], wd)].sort_values('eta_lambda')
@@ -402,9 +414,20 @@ def plot_exp2_focused_spoons(ext_dfs, out_name='response_to_reviewer_focused.png
         ax.set_yscale('log')
     elif yscale == 'linear':
         ax.set_yscale('linear')
+    elif yscale == 'inverse_error':
+        fwd, inv = _inverse_error_scale()
+        ax.set_yscale('function', functions=(fwd, inv))
+        from matplotlib.ticker import FixedLocator, FixedFormatter
+        lo = ylim[0] if ylim else 0
+        candidate = [0, 10, 20, 30, 40, 50, 55, 60, 65, 68, 70, 72, 74, 76, 78, 80]
+        ticks = [t for t in candidate if t >= lo - 1e-6]
+        ax.yaxis.set_major_locator(FixedLocator(ticks))
+        ax.yaxis.set_major_formatter(FixedFormatter([str(t) for t in ticks]))
     else:
         fwd, inv = _piecewise_loss_scale(agg[metric].values)
         ax.set_yscale('function', functions=(fwd, inv))
+    if ylim is not None:
+        ax.set_ylim(*ylim)
     ax.set_xlabel(r'$\eta \times \lambda$', fontsize=12)
     ax.set_ylabel(y_label, fontsize=12)
     def _fmt_pow10(v):
@@ -764,9 +787,10 @@ if __name__ == '__main__':
         metric='final_test_acc',
         y_label='Test Accuracy (%)',
         title_metric='Test Accuracy (final)',
+        yscale='inverse_error',
         data_lo=1e-6, data_hi=1e-3,
         view_lo=5e-7, view_hi=5e-3,
-        higher_is_better=True,
+        higher_is_better=True, ylim=(0, 80),
     )
     plot_exp2_focused_spoons(
         ext_dfs,
@@ -774,9 +798,33 @@ if __name__ == '__main__':
         metric='best_test_acc',
         y_label='Best Test Accuracy (%)',
         title_metric='Test Accuracy (best, early-stop)',
+        yscale='inverse_error',
         data_lo=1e-6, data_hi=1e-3,
         view_lo=5e-7, view_hi=5e-3,
-        higher_is_better=True,
+        higher_is_better=True, ylim=(0, 80),
+    )
+    # Zoomed variants: focus on 60-80 band where the spoon "bottoms" cluster
+    plot_exp2_focused_spoons(
+        ext_dfs,
+        out_name='response_to_reviewer_focused_test_acc_zoom.png',
+        metric='final_test_acc',
+        y_label='Test Accuracy (%)',
+        title_metric='Test Accuracy (final, zoomed)',
+        yscale='inverse_error',
+        data_lo=1e-6, data_hi=1e-3,
+        view_lo=5e-7, view_hi=5e-3,
+        higher_is_better=True, ylim=(60, 80),
+    )
+    plot_exp2_focused_spoons(
+        ext_dfs,
+        out_name='response_to_reviewer_focused_best_acc_zoom.png',
+        metric='best_test_acc',
+        y_label='Best Test Accuracy (%)',
+        title_metric='Test Accuracy (best, zoomed)',
+        yscale='inverse_error',
+        data_lo=1e-6, data_hi=1e-3,
+        view_lo=5e-7, view_hi=5e-3,
+        higher_is_better=True, ylim=(60, 80),
     )
     plot_exp2_focused_index(ext_dfs)
     plot_exp2_focused_collapse(ext_dfs)
