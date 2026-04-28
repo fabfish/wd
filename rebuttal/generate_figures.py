@@ -639,9 +639,10 @@ def plot_exp2_focused_smooth(ext_dfs,
             r, g, b = to_rgb(const_xband_color)
             n_strip = 120
             grid = np.linspace(x_lo, x_hi, n_strip + 1)
-            sigma = max(0.5 * (x_hi - x_lo), 0.05)
+            sigma = max(0.30 * (x_hi - x_lo), 0.03)
             mids = 0.5 * (grid[:-1] + grid[1:])
             strength = np.exp(-((mids - peak_x_mean) ** 2) / (2 * sigma ** 2))
+            strength = strength ** 1.5
             xs_edge = np.power(10.0, grid)
             ys_edge = np.array([ylim[0], ylim[1]])
             X, Y = np.meshgrid(xs_edge, ys_edge)
@@ -654,10 +655,10 @@ def plot_exp2_focused_smooth(ext_dfs,
                           zorder=1, rasterized=True)
 
         if show_optimum_cross:
-            cross_alpha = min(1.0, max(const_band_alpha, const_xband_alpha) * 3.0)
             ax.axvline(float(np.power(10.0, peak_x_mean)),
-                       color='#3a4a5d', linestyle='--',
-                       linewidth=0.9, alpha=cross_alpha, zorder=2)
+                       color=const_xband_color,
+                       linestyle=(0, (5, 3)),
+                       linewidth=2.0, alpha=0.85, zorder=2)
 
     ax.set_xscale('log')
     ax.set_xlim(view_lo, view_hi)
