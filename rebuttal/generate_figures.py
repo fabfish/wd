@@ -479,7 +479,7 @@ def plot_exp2_focused_smooth(ext_dfs,
                              show_const_xband=True,
                              const_xband_color='#d94545',
                              const_xband_alpha=0.30,
-                             const_xband_pad=0.08,
+                             const_xband_pad=0.30,
                              show_optimum_cross=True):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
