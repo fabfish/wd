@@ -303,6 +303,18 @@ FOCUS_VIEW_LO = 1e-6
 FOCUS_VIEW_HI = 1e-2
 FOCUS_WDS = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 5e-2]
 
+# Custom palette per λ, used by the focused smooth plot. Plasma-style
+# scientific gradient: cool→warm follows the magnitude of λ, so the
+# colour ordering itself encodes the value (also colour-blind friendly
+# and legible in B/W print).
+FOCUS_LAMBDA_COLORS = {
+    5e-4: '#0D0887',  # deep ultramarine
+    1e-3: '#6A00A8',  # deep purple
+    2e-3: '#B12A90',  # magenta — visual centre
+    5e-3: '#E16462',  # coral red
+    1e-2: '#FCA636',  # bright orange
+}
+
 
 def _piecewise_loss_scale(y_vals):
     """Return (forward, inverse) callables for the rebuttal's piecewise y-scale:
@@ -472,15 +484,23 @@ def plot_exp2_focused_smooth(ext_dfs,
                              envelope_color='#7a808a',
                              envelope_alpha=0.28,
                              envelope_smooth_sigma=0.18,
-                             show_const_band=True,
-                             const_band_color='#5da0d3',
-                             const_band_alpha=0.18,
+                             show_const_band=False,
+                             const_band_color='#bcd2e3',
+                             const_band_alpha=0.55,
                              const_band_pad=0.20,
                              show_const_xband=True,
                              const_xband_color='#d94545',
-                             const_xband_alpha=0.30,
+                             const_xband_alpha=0.38,
                              const_xband_pad=0.30,
-                             show_optimum_cross=True):
+                             show_optimum_cross=False,
+                             show_peak_rect=True,
+                             peak_rect_x=(3e-5, 7.5e-5),
+                             peak_rect_color='#9a9a9a',
+                             peak_rect_alpha=0.7,
+                             peak_rect_label='Theory const.',
+                             const_band_label='Best acc',
+                             show_title=False,
+                             legend_loc='upper right'):
     """Smooth, "publication-style" version of the best-acc focused plot.
 
     - Drops the requested λ values (default: 0.05, 0.0001).
@@ -503,7 +523,17 @@ def plot_exp2_focused_smooth(ext_dfs,
     cmap = plt.get_cmap('turbo', max(len(FOCUS_WDS), 2))
     color_idx = {w: i for i, w in enumerate(FOCUS_WDS)}
 
-    fig, ax = plt.subplots(figsize=(7.4, 5.6))
+    def _curve_color(wd_val):
+        for lam, c in FOCUS_LAMBDA_COLORS.items():
+            if np.isclose(wd_val, lam):
+                return c
+        ci = color_idx.get(
+            next((fw for fw in FOCUS_WDS if np.isclose(wd_val, fw)), wd_val),
+            len(FOCUS_WDS) // 2,
+        )
+        return cmap(ci)
+
+    fig, ax = plt.subplots(figsize=(6.6, 5.2))
 
     # Gradient background: gray outside [white_lo, white_hi], white inside.
     # Implement via a smooth log-x raised-cosine envelope so the transition
@@ -552,11 +582,7 @@ def plot_exp2_focused_smooth(ext_dfs,
                .dropna(subset=[metric]))
         if len(sub) < 2:
             continue
-        ci = color_idx.get(
-            next((fw for fw in FOCUS_WDS if np.isclose(wd, fw)), wd),
-            len(FOCUS_WDS) // 2,
-        )
-        color = cmap(ci)
+        color = _curve_color(wd)
         log_x = np.log10(sub['eta_lambda'].values)
         y = sub[metric].values
         order = np.argsort(log_x)
@@ -636,29 +662,24 @@ def plot_exp2_focused_smooth(ext_dfs,
 
         if show_const_band:
             half_w_y = 0.5 * (peak_y_hi - peak_y_lo) + const_band_pad
-            n_strip_y = 100
-            ygrid = np.linspace(peak_y_mean - half_w_y,
-                                peak_y_mean + half_w_y, n_strip_y + 1)
-            ymids = 0.5 * (ygrid[:-1] + ygrid[1:])
-            strength_y = _gradient_strip(ymids, peak_y_mean, half_w_y)
-            r, g, b = to_rgb(const_band_color)
-            xs_edge = np.array([view_lo, view_hi])
-            X, Y = np.meshgrid(xs_edge, ygrid)
-            rgba_y = np.zeros((n_strip_y, 1, 4))
-            rgba_y[:, 0, 0] = r
-            rgba_y[:, 0, 1] = g
-            rgba_y[:, 0, 2] = b
-            rgba_y[:, 0, 3] = strength_y * const_band_alpha
-            ax.pcolormesh(X, Y, rgba_y, shading='flat',
-                          zorder=1, rasterized=True)
+            ax.axhspan(peak_y_mean - half_w_y, peak_y_mean + half_w_y,
+                       facecolor=const_band_color, edgecolor='none',
+                       alpha=const_band_alpha, zorder=1)
 
         if show_const_xband:
-            half_w_x = 0.5 * (peak_x_hi - peak_x_lo) + const_xband_pad
+            if show_peak_rect:
+                log_rect_lo = np.log10(peak_rect_x[0])
+                log_rect_hi = np.log10(peak_rect_x[1])
+                xband_center = 0.5 * (log_rect_lo + log_rect_hi)
+                half_w_x = 0.5 * (log_rect_hi - log_rect_lo)
+            else:
+                xband_center = peak_x_mean
+                half_w_x = 0.5 * (peak_x_hi - peak_x_lo) + const_xband_pad
             n_strip_x = 140
-            xgrid = np.linspace(peak_x_mean - half_w_x,
-                                peak_x_mean + half_w_x, n_strip_x + 1)
+            xgrid = np.linspace(xband_center - half_w_x,
+                                xband_center + half_w_x, n_strip_x + 1)
             xmids = 0.5 * (xgrid[:-1] + xgrid[1:])
-            strength_x = _gradient_strip(xmids, peak_x_mean, half_w_x)
+            strength_x = _gradient_strip(xmids, xband_center, half_w_x)
             r, g, b = to_rgb(const_xband_color)
             xs_edge_x = np.power(10.0, xgrid)
             ys_edge_x = np.array([ylim[0], ylim[1]])
@@ -674,8 +695,22 @@ def plot_exp2_focused_smooth(ext_dfs,
         if show_optimum_cross:
             ax.axvline(float(np.power(10.0, peak_x_mean)),
                        color=const_xband_color,
-                       linestyle=(0, (5, 3)),
-                       linewidth=2.0, alpha=0.85, zorder=2)
+                       linestyle=(0, (0.6, 0.75)),
+                       linewidth=8.0, alpha=0.425, zorder=2)
+
+    if show_peak_rect:
+        from matplotlib.patches import Rectangle
+        rx_lo, rx_hi = peak_rect_x
+        rect = Rectangle((rx_lo, ylim[0]),
+                         rx_hi - rx_lo,
+                         ylim[1] - ylim[0],
+                         fill=False,
+                         edgecolor=peak_rect_color,
+                         linestyle=(0, (6, 4)),
+                         linewidth=1.8,
+                         alpha=peak_rect_alpha,
+                         zorder=2)
+        ax.add_patch(rect)
 
     ax.set_xscale('log')
     ax.set_xlim(view_lo, view_hi)
@@ -696,20 +731,32 @@ def plot_exp2_focused_smooth(ext_dfs,
             return rf'10^{{{int(round(e))}}}'
         m, ex = f'{v:.0e}'.split('e')
         return rf'{int(m)}\!\times\!10^{{{int(ex)}}}'
-    if band_style == 'none':
-        ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$',
-                     fontsize=11, fontweight='bold')
-    else:
-        band_label = ({'middle_gray': 'gray band',
-                       'middle_red':  'highlight band'}
-                      .get(band_style, 'white band'))
-        ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
-                     rf'({band_label} $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
-                     fontsize=11, fontweight='bold')
+    if show_title:
+        if band_style == 'none':
+            ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$',
+                         fontsize=11, fontweight='bold')
+        else:
+            band_label = ({'middle_gray': 'gray band',
+                           'middle_red':  'highlight band'}
+                          .get(band_style, 'white band'))
+            ax.set_title(rf'Exp2 (smooth): {title_metric} vs $\eta \times \lambda$ '
+                         rf'({band_label} $[{_fmt_pow10(white_lo)},\,{_fmt_pow10(white_hi)}]$)',
+                         fontsize=11, fontweight='bold')
     ax.grid(True, which='major', axis='y', alpha=0.20)
     ax.grid(True, which='major', axis='x', alpha=0.15)
-    ax.legend(fontsize=8, ncol=1, loc='center left',
-              bbox_to_anchor=(1.02, 0.5), frameon=True)
+
+    from matplotlib.patches import Patch
+    handles, labels = ax.get_legend_handles_labels()
+    if show_const_band:
+        handles.append(Patch(facecolor=const_band_color,
+                             alpha=const_band_alpha,
+                             edgecolor='none', label=const_band_label))
+    if show_peak_rect:
+        handles.append(Patch(facecolor='none', edgecolor=peak_rect_color,
+                             linestyle='--', linewidth=1.6,
+                             alpha=peak_rect_alpha, label=peak_rect_label))
+    ax.legend(handles=handles, fontsize=9, ncol=1, loc=legend_loc,
+              frameon=True, framealpha=0.92)
     fig.tight_layout()
     fig.savefig(OUT / out_name)
     plt.close(fig)
