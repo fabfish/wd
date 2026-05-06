@@ -1,0 +1,7 @@
+\section{Conclusion}
+In this work, we investigate the coupling between weight decay and other optimization hyperparameters from a generalization perspective. By establishing generalization bounds, we show that introducing the weight decay coefficient $\lambda$ disrupts the pre-existing hyperparameter equilibrium, necessitating a system-wide readjustment. Based on this, we propose the "Regularization Equivalence" hypothesis as a heuristic design principle. By aligning the stability profiles of explicit regularization (weight decay) and implicit regularization (SWA), we derive the explicit hyperparameter scaling law: $\lambda \approx 2/\eta T$. 
+Furthermore, our analysis explicitly characterizes the role of batch size $B$ as a noise compensation mechanism: as $B$ increases, the reduction in implicit gradient noise must be counterbalanced by scaling up the joint configuration of $\lambda$ and $\eta$.
+Empirically, we validated our heuristic theoretical findings and the proposed scaling laws across diverse architectures, ranging from ResNet-18 to Qwen3-0.6B language model. 
+
+\paragraph{Limitation.} 
+While our current theoretical analysis is grounded in convex assumptions for tractability, the robust empirical alignment across non-convex architectures (e.g., LLMs) suggests the proposed laws capture fundamental optimization dynamics. Future work aims to rigorously extend this stability framework to non-convex settings.

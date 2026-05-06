@@ -1,0 +1,43 @@
+\section{Introduction}
+The immense success of deep learning is largely attributed to its remarkable generalization capability. To further enhance this capability, techniques such as weight decay \cite{doi:10.1137/0109031,Hoerl,a92f3c16-7c6e-31d3-b403-82d2b0a469e4,10.5555/2986916.2987033} and model averaging \cite{szegedy2016rethinking,izmailov2018averaging} have become integral standard practices in modern neural network training. However, in practice, the configuration of these hyperparameters often relies on computationally expensive grid searches or empirical heuristics. While existing scaling laws have extensively explored the quantitative interplay between the learning rate ($\eta$) \cite{zhou2026setlearningratelargescale} and batch size ($B$) \cite{mccandlish2018empiricalmodellargebatchtraining,zhou2026setbatchsizelargescale}, $\lambda$ is often tuned via expensive grid searches or, worse, treated as a fixed default value (e.g., $10^{-4}$), regardless of changes in compute budget or training duration. This static treatment ignores a fundamental reality: weight decay actively alters the optimization landscape and the effective step size, necessitating a system-wide readjustment of the entire hyperparameter configuration.
+
+Recent research \cite{wang2025setadamwsweightdecay} on AdamW shows that the optimal weight decay setting depends on the number of iterations and the learning rate (i.e. $\lambda=\frac{1}{\eta T}$), strongly suggesting a profound intrinsic coupling among the hyperparameters. Based on this, this paper seeks to address the following two core questions: \textbf{Q1}. How does the introduction of $\lambda$ reshape the optimal performance of the learning algorithm? To maintain performance, what specific dependent adjustments must other hyperparameters exhibit? \textbf{Q2}. Can we establish a quantitative scaling law based on theoretical derivation that precisely characterizes the intrinsic coupling mechanism between $\lambda$, $\eta$, and $B$? 
+
+\begin{table*}[t]
+\caption{Comparison of generalization bound for SGD, SWA, SGD-WD, SGDM and SGDM-WD. 
+Here $T$ represents iterations, $n$ denotes the size of the dataset. $G$ and $L$ are Lipschitz constant. The constants $\tau_{\beta},\Gamma_{\beta} \in(0,1)$ dependent on the momentum coefficient $\beta$. $\lambda$ and $\eta$ are the decay factor and learning rate, respectively. The momentum $m_t=\beta m_{t-1}+(1-\beta)\nabla F(\theta_{t})$. Our theoretical analysis shows that introducing weight decay significantly tightens the bound and offers new constraints on the learning rate to achieve the optimal result.}
+\label{sample-table}
+\vspace{-0.2cm}
+\begin{center}
+%\begin{small}
+\renewcommand\arraystretch{1.3}
+\resizebox{\textwidth}{!}{
+\begin{sc}
+\begin{tabular}{l|c|c|c}
+\toprule
+% \hline
+Algorithm & Update Strategy & Learning Rate & Generalization Bound  \\ \midrule %& Optimization Bound
+SGD & $\theta_{t+1} = \theta_{t} - \eta \nabla_\theta F(\theta_{t})$ & $\eta \leq \frac{2}{L}$ & $2\eta TG^2/n$ \cite{hardt2016train}\\ \hline
+SWA  &  $\theta_{t+1} = \theta_0 - \eta\sum_{i=1}^{t+1} \nabla F(\theta_{i-1})$ & $\eta \leq \frac{2}{L}$ &  $\eta TG^2/n$ \cite{pmlr-v235-wang24bl,hardt2016train}\\ \hline
+SGD-WD  &  $\theta_{t+1} = (1-\lambda\eta)\theta_{t} - \eta \nabla_\theta F(\theta_{t})$& $\eta \leq \frac{2}{2\lambda + L}$ &$2G^2/\lambda n$ Theorem \ref{thm:sgd-WD}\\ \hline
+SGDM  &  $\theta_{t+1} = \theta_{t} - \eta m_t$& $\eta \leq \frac{2}{L(1-\beta)}$ &$2\eta\tau_{\beta} TG^2/n$ Theorem \ref{thm:sgdm}\\ \hline
+SGDM-WD &  $\theta_{t+1} = (1-\lambda\eta)\theta_{t} - \eta m_{t}$& $\eta \leq \frac{2}{2\lambda +L\Gamma_{\beta}}$ & $2\tau_{\beta} G^2/\lambda n$ Theorem \ref{thm:sgdm-WD}\\ \bottomrule
+\end{tabular}
+\end{sc}
+}
+%\end{small}
+\end{center}
+\vskip -0.2in
+\end{table*}
+
+To address \textbf{Q1}, we turn to Uniform Stability \cite{hardt2016train} as a core theoretical tool, as it yields generalization bounds that explicitly depend on the parameters $\lambda$, $\eta$, and $T$, enabling a systematic study of their coupling. Building on SGD and SGDM as baseline optimizers, we derive generalization bounds for their weight-decayed counterparts, thereby characterizing the impact of the decay coefficient $\lambda$ on optimization behavior and its interaction with other hyperparameters, including the learning rate.
+Direct analysis of the coupling for optimal $\lambda$ is difficult due to the non-convex nature of deep loss landscapes. To answer \textbf{Q2}, we propose a heuristic design principle termed "Regularization Equivalence."
+Intuitively, explicit weight decay restricts the solution norm, while implicit methods like Stochastic Weight Averaging (SWA) \cite{izmailov2018averaging} average the trajectory to find flat minima. If both methods are tuned to yield optimal generalization, we posit that they must impose comparable constraints on the algorithm's stability. By analytically equating their worst-case generalization bounds, we recover an intrinsic scaling law: $\lambda \eta T \approx \text{Constant}$. This derivation, while heuristic, provides a powerful proxy for identifying the optimal operating regime. Furthermore, based on the relationship between iterations $T$ and epochs $T_{epo}$, we derive a hyperparameter coupling $\lambda \eta nT_{epo}/B \approx \text{Constant}$, which incorporates batch size. Finally, we validate these scaling laws on various tasks using ResNet-18 and Qwen3-0.6B.
+
+Our main contributions can be summarized as follows:
+\begin{itemize}
+    \item We derive and systematically compare the generalization bounds for SGD, SGD with Weight Decay (SGD-WD), SGD with Momentum (SGDM), and SGD with Momentum and Weight Decay (SGDM-WD) based on stability as shown in Table \ref{sample-table}. Our theoretical analysis reveals that weight decay improves the generalization bound and enforces more stringent learning rate conditions for SGD and SGDM, respectively. %Even under the more stable SGDM optimizer, the influence of weight decay remains dominant.
+    \item We derive a unified scaling rule, $\lambda \propto \frac{1}{\eta T}$, grounded in the heuristic alignment of stability bounds. This law theoretically justifies empirical observations regarding the coupling of weight decay and training duration. This finding corroborates the empirical results reported in \cite{wang2025setadamwsweightdecay}.
+    \item We explicitly quantify the relationship between explicit regularization $\lambda$ and implicit regularization $B$. We show that as $B$ increases, $\lambda$ must be scaled up to maintain the total regularization strength. 
+    \item We perform validation experiments, and the observation aligns with our finding that weight decay enhances generalization but also constrains the optimal learning rate. In addition, we validate the proposed hyperparameter scaling law across different architectures and task domains, including ResNet-18 for vision and Qwen3-0.6B for language modeling.
+\end{itemize}
