@@ -77,9 +77,15 @@ Lemma \ref{thm:SWA} shows that under the assumption of convexity, the bound of S
 
 By bridging the generalization bounds of SGD-WD (Theorem \ref{thm:sgd-WD}) and SWA (Lemma \ref{thm:SWA}) under the Regularization Equivalence hypothesis, we equate their stability constraints to obtain the following coupling relationship:
 \begin{equation}\label{coupling:lamda}
-\lambda \approx \frac{C}{\eta T}, %\implies \lambda \eta T \approx \text{Constant} 
+\lambda \approx \frac{C}{S}, \qquad S \;:=\; \sum_{t<T}\eta_t, %\implies \lambda \eta T \approx \text{Constant} 
 \end{equation}
-where $C$ subsumes constant factors. It captures the dependency relationship between $\eta$ and $\lambda$ that must be followed to maintain system stability across varying training durations.
+where $S$ is the total step-size budget consumed over training and $C$ subsumes constant factors. It captures the dependency relationship between $\eta$ and $\lambda$ that must be followed to maintain system stability across varying training durations.
+
+We state the coupling in terms of $S$ rather than $\eta T$ deliberately. For a constant step size $S=\eta T$ and Eq.~\eqref{coupling:lamda} reduces to the familiar $\lambda \approx C/(\eta T)$. For cosine annealing to zero, stepped once per epoch, $\sum_{k<T}\tfrac{1}{2}\left(1+\cos(\pi k/T)\right) = (T+1)/2$ exactly, so $S = \eta T/2$ and the same relation reads $\lambda \approx 2C/(\eta T)$. The factor of two that distinguishes these two statements is therefore a property of the schedule, not of the analysis, and writing the law in terms of $S$ removes the ambiguity. It also yields a prediction that is directly testable: at matched $\eta$ and $T$, a constant-step-size run should prefer half the weight decay of a cosine run.
+
+\begin{remark}[Scope of the claim]\label{rem:heuristic}
+Equating two upper bounds does not locate an optimum: bounds may be loose by different amounts, and nothing forces the maximizer of the true generalization performance to lie where two envelopes cross. What the argument does determine is how that crossing point \emph{scales} in $\eta$, $T$ and $B$, because the loose constants enter multiplicatively and are absorbed into the single prefactor $C$. We therefore treat Eq.~\eqref{coupling:lamda} as a heuristic with a derived exponent and a fitted constant. The exponents are falsifiable, and Section~\ref{sec:experiments} measures each of them; $C$ is calibrated once and is not predicted by the analysis.
+\end{remark}
 
 \begin{remark}
 Eq.~\eqref{coupling:lamda} predicts that for a fixed iteration $T$, $\lambda$ must scale inversely with $\eta$. This theoretical derivation corroborates recent empirical findings in \cite{wang2025setadamwsweightdecay,bergsma2025powerlinesscalinglaws}. \textcolor{red}{As visualized in the left of Fig. \ref{fig:WD and LR}, our experimental data aligns well with this theoretical curve $1/x$, confirming that the heuristic alignment of stability bounds successfully captures the intrinsic coupling.}
@@ -87,6 +93,10 @@ Eq.~\eqref{coupling:lamda} predicts that for a fixed iteration $T$, $\lambda$ mu
 
 \begin{remark}
 Eq.~\eqref{coupling:lamda} suggests that $\eta$ and $\lambda$ play commensurate roles in the system. This implies that extreme concurrent configurations of these parameters will destabilize the training process. \textcolor{red}{As demonstrated in the left and right of Figure \ref{fig:WD and LR}, the model attains optimal generalization only when the joint product of these hyperparameters (e.g., $\eta \cdot \lambda$) is maintained within an appropriate interval.}
+\end{remark}
+
+\begin{remark}[The product is necessary but not sufficient]\label{rem:twosided}
+Eq.~\eqref{coupling:lamda} constrains the product, but it is not the only constraint the analysis imposes. Theorem~\ref{thm:sgd-WD} also requires $\eta \leq 2/(2\lambda + L)$, a ceiling on the step size that \emph{tightens} as $\lambda$ grows. The admissible region is therefore the intersection of a band and a ceiling rather than a one-dimensional curve, and the two hyperparameters are not interchangeable along the band: for a fixed product, small $\eta$ fails to consume enough of the step budget within $T$ iterations, while large $\eta$ crosses the ceiling. This is the sense in which weight decay is not a redundant knob that could be absorbed into the learning rate, and it distinguishes our account from analyses that constrain the product alone. Section~\ref{sec:experiments} measures the accuracy profile along a line of constant $\eta\lambda$ and confirms that it is not flat.
 \end{remark}
 
  \subsection{Coupling of $\lambda$, $\eta$ and $B$}
