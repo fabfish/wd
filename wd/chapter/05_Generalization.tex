@@ -4,7 +4,7 @@
 \textbf{Q1:} From the perspective of stability, how does the introduction of the weight decay fundamentally reshape the stability bound of the learning algorithm? To maintain optimal system performance, what dependencies must other hyperparameters exhibit? 
 \end{tcolorbox}
 
-In fact, \citet{10.5555/2986916.2987033} have offered a preliminary answer assuming a linear network, showing that weight decay significantly enhances generalization by suppressing irrelevant weight components and mitigating the impact of noise. However, this conclusion cannot be extended to parameter-dependent theoretical studies (e.g., involving $\lambda, \eta, T$), precluding further analysis of optimal parameter settings. Consequently, we investigate the theoretical properties of the weight decay algorithm based on stability.
+In fact, \citet{10.5555/2986916.2987033} have offered a preliminary answer assuming a linear network, showing that weight decay significantly enhances generalization by suppressing irrelevant weight components and mitigating the impact of noise. However, this conclusion cannot be extended to parameter-dependent theoretical studies (e.g., involving $\lambda, \eta, T$), precluding further analysis of coupling among hyperparameters. Consequently, we investigate the theoretical properties of the weight decay algorithm based on stability, which can build the parameter-dependent bounds.
 
 %Establishing a generalization error bound for certain algorithm and using it to find variable dependencies is a primary means of studying generalization ability. 
 
@@ -72,11 +72,18 @@ Lemma \ref{thm:sgd} establishes a generalization upper bound dependent on the le
 \end{remark}
 
 \begin{theorem}\label{thm:sgd-WD}
-Assume that the loss function $F(w;z)$ is convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGD-DW with weight decay coefficient $\lambda \in (0,1)$ and learning rate $\eta \leq \frac{2}{2\lambda +L}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGD-DW has uniform stability of 
+Assume that the loss function $F(w;z)$ is convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGD-WD with weight decay coefficient $\lambda \in (0,1)$ and learning rate $\eta \leq \frac{2}{2\lambda +L}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGD-WD has uniform stability of 
 \begin{equation}
   \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2G^2}{\lambda n}.
  \end{equation}
 \end{theorem}
+
+
+\noindent
+\begin{minipage}[t]{0.5\textwidth}
+
+    \vspace{0pt} % 顶部对齐锚点
+
 
 \begin{remark}
 Theorem \ref{thm:sgd-WD} presents a bound $\mathcal{O}(1/n)$, which is tighter than the bound $\mathcal{O}(T/n)$ in Lemma \ref{thm:sgd}. Unlike the linear growth with respect to iterations $T$ in SGD, SGD-WD achieves a smaller constant upper bound, indicating that weight decay significantly improves generalization. This indicates that weight decay is not merely a regularization technique; rather, it alters the optimization dynamics, steering the algorithm toward regions with improved stability. This insight underlies our connection to SWA, which similarly seeks flatter, more stable regions of the landscape. 
@@ -85,53 +92,44 @@ Theorem \ref{thm:sgd-WD} presents a bound $\mathcal{O}(1/n)$, which is tighter t
 \begin{remark}\label{remark 2}
 The tighter bound of SGD-WD is primarily attributed to the weight decay coefficient $\lambda$, which induces the $(1-\lambda\eta)$-expansive property in the algorithm, denoted $\Vert \theta_t-\theta^{\prime}_t\Vert \leq (1-\lambda\eta)\Vert \theta_{t-1} - \theta^{\prime}_{t-1}\Vert$. This aligns with the theoretical properties of SGD under the strong convexity assumption \cite{hardt2016train}, yielding an equivalent upper bound. However, a key distinction is that SGD-WD necessitates a smaller learning rate to satisfy the expansive condition under convexity, which is essential for convergence. For the detailed proof, please refer to appendix \ref{sec:app-thm4.1}.    
 \end{remark}
-
-\paragraph{In summary,} 
-
-\begin{theorem}\label{thm:sgdm}
-Assume that the loss function $F(w;z)$ is $\mu$-strongly convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGDM with learning rate $\eta \leq \frac{2}{L(1-\beta)}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGDM has uniform stability of 
-\begin{equation}
-  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta}\eta G^2 T}{n},
- \end{equation}
-where $\tau_{\beta}\in(0,1)$ is a constant, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. 
-\end{theorem}
-
-\begin{remark}
-The Theorem \ref{thm:sgdm} shows that, under $\mu$-strongly convex assumptions, SGDM admits a generalization bound $\mathcal{O}(\tau_{\beta}\eta T/n)$, with the improvement reflected in a reduced constant $\tau_\beta$ dependent on $\beta$, highlighting the stabilizing effect of momentum.
-In fact, $\tau_\beta=[1-(1-\beta)^t]\beta+(1-\beta)$, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. We retain it to account for momentum's influence.    
-\end{remark}
-
-% \begin{remark}
     
-% \end{remark}
-
-\begin{theorem}\label{thm:sgdm-WD}
-Assume that the loss function $F(w;z)$ is $\mu$-strongly convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGDM-WD with weight decay coefficient $\lambda \in (0,1)$ and learning rate $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$ for $T$ steps, where $\Gamma_{\beta}\in(0,1)$ is a constant dependent on the momentum coefficient $\beta$ and each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGDM-WD has uniform stability of
-\begin{equation}
-  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta} G^2 }{\lambda n},
- \end{equation}
- where $\tau_{\beta}\in(0,1)$ is a constant, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. 
-\end{theorem}
-
-\begin{remark}
-Compared to Theorem \ref{thm:sgdm}, Theorem \ref{thm:sgdm-WD} shows that SGDM-WD achieves a tight bound $\mathcal{O}(1/n)$ that is independent of iteration $T$. Furthermore, this bound improves the result of Theorem \ref{thm:sgd-WD}, particularly in terms of the factor $\tau_{\beta}$. For the introduced momentum $\beta$, this fully demonstrates the dominant role of weight decay $\lambda$.
-\end{remark}
-
-\begin{remark}\label{remark 1}
-While weight decay tightens the generalization bound, it simultaneously imposes a stricter constraint on the learning rate, specifically $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$ to ensure the non-expansive property of SGD-WD under convex assumptions. The term $2\lambda$ in the denominator reveals an intrinsic trade-off: enhancing regularization strength (larger $\lambda$) necessitates a proportional reduction in the step size $\eta$ to prevent the contractive mechanism from destabilizing the trajectory. For clarity, complex momentum-related constants are subsumed into $\Gamma_{\beta} \in (0,1)$, as they affect the precise stability boundary but do not alter the structural coupling between $\lambda$ and $\eta$. The proof for explicit factors $\tau_{\beta}$ and $\Gamma_{\beta}$ are detailed in Appendix \ref{sec:app-thm:sgdm-wd}. 
-\end{remark}
-
-While weight decay tightens the generalization bound, it simultaneously imposes a stricter constraint on the learning rate, specifically $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$, to maintain the non-expansive property. The term $2\lambda$ in the denominator reveals an intrinsic trade-off: enhancing regularization strength (larger $\lambda$) necessitates a proportional reduction in the step size $\eta$ to prevent the contractive mechanism from destabilizing the trajectory. For clarity, complex momentum-related constants are subsumed into $\Gamma_{\beta} \in (0,1)$, as they affect the precise stability boundary but do not alter the structural coupling between $\lambda$ and $\eta$.
-
-\begin{figure}[t]
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \vspace{0pt} % 顶部对齐锚点
     \centering
-    \includegraphics[width=0.85\linewidth]{figures/performance.jpg}
-    \vspace{-0.4cm}
-    \caption{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+    \includegraphics[width=\textwidth]{figures/performance.jpg} 
+    \captionof{figure}{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
     \label{fig:performance}
-    \vspace{-0.4cm}
-\end{figure}
+\end{minipage}
 
-\textbf{Answer to Q1:} As demonstrated by Lemma \ref{thm:sgd} and Theorems \ref{thm:sgd-WD}, \ref{thm:sgdm} and \ref{thm:sgdm-WD}, weight decay not only enhances the generalization capability of base optimizers but also imposes new requirements on learning rate setting. Specifically, for the basic optimizer, the introduction of $\lambda$ significantly reduces the conditions of learning rate under optimal performance, which is also empirically verified, as shown in Figure \ref{fig:performance}. This prompts us to rethink the coupling between $\lambda$ and $\eta$.
+\vspace{1em}
 
 
+% \begin{wrapfigure}{r}{0.4\textwidth}
+% \vspace{-12pt}
+% \includegraphics[width=0.40\textwidth]
+% {figures/performance.jpg} 
+% \vspace{-15pt}
+% \caption{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+% \vspace{-.2cm}
+% \label{fig:performance}
+% \end{wrapfigure}
+
+
+% \begin{figure}[htbp] % [h]表示尽量放在当前位置，[t]表示如果放不下就放在页顶
+%     \centering
+%     % 调整宽度：0.8\linewidth 表示占行宽的80%，你可以改成 1.0 让它占满
+%     \includegraphics[width=0.98\linewidth]{figures/performance.jpg} 
+    
+%     \vspace{-0.2cm} % 如果觉得标题离图片太远，可以用负值拉近一点
+    
+%     \caption{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+%     \label{fig:performance}
+%     \vspace{-0.2cm} % 调整图片下方的空白，节省空间
+% \end{figure}
+Additionally, we conduct a study and comparison of SGDM and SGDM-WD using stability analysis, and obtain the same theoretical results: the introduction of $\lambda$ yields a tighter bound and a more restrictive condition on $\eta$. Due to space constraints, we place the detailed content in the \textbf{Appendix \ref{gen_SGDM}}.
+
+\textbf{Answer to Q1:} As demonstrated by Lemma \ref{thm:sgd} and Theorems \ref{thm:sgd-WD}, \ref{thm:sgdm} and \ref{thm:sgdm-WD}, weight decay not only enhances the generalization capability of base optimizers but also imposes new requirements on learning rate setting. Specifically, SGD-WD and SGDM-WD show better performance than SGD and SGDM, and their learning rates at optimal performance are lower than those of SGD and SGDM, which is verified in Figure \ref{fig:performance}. This prompts us to rethink the coupling between $\lambda$ and $\eta$.
+
+% \vspace{0.5cm}

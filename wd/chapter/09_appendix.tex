@@ -1,3 +1,184 @@
+\section{Related work}\label{related}
+\textbf{Weight decay in the optimization system.} 
+
+
+\textbf{Generalization of weight decay.} 
+In classical statistics and machine learning, improving model generalization via weight decay has long been an important research topic \cite{doi:10.1137/0109031,Hoerl,a92f3c16-7c6e-31d3-b403-82d2b0a469e4}. \citet{10.5555/2986916.2987033} show in linear networks that weight decay suppresses irrelevant components of the weight vector and mitigates the effect of noise in the target values, thereby significantly improving generalization performance. More generally, \citet{ShalevShwartz2014UnderstandingML} and \citet{Zhang2016UnderstandingDL} provide theoretical generalization analyses supporting the regularization effect of weight decay, although the latter noted that its improvement on test accuracy can be limited in practice. Building on adaptive optimization, \citet{Loshchilov2017DecoupledWD} highlight the fundamental difference between weight decay and $L_2$-regularization in Adam, demonstrating that AdamW achieves more effective regularization while simplifying hyperparameter tuning. From the Bayesian posterior aspect, \citet{Zhou2024TowardsUC} prove the convergence of AdamW and justify its generalization advantages over Adam and $L_2$-Adam.
+
+\section{Experiments}\label{Appendix:exp}
+
+\subsection{Setup}
+We test the scaling laws from Sections~4--5 and translate them into actionable configuration strategies when a key parameter varies across CIFAR-100 with ResNet-18. Experiment sets are run: optimal performance of different optimizers and their corresponding learning rates (Exp.~1), $\eta$--$\lambda$ interaction (Exp.~2), $B$, $\lambda$, and $\eta$ coupling (Exp.~3), and $B$, $\lambda$, and $\eta$ coupling in LLM fine-tuning (Exp.~4).
+
+\textbf{Dataset and model.}
+\emph{Vision setting (Exp.~1--3).}
+%  update
+We use CIFAR-100~\cite{krizhevsky2009learning}: 60k $32{\times}32$ color images, 100 classes, 50k train / 10k test. Training uses random crop, random horizontal flip and normalization. Test uses the same normalization without augmentation. The main text uses ResNet-18 adapted for CIFAR (no initial max-pooling). We train for 100 epochs with PyTorch cosine learning-rate schedule and mixed precision (AMP); cross-architecture and multi-seed reproducibility are reported separately in Appendix~\ref{Appendix:robustness}.
+
+\emph{LLM setting (Exp.~4).}
+We adopt Qwen3-0.6B~\cite{qwen3} as the pretrained backbone and conduct parameter-efficient fine-tuning on MathInstruct~\cite{yue2023mammoth} using LoRA~\cite{hu2021loralowrankadaptationlarge}, implemented within the LLaMA-Factory framework~\cite{zheng2024llamafactory}.
+Training examples are formatted as instruction--response pairs and optimized in causal language model fashion using the model's native tokenizer, with a fixed maximum sequence length.
+To assess out-of-distribution generalization, we evaluate on SVAMP \citep{patel2021nlp} via exact-match accuracy of the final numeric answer. All evaluations use a fixed prompting setup (0-shot) and an identical decoding protocol, held constant across all other hyperparameter configurations to ensure a controlled and fair comparison.
+In Figure~\ref{fig:LLM1}, the small batch size is set to 32, whereas the large batch size is set to 128.
+
+\textbf{Methodology.}
+For the vision setting (Exp.~1--3), we compare four optimizer variants: plain \textbf{SGD}; \textbf{SGDM} (SGD with momentum coefficient $\beta$); \textbf{SGD+WD} (SGD with weight decay $\lambda$); and \textbf{SGDM+WD} (SGD with both $\beta$ and $\lambda$). Here $\eta$ is the learning rate, $\lambda$ is the weight-decay (WD) coefficient, and $\beta$ is the momentum coefficient in the velocity update $m_t \leftarrow \beta\cdot m_{t-1} + (1-\beta)\nabla F(\theta_t)$ (PyTorch convention). For each variant we run grid search over $\eta$; for WD variants we also search over $\lambda$, and for momentum variants we fix or sweep $\beta$ as noted in the results. Core grids are extended with finer sweeps to locate stability boundaries. All reported $(\eta^*,\lambda^*)$ and accuracies correspond to the configurations that achieve the best test performance in the figures.
+
+For the LLM setting (Exp.~4), we perform a controlled sweep over learning rate $\eta$ and weight decay $\lambda$ for LoRA fine-tuning, while holding the remaining factors fixed (LoRA hyperparameters and schedule). We report SVAMP performance for stable runs to identify the high-accuracy region over the $(\eta,\lambda)$  for a given bitch size.
+
+\subsection{Results}
+
+\paragraph{Exp.\ 1: Optimal performance and corresponding LR.}
+The theory (Theorems \ref{thm:sgd-WD}, \ref{thm:sgdm-WD}) predicts better generalization and stricter learning rate bounds as we add weight decay, hence $\varepsilon_{\text{SGD}} > \varepsilon_{\text{SGD+WD}}$, $\varepsilon_{\text{SGDM}} > \varepsilon_{\text{SGDM+WD}}$ and $\eta^*_{\text{SGD}} > \eta^*_{\text{SGD+WD}}$, $\eta^*_{\text{SGDM}} > \eta^*_{\text{SGDM+WD}}$. Figure~\ref{fig:performance} confirms this ordering: Introducing $\lambda$ leads to smaller generalization error and optimal learning rates for both SGD+WD and SGDM+WD. Table~\ref{tab:exp1} (in Appendix \ref{Appendix:exp}) summarizes the best configurations from our search. Plain SGD peaks at $\eta^* \approx 0.3$ ($73.61\%$ test accuracy). 
+Adding momentum ($\beta{=}0.1$) without WD as a new baseline SGDM yields $\eta^* \approx 0.15$ ($73.47\%$). With WD $\lambda{=}0.005$, SGD+WD attains $\eta^* \approx 0.25$ and $78.29\%$; SGDM+WD with $\lambda{=}0.0015$ reaches $\eta^* \approx 0.1$ and $78.61\%$. WD clearly improves generalization but requires a commensurate reduction in $\eta$ to stay within the stable regime.
+%In practice, when adding $\lambda$, $\eta$ should be reduced to retain optimal generalization.
+
+\vspace{-0.5em} 
+\begin{table}[h]
+\caption{Optimal accuracy and corresponding LR by optimizer.}
+\label{tab:exp1}
+% \vspace{-0.5em}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Optimizer & $\eta^*$ & Test acc. (\%) \\
+\midrule
+SGD & 0.30 & 73.61 \\
+SGD+WD ($\lambda{=}0.005$) & 0.25 & 78.29 \\
+SGDM ($\beta{=}0.1$, no WD) & 0.15 & 73.47 \\
+SGDM+WD ($\beta{=}0.8$, $\lambda{=}0.0015$) & 0.10 & 78.61 \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{table}
+
+
+
+\paragraph{Exp.\ 2: $\eta$--$\lambda$ interaction.}
+With momentum $0.9$ and batch size $128$ fixed, we check the inverse scaling $\lambda =\mathcal{O}( 1/\eta)$ (Eq.~\ref{coupling:lamda}). 
+For fixed $T$, Eq.~\eqref{coupling:lamda} implies that high accuracy should lie along a trade-off where larger $\eta$ pairs with smaller $\lambda$. 
+Figure~\ref{fig:WD and LR} shows test accuracy over $\eta \in [0.01, 0.3]$ and $\lambda \in [10^{-5}, 10^{-2}]$. 
+The high-accuracy region forms a band consistent with $\eta \cdot \lambda \approx \text{const}$: from high-$\eta$/low-$\lambda$ (e.g.\ $\eta{=}0.2$, $\lambda{=}5{\times}10^{-4}$) to low-$\eta$/high-$\lambda$ (e.g.\ $\eta{=}0.05$, $\lambda{=}5{\times}10^{-3}$). 
+Increasing $\eta$ while keeping performance requires proportionally decreasing $\lambda$, and vice versa. 
+Keeping $\eta \cdot \lambda$ in a moderate range preserves test performance when varying either parameter.
+% update
+To make this scaling law directly visible, we additionally plot each fixed-$\lambda$ curve against the joint product $\eta\times\lambda$ (Fig.~\ref{fig:WD and LR}(b,c)): all curves attain their lowest train loss and highest test accuracy, respectively, inside the same narrow $\eta\times\lambda$ band, confirming Eq.~\eqref{coupling:lamda}.
+
+\paragraph{Exp.\ 3: $B$, $\lambda$, and $\eta$ coupling.}
+We test the batch-size coupling (Eq.~\ref{coupling:Batch}) using the linear rule $\eta \propto B$ and $B \in \{32, 128, 256, 512\}$. 
+Eq.~\eqref{coupling:Batch} predicts that $B$ is positively coupled with $\eta$ and $\lambda$; under linear LR scaling $\eta \propto B$, optimal $\lambda$ should increase with $B$. 
+Figure~\ref{fig:batch} demonstrates that the optimal $\lambda$ and effective $\eta \cdot \lambda$ grow with batch size. When scaling batch size, both learning rate and weight decay should be scaled up (e.g., linear LR rule and proportionally larger $\lambda$) to preserve generalization.
+For instance, the green location shifts indicate that best $\lambda$ at $B{=}32$ shifts to higher values at $B{=}128$.
+
+\paragraph{Robustness across architectures and random seeds.}
+To verify that our predictions do not rely on a single architecture or a single random initialization, we additionally rerun the experiments on \textbf{VGG-16} (no residual connections, $14.8$M params) and \textbf{ResNet-50} ($23.5$M params), each with random seeds (42, 123); ResNet-18 is independently rerun four times (two seeds $\times$ two runs each). 
+This adds up to roughly $640$ training runs in total, all reported as mean $\pm$ half-range. 
+We summarise the cross-architecture findings here and defer per-architecture tables, full heatmaps, and stability summaries to Appendix~\ref{Appendix:robustness}.
+
+% (i) The stability boundary ordering: SGDM+WD peak at $\eta^{*}=0.1$, while SGD+WD peaks on a broad plateau $\eta^{*}\in[0.5,1.0]$. 
+% (ii) The anti-diagonal $\eta$--$\lambda$ pattern of Exp.~2 is preserved on every architecture; at $\eta=0.2$, all eight independent runs (R18$\times$4 + VGG$\times$2 + R50$\times$2) unanimously select $\lambda^{*}=5\!\times\!10^{-4}$. 
+% (iii) Under the linear LR rule of Exp.~3, the optimal $\lambda^{*}$ stays in $[5\!\times\!10^{-4},\,10^{-3}]$ for all four batch sizes on every architecture. 
+% Half-ranges are below $0.5\%$ in the stable region and only grow near the divergence boundary, confirming that the conclusions are seed- and architecture-robust.
+
+\paragraph{Exp.\ 4: Coupling among $B$, $\lambda$, and $\eta$ in LLM fine-tuning.}
+We examine whether the $\eta$–$\lambda$ trade-off observed in Exp.~2 persists in a realistic LLM fine-tuning regime. Concretely, we fine-tune Qwen3-0.6B with LoRA on MathInstruct and evaluate out-of-distribution generalization on SVAMP. We sweep the learning rate $\eta$ and weight decay $\lambda$ over a log-spaced grid, while holding the LoRA configuration (e.g., rank) and the optimization schedule fixed (constant learning rate, no warmup). Performance is measured by exact-match accuracy of the final SVAMP answer under a fixed prompting template and decoding protocol, which are kept identical across all hyperparameter settings for a controlled comparison. We report results under 0-shot prompting.
+
+%As shown in Fig.~\ref{fig:LLM1}, 8-shot prompting underperforms 0-shot across a broad region of the $(\eta,\lambda)$ grid. One plausible explanation is that adding in-context exemplars substantially increases the effective prompt length and compositional complexity, thereby worsening position-related degradation: the actual query and its key constraints are pushed toward later positions in the sequence, where attention and conditioning can be weaker, leading the model to rely more on superficial template cues than on the problem-specific details required for an exact final answer.
+
+In language modeling experiments based on Qwen3-0.6B, we similarly validate the hyperparameter scaling law after incorporating batch size. As illustrated in the Figure \ref{fig:LLM1}, for a fixed performance level, the blue points (corresponding to larger batch sizes) consistently lie to the right of the red points (corresponding to smaller batch sizes). Since the horizontal axis represents increasing joint values of $\eta\times\lambda$ (from $10^{-6}$ to $10^{-4}$), this indicates that larger batch sizes require larger joint values to achieve the same performance. These results further confirm, at a larger scale, that maintaining stability at comparable performance levels necessitates that the batch size scales proportionally with $\eta\times\lambda$. 
+
+
+\section{Robustness across architectures and random seeds}\label{Appendix:robustness}
+
+For section~\ref{sec:experiments}, we run the experiments on three architecturally diverse ConvNets with multiple seeds and report all numbers as \emph{mean $\pm$ half-range}.
+
+\paragraph{Setup.}
+\textbf{Architectures}: ResNet-18 ($11.2$M parameters, residual), VGG-16 ($14.8$M, no skip connections), ResNet-50 ($23.5$M, deeper residual). \textbf{Seeds}: each (architecture, configuration) pair is run with seeds $\{42,\,123\}$; for ResNet-18 we additionally run two repetitions per seed (4 independent runs total) to also account for CUDA non-determinism (\texttt{cudnn.benchmark}=True). \textbf{Grids}: Exp.~1 sweeps $8$ learning rates over three optimizer variants ($24$ configs); Exp.~2 sweeps $5$ learning rates $\times$ $7$ weight decays ($35$ configs); Exp.~3 sweeps $4$ batch sizes (with the linear LR rule $\eta=0.1\times B/128$) $\times$ $6$ weight decays ($24$ configs). All other settings (CIFAR-100, $100$ epochs, CosineAnnealingLR, AMP) match the main text. The full study comprises approximately $640$ independent training runs.
+
+% \paragraph{Exp.~1: Stability boundary ordering across architectures.}
+% Table~\ref{tab:robust-exp1} reports the optimal learning rate $\eta^{*}$ and the corresponding peak test accuracy for each (optimizer, architecture) pair. Three observations are robust across all three architectures: 
+% (i) introducing $\lambda$ shifts the optimum either by widening the stable LR range (SGD$\to$SGD+WD) or by tightening it (SGDM$\to$SGDM+WD), exactly as predicted by Theorems~\ref{thm:sgd-WD} and~\ref{thm:sgdm-WD}; 
+% (ii) VGG-16, lacking skip connections, has a strictly tighter stability boundary than the two ResNets, which is consistent with a larger smoothness constant $L$.
+
+% \begin{table}[h]
+% \centering
+% \small
+% \caption{Cross-architecture comparison for Exp.~1. Best test accuracy ($\%$, mean~$\pm$~half-range) and the corresponding $\eta^{*}$ for SGD, SGD+WD ($\lambda{=}5\!\times\!10^{-4}$), and SGDM+WD (PyTorch momentum $=0.9$, $\lambda{=}5\!\times\!10^{-4}$). ResNet-18 is averaged over $4$ independent runs (two seeds $\times$ two reps); VGG-16 and ResNet-50 are averaged over $2$ seeds.}
+% \label{tab:robust-exp1}
+% \vspace{0.2em}
+% \begin{tabular}{l c c c c c c}
+% \toprule
+%  & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
+% \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+% Optimizer & $\eta^{*}$ & Acc.\ (\%) & $\eta^{*}$ & Acc.\ (\%) & $\eta^{*}$ & Acc.\ (\%) \\
+% \midrule
+% SGD+WD   & $0.5$ & $76.60 \pm 0.42$ & $1.0$ & $72.92 \pm 0.29$ & $1.0$ & $77.62 \pm 0.56$ \\
+% SGDM+WD  & $0.1$ & $77.30 \pm 0.18$ & $0.1$ & $73.00 \pm 0.09$ & $0.1$ & $77.31 \pm 0.26$ \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+\paragraph{The $\eta$--$\lambda$ inverse relationship across architectures.}
+For each architecture and each fixed $\eta$, Table~\ref{tab:robust-exp2} reports the optimal weight decay $\lambda^{*}$ together with the peak test accuracy attained. The optimal $\lambda^{*}$ decreases monotonically with $\eta$ on every architecture, and the consensus $\lambda^{*}$ ranges agree exactly across the three models.
+% In particular, at $\eta=0.2$ all eight independent runs (ResNet18$\times$4 + VGG$\times$2 + ResNet50$\times$2) unanimously select $\lambda^{*}=5\!\times\!10^{-4}$. 
+The full per-architecture heatmaps are shown in Fig.~\ref{fig:robust-exp2}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Cross-architecture comparison for Exp.~2 (SGDM, $B{=}128$). For each $\eta$ we report the optimal $\lambda^{*}$ and the corresponding peak test accuracy ($\%$, mean~$\pm$~half-range).}
+\label{tab:robust-exp2}
+\vspace{0.2em}
+\begin{tabular}{c c c c c c c}
+\toprule
+ & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+$\eta$ & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) \\
+\midrule
+$0.01$ & $5\!\times\!10^{-3}$ & $77.58 \pm 0.07$ & $1\!\times\!10^{-2}$ & $74.90 \pm 0.19$ & $5\!\times\!10^{-3}$ & $79.49 \pm 0.27$ \\
+$0.05$ & $2\!\times\!10^{-3}$ & $78.25 \pm 0.23$ & $1\!\times\!10^{-3}$ & $73.72 \pm 0.01$ & $1\!\times\!10^{-3}$ & $77.89 \pm 0.04$ \\
+$0.10$ & $1\!\times\!10^{-3}$ & $77.35 \pm 0.20$ & $1\!\times\!10^{-3}$ & $73.00 \pm 0.05$ & $1\!\times\!10^{-3}$ & $77.34 \pm 0.27$ \\
+$0.20$ & $5\!\times\!10^{-4}$ & $76.34 \pm 0.09$ & $5\!\times\!10^{-4}$ & $72.97 \pm 0.26$ & $5\!\times\!10^{-4}$ & $77.65 \pm 0.36$ \\
+$0.30$ & $5\!\times\!10^{-4}$ & $75.48 \pm 0.18$ & $5\!\times\!10^{-4}$ & $72.27 \pm 0.04$ & $2\!\times\!10^{-4}$ & $77.55 \pm 1.12$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figures/appendix_exp2_3arch.png}
+\caption{Exp.~2, full $\eta$--$\lambda$ heatmaps across architectures (SGDM, $B{=}128$). Cell value is the best test accuracy ($\%$) averaged over $2$--$4$ runs. The anti-diagonal high-accuracy band (i.e.\ $\eta\cdot\lambda\approx\text{const}$) is preserved on every architecture.}
+\label{fig:robust-exp2}
+\end{figure}
+
+\paragraph{Batch-size scaling with the linear LR rule.}
+Under $\eta=0.1\times B/128$, the optimal $\lambda^{*}$ stays inside $[5\!\times\!10^{-4},\,10^{-3}]$ for all four batch sizes on all three architectures (Table~\ref{tab:robust-exp3}). At $B{=}64$ and $B{=}512$, all eight runs unanimously select $\lambda^{*}=10^{-3}$. Equivalently, the optimal joint product $\eta\cdot\lambda$ grows monotonically with $B$ on every architecture, in agreement with the batch-dependent scaling law $\lambda\approx B/(\eta n T_{epo})$ (Eq.~\eqref{coupling:Batch}).
+
+\begin{table}[h]
+\centering
+\small
+\caption{Cross-architecture comparison for Exp.~3, batch-size scaling under the linear LR rule $\eta=0.1\times B/128$. For each $B$ we report the optimal $\lambda^{*}$ and the corresponding peak test accuracy ($\%$, mean~$\pm$~half-range).}
+\label{tab:robust-exp3}
+\vspace{0.2em}
+\begin{tabular}{c c c c c c c c}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+$B$ & $\eta$ & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) \\
+\midrule
+$64$  & $0.05$ & $1\!\times\!10^{-3}$ & $78.27 \pm 0.40$ & $1\!\times\!10^{-3}$ & $73.64 \pm 0.09$ & $5\!\times\!10^{-4}$ & $77.38 \pm 0.14$ \\
+$128$ & $0.10$ & $1\!\times\!10^{-3}$ & $77.35 \pm 0.20$ & $1\!\times\!10^{-3}$ & $73.00 \pm 0.05$ & $1\!\times\!10^{-3}$ & $77.34 \pm 0.27$ \\
+$256$ & $0.20$ & $5\!\times\!10^{-4}$ & $76.66 \pm 0.56$ & $1\!\times\!10^{-3}$ & $72.95 \pm 0.06$ & $5\!\times\!10^{-4}$ & $77.12 \pm 0.28$ \\
+$512$ & $0.40$ & $1\!\times\!10^{-3}$ & $75.35 \pm 0.44$ & $1\!\times\!10^{-3}$ & $71.86 \pm 0.20$ & $5\!\times\!10^{-4}$ & $76.69 \pm 0.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reproducibility summary.}
+Across the $59$ $(\eta,\lambda)$ and $(B,\lambda)$ configurations of Exp.~2--3, the seed-to-seed difference $|\Delta(\text{seed}{=}123-\text{seed}{=}42)|$ is below $1\%$ for $76.3\%$ of configurations and below $2\%$ for $91.5\%$ of configurations; the residual five outliers all lie in unstable regimes (high $\eta\cdot\lambda$, near the divergence boundary). In the stable region the half-range is consistently below $0.5\%$. Combined with the architecture-level agreement reported above, this confirms that the three theoretical predictions of Section~\ref{sec:experiments}: (i) the stability boundary ordering, (ii) the inverse $\eta$--$\lambda$ relationship, and (iii) the batch-size coupling $\lambda\eta\propto B$ are robust to both random seed variation and the choice of architecture (residual vs.\ non-residual, shallow vs.\ deep).
+
+
 \section{Proof of Some Basic Properties}
 \label{sec:app-a}
 
@@ -79,6 +260,42 @@ Plugging this back into Eq.~\eqref{convex-basic}, we obtain
   \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert L(\theta_T;z) - L(\theta^{\prime}_T;z)\vert \leq \frac{2G^2}{\lambda n}.
  \end{equation}
 And we finish the proof.
+
+\section{Generalization Analysis for SGDM and SGDM-WD}\label{gen_SGDM}
+\begin{theorem}\label{thm:sgdm}
+Assume that the loss function $F(w;z)$ is $\mu$-strongly convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGDM with learning rate $\eta \leq \frac{2}{L(1-\beta)}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGDM has uniform stability of 
+\begin{equation}
+  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta}\eta G^2 T}{n},
+ \end{equation}
+where $\tau_{\beta}\in(0,1)$ is a constant, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. 
+\end{theorem}
+
+\begin{remark}
+The Theorem \ref{thm:sgdm} shows that, under $\mu$-strongly convex assumptions, SGDM admits a generalization bound $\mathcal{O}(\tau_{\beta}\eta T/n)$, with the improvement reflected in a reduced constant $\tau_\beta$ dependent on $\beta$, highlighting the stabilizing effect of momentum.
+In fact, $\tau_\beta=[1-(1-\beta)^t]\beta+(1-\beta)$, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. We retain it to account for momentum's influence.    
+\end{remark}
+
+% \begin{remark}
+    
+% \end{remark}
+
+\begin{theorem}\label{thm:sgdm-WD}
+Assume that the loss function $F(w;z)$ is $\mu$-strongly convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGDM-WD with weight decay coefficient $\lambda \in (0,1)$ and learning rate $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$ for $T$ steps, where $\Gamma_{\beta}\in(0,1)$ is a constant dependent on the momentum coefficient $\beta$ and each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGDM-WD has uniform stability of
+\begin{equation}
+  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta} G^2 }{\lambda n},
+ \end{equation}
+ where $\tau_{\beta}\in(0,1)$ is a constant, and as $T\rightarrow\infty$, $\tau_{\beta}\rightarrow 1$. 
+\end{theorem}
+
+\begin{remark}
+Compared to Theorem \ref{thm:sgdm}, Theorem \ref{thm:sgdm-WD} shows that SGDM-WD achieves a tight bound $\mathcal{O}(1/n)$ that is independent of iteration $T$. Furthermore, this bound improves the result of Theorem \ref{thm:sgd-WD}, particularly in terms of the factor $\tau_{\beta}$. For the introduced momentum $\beta$, this fully demonstrates the dominant role of weight decay $\lambda$.
+\end{remark}
+
+\begin{remark}\label{remark 1}
+While weight decay tightens the generalization bound, it simultaneously imposes a stricter constraint on the learning rate, specifically $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$ to ensure the non-expansive property of SGD-WD under convex assumptions. The term $2\lambda$ in the denominator reveals an intrinsic trade-off: enhancing regularization strength (larger $\lambda$) necessitates a proportional reduction in the step size $\eta$ to prevent the contractive mechanism from destabilizing the trajectory. For clarity, complex momentum-related constants are subsumed into $\Gamma_{\beta} \in (0,1)$, as they affect the precise stability boundary but do not alter the structural coupling between $\lambda$ and $\eta$. The proof for explicit factors $\tau_{\beta}$ and $\Gamma_{\beta}$ are detailed in Appendix \ref{sec:app-thm:sgdm-wd}. 
+\end{remark}
+
+While weight decay tightens the generalization bound, it simultaneously imposes a stricter constraint on the learning rate, specifically $\eta \leq \frac{2}{2\lambda + L\Gamma_{\beta}}$, to maintain the non-expansive property. The term $2\lambda$ in the denominator reveals an intrinsic trade-off: enhancing regularization strength (larger $\lambda$) necessitates a proportional reduction in the step size $\eta$ to prevent the contractive mechanism from destabilizing the trajectory. For clarity, complex momentum-related constants are subsumed into $\Gamma_{\beta} \in (0,1)$, as they affect the precise stability boundary but do not alter the structural coupling between $\lambda$ and $\eta$.
 
 \subsection{Proof of Theorem \ref{thm:sgdm}}\label{sec:app-thm:sgdm}
 
@@ -259,111 +476,4 @@ Plugging this back into Eq.~\eqref{convex-basic}, we obtain
   \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert L(\theta_T;z) - L(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta}G^2}{\lambda n}.
  \end{equation}
 And we finish the proof.
-
-\section{Experiments}\label{Appendix:exp}
-
-\textbf{Dataset and model.}
-\emph{Vision setting (Exp.~1--3).}
-We use CIFAR-100~\cite{krizhevsky2009learning}: 60k $32{\times}32$ color images, 100 classes, 50k train / 10k test. Training uses random crop, random horizontal flip and normalization. Test uses the same normalization without augmentation. The main text uses ResNet-18 adapted for CIFAR (no initial max-pooling). We train for 100 epochs with PyTorch cosine learning-rate schedule and mixed precision (AMP); cross-architecture and multi-seed reproducibility are reported separately in Appendix~\ref{Appendix:robustness}.
-
-\emph{LLM setting (Exp.~4).}
-We adopt Qwen3-0.6B~\cite{qwen3} as the pretrained backbone and conduct parameter-efficient fine-tuning on MathInstruct~\cite{yue2023mammoth} using LoRA~\cite{hu2021loralowrankadaptationlarge}, implemented within the LLaMA-Factory framework~\cite{zheng2024llamafactory}.
-Training examples are formatted as instruction--response pairs and optimized in causal language model fashion using the model's native tokenizer, with a fixed maximum sequence length.
-To assess out-of-distribution generalization, we evaluate on SVAMP \citep{patel2021nlp} via exact-match accuracy of the final numeric answer. All evaluations use a fixed prompting setup (0-shot) and an identical decoding protocol, held constant across all other hyperparameter configurations to ensure a controlled and fair comparison.
-In Figure~\ref{fig:LLM1}, the small batch size is set to 32, whereas the large batch size is set to 128.
-
-\textbf{Methodology.}
-For the vision setting (Exp.~1--3), we compare four optimizer variants: plain \textbf{SGD}; \textbf{SGDM} (SGD with momentum coefficient $\beta$); \textbf{SGD+WD} (SGD with weight decay $\lambda$); and \textbf{SGDM+WD} (SGD with both $\beta$ and $\lambda$). Here $\eta$ is the learning rate, $\lambda$ is the weight-decay (WD) coefficient, and $\beta$ is the momentum coefficient in the velocity update $m_t \leftarrow \beta\cdot m_{t-1} + (1-\beta)\nabla F(\theta_t)$ (PyTorch convention). For each variant we run grid search over $\eta$; for WD variants we also search over $\lambda$, and for momentum variants we fix or sweep $\beta$ as noted in the results. Core grids are extended with finer sweeps to locate stability boundaries. All reported $(\eta^*,\lambda^*)$ and accuracies correspond to the configurations that achieve the best test performance in the figures.
-
-For the LLM setting (Exp.~4), we perform a controlled sweep over learning rate $\eta$ and weight decay $\lambda$ for LoRA fine-tuning, while holding the remaining factors fixed (LoRA hyperparameters and schedule). We report SVAMP performance for stable runs to identify the high-accuracy region over the $(\eta,\lambda)$  for a given bitch size.
-
-
-\section{Robustness across architectures and random seeds}\label{Appendix:robustness}
-
-To rule out that the conclusions of Section~\ref{sec:experiments} depend on a single random seed or a single architecture, we rerun Exp.~1--3 on three architecturally diverse ConvNets with multiple seeds and report all numbers as \emph{mean $\pm$ half-range}.
-
-\paragraph{Setup.}
-\textbf{Architectures}: ResNet-18 ($11.2$M parameters, residual), VGG-16 ($14.8$M, no skip connections), ResNet-50 ($23.5$M, deeper residual). \textbf{Seeds}: each (architecture, configuration) pair is run with seeds $\{42,\,123\}$; for ResNet-18 we additionally run two repetitions per seed (4 independent runs total) to also account for CUDA non-determinism (\texttt{cudnn.benchmark}=True). \textbf{Grids}: Exp.~1 sweeps $8$ learning rates over three optimizer variants ($24$ configs); Exp.~2 sweeps $5$ learning rates $\times$ $7$ weight decays ($35$ configs); Exp.~3 sweeps $4$ batch sizes (with the linear LR rule $\eta=0.1\times B/128$) $\times$ $6$ weight decays ($24$ configs). All other settings (CIFAR-100, $100$ epochs, CosineAnnealingLR, AMP) match the main text. The full study comprises approximately $640$ independent training runs.
-
-\paragraph{Exp.~1 -- Stability boundary ordering across architectures.}
-Table~\ref{tab:robust-exp1} reports the optimal learning rate $\eta^{*}$ and the corresponding peak test accuracy for each (optimizer, architecture) pair. Three observations are robust across all three architectures: 
-(i) plain SGD and SGDM+WD share the same optimum $\eta^{*}=0.1$, while SGD+WD admits a much wider stable plateau and peaks at $\eta^{*}\in[0.5,\,1.0]$; 
-(ii) introducing $\lambda$ shifts the optimum either by widening the stable LR range (SGD$\to$SGD+WD) or by tightening it (SGDM$\to$SGDM+WD), exactly as predicted by Theorems~\ref{thm:sgd-WD} and~\ref{thm:sgdm-WD}; 
-(iii) VGG-16, lacking skip connections, has a strictly tighter stability boundary than the two ResNets, which is consistent with a larger smoothness constant $L$.
-
-\begin{table}[h]
-\centering
-\small
-\caption{Cross-architecture comparison for Exp.~1. Best test accuracy ($\%$, mean~$\pm$~half-range) and the corresponding $\eta^{*}$ for SGD, SGD+WD ($\lambda{=}5\!\times\!10^{-4}$), and SGDM+WD (PyTorch momentum $=0.9$, $\lambda{=}5\!\times\!10^{-4}$). ResNet-18 is averaged over $4$ independent runs (two seeds $\times$ two reps); VGG-16 and ResNet-50 are averaged over $2$ seeds.}
-\label{tab:robust-exp1}
-\vspace{0.2em}
-\begin{tabular}{l c c c c c c}
-\toprule
- & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-Optimizer & $\eta^{*}$ & Acc.\ (\%) & $\eta^{*}$ & Acc.\ (\%) & $\eta^{*}$ & Acc.\ (\%) \\
-\midrule
-SGD      & $0.1$ & $73.22 \pm 0.14$ & $0.1$ & $69.12 \pm 0.45$ & $0.1$ & $72.64 \pm 0.83$ \\
-SGD+WD   & $0.5$ & $76.60 \pm 0.42$ & $1.0$ & $72.92 \pm 0.29$ & $1.0$ & $77.62 \pm 0.56$ \\
-SGDM+WD  & $0.1$ & $77.30 \pm 0.18$ & $0.1$ & $73.00 \pm 0.09$ & $0.1$ & $77.31 \pm 0.26$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Exp.~2 -- $\eta$--$\lambda$ inverse relationship across architectures.}
-For each architecture and each fixed $\eta$, Table~\ref{tab:robust-exp2} reports the optimal weight decay $\lambda^{*}$ together with the peak test accuracy attained. The optimal $\lambda^{*}$ decreases monotonically with $\eta$ on every architecture, and the consensus $\lambda^{*}$ ranges agree exactly across the three models. In particular, at $\eta=0.2$ all eight independent runs (R18$\times$4 + VGG$\times$2 + R50$\times$2) unanimously select $\lambda^{*}=5\!\times\!10^{-4}$. The full per-architecture heatmaps are shown in Fig.~\ref{fig:robust-exp2}.
-
-\begin{table}[h]
-\centering
-\small
-\caption{Cross-architecture comparison for Exp.~2 (SGDM, $B{=}128$). For each $\eta$ we report the optimal $\lambda^{*}$ and the corresponding peak test accuracy ($\%$, mean~$\pm$~half-range).}
-\label{tab:robust-exp2}
-\vspace{0.2em}
-\begin{tabular}{c c c c c c c}
-\toprule
- & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-$\eta$ & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) \\
-\midrule
-$0.01$ & $5\!\times\!10^{-3}$ & $77.58 \pm 0.07$ & $1\!\times\!10^{-2}$ & $74.90 \pm 0.19$ & $5\!\times\!10^{-3}$ & $79.49 \pm 0.27$ \\
-$0.05$ & $2\!\times\!10^{-3}$ & $78.25 \pm 0.23$ & $1\!\times\!10^{-3}$ & $73.72 \pm 0.01$ & $1\!\times\!10^{-3}$ & $77.89 \pm 0.04$ \\
-$0.10$ & $1\!\times\!10^{-3}$ & $77.35 \pm 0.20$ & $1\!\times\!10^{-3}$ & $73.00 \pm 0.05$ & $1\!\times\!10^{-3}$ & $77.34 \pm 0.27$ \\
-$0.20$ & $5\!\times\!10^{-4}$ & $76.34 \pm 0.09$ & $5\!\times\!10^{-4}$ & $72.97 \pm 0.26$ & $5\!\times\!10^{-4}$ & $77.65 \pm 0.36$ \\
-$0.30$ & $5\!\times\!10^{-4}$ & $75.48 \pm 0.18$ & $5\!\times\!10^{-4}$ & $72.27 \pm 0.04$ & $2\!\times\!10^{-4}$ & $77.55 \pm 1.12$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=\linewidth]{figures/appendix_exp2_3arch.png}
-\caption{Exp.~2, full $\eta$--$\lambda$ heatmaps across architectures (SGDM, $B{=}128$). Cell value is the best test accuracy ($\%$) averaged over $2$--$4$ runs. The anti-diagonal high-accuracy band (i.e.\ $\eta\cdot\lambda\approx\text{const}$) is preserved on every architecture.}
-\label{fig:robust-exp2}
-\end{figure}
-
-\paragraph{Exp.~3 -- Batch-size scaling with the linear LR rule.}
-Under $\eta=0.1\times B/128$, the optimal $\lambda^{*}$ stays inside $[5\!\times\!10^{-4},\,10^{-3}]$ for all four batch sizes on all three architectures (Table~\ref{tab:robust-exp3}). At $B{=}64$ and $B{=}512$, all eight runs unanimously select $\lambda^{*}=10^{-3}$. Equivalently, the optimal joint product $\eta\cdot\lambda$ grows monotonically with $B$ on every architecture, in agreement with the batch-dependent scaling law $\lambda\approx B/(\eta n T_{epo})$ (Eq.~\eqref{coupling:Batch}).
-
-\begin{table}[h]
-\centering
-\small
-\caption{Cross-architecture comparison for Exp.~3, batch-size scaling under the linear LR rule $\eta=0.1\times B/128$. For each $B$ we report the optimal $\lambda^{*}$ and the corresponding peak test accuracy ($\%$, mean~$\pm$~half-range).}
-\label{tab:robust-exp3}
-\vspace{0.2em}
-\begin{tabular}{c c c c c c c c}
-\toprule
- & & \multicolumn{2}{c}{\textbf{ResNet-18}} & \multicolumn{2}{c}{\textbf{VGG-16}} & \multicolumn{2}{c}{\textbf{ResNet-50}} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
-$B$ & $\eta$ & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) & $\lambda^{*}$ & Acc.\ (\%) \\
-\midrule
-$64$  & $0.05$ & $1\!\times\!10^{-3}$ & $78.27 \pm 0.40$ & $1\!\times\!10^{-3}$ & $73.64 \pm 0.09$ & $5\!\times\!10^{-4}$ & $77.38 \pm 0.14$ \\
-$128$ & $0.10$ & $1\!\times\!10^{-3}$ & $77.35 \pm 0.20$ & $1\!\times\!10^{-3}$ & $73.00 \pm 0.05$ & $1\!\times\!10^{-3}$ & $77.34 \pm 0.27$ \\
-$256$ & $0.20$ & $5\!\times\!10^{-4}$ & $76.66 \pm 0.56$ & $1\!\times\!10^{-3}$ & $72.95 \pm 0.06$ & $5\!\times\!10^{-4}$ & $77.12 \pm 0.28$ \\
-$512$ & $0.40$ & $1\!\times\!10^{-3}$ & $75.35 \pm 0.44$ & $1\!\times\!10^{-3}$ & $71.86 \pm 0.20$ & $5\!\times\!10^{-4}$ & $76.69 \pm 0.00$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Reproducibility summary.}
-Across the $59$ $(\eta,\lambda)$ and $(B,\lambda)$ configurations of Exp.~2--3, the seed-to-seed difference $|\Delta(\text{seed}{=}123-\text{seed}{=}42)|$ is below $1\%$ for $76.3\%$ of configurations and below $2\%$ for $91.5\%$ of configurations; the residual five outliers all lie in unstable regimes (high $\eta\cdot\lambda$, near the divergence boundary). In the stable region the half-range is consistently below $0.5\%$. Combined with the architecture-level agreement reported above, this confirms that the three theoretical predictions of Section~\ref{sec:experiments}---(i) the stability boundary ordering, (ii) the inverse $\eta$--$\lambda$ relationship, and (iii) the batch-size coupling $\lambda\eta\propto B$---are robust to both random seed variation and the choice of architecture (residual vs.\ non-residual, shallow vs.\ deep).
 

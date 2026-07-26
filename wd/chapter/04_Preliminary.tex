@@ -1,11 +1,11 @@
 \section{Preliminary}
-The necessary notations, definitions of stability, and generalization are given in this section.
+%The necessary notations, definitions of stability, and generalization are given in this section.
 
 \subsection{Problem Setup}
 
 Let $F(\theta, z)$ be a loss function that measures the loss of the predicted value of the parameter $\theta$ at a given sample $z$. There is an unknown distribution $\mathcal{D}$ over examples from some space $\mathcal{Z}$, and a sample dataset $S=(z_1, z_2,..., z_n)$ of $n$ examples i.i.d. drawn from $\mathcal{D}$. Then the \emph{population risk} and \emph{empirical risk} are defined as 
 \begin{equation*}
-\textbf{Population Risk:}  \min_\theta \{R_\mathcal{D}[\theta]=E_ {z \sim \mathcal{D}}F(\theta; z) \}; 
+\textbf{Population Risk:}  \min_\theta \{R_\mathcal{D}[\theta]=E_ {z \sim \mathcal{D}}F(\theta; z) \}; \ 
 \textbf{Empirical Risk:}  \min_\theta \{ R_S [\theta]= \frac{1}{n} \sum_{i=1}^{n}F(\theta; z_i) \}.
 \end{equation*}
 %$R_\mathcal{D}[w]=E_ {z \sim \mathcal{D}}F(w; z)$.
@@ -54,7 +54,7 @@ where $\eta > 0 $ is the learning rate, $\nabla_\theta F(\theta_{t},z_{i_t})$ de
 
 %Picking $i_t \sim \text{Uniform}\left\{1, \cdots, n \right\}$ at each step is commonly explored in analyzing the stability \cite{hardt2016train,xiao2022stability}. 
 
-\textbf{SGDM} introduces an additional momentum term $m$, with the following updates:
+\textbf{SGDM} introduces an additional momentum term $m$, with the following updates
 \begin{equation}\label{SGDM-rules}
 \theta_{t+1} = \theta_{t} - \eta m_{t}, \quad m_{t} = \beta_{t} m_{t-1} + (1 - \beta_t) \nabla_{\theta} F(\theta_t, z_{i_t}),
 \end{equation} 
