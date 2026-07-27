@@ -1,6 +1,6 @@
 # Resolved placeholder values
 
-From 827 runs (10 from this round).
+From 974 runs (160 from this round).
 
 - `[[E1-T-SLOPE]]` = PENDING
 - `[[E1-T-CI]]` = PENDING
@@ -11,12 +11,12 @@ From 827 runs (10 from this round).
 - `[[E1-LOWLR-SLOPE]]` = PENDING
 - `[[E1-ETAT-COLLAPSE]]` = PENDING
 - `[[E1-SCHED-RATIO]]` = PENDING
-- `[[E2B-ISO-DROP]]` = PENDING
-- `[[E2B-ISO-RANGE]]` = PENDING
-- `[[E3-SLOPE]]` = PENDING
-- `[[E3-INTERCEPT]]` = PENDING
+- `[[E2B-ISO-DROP]]` = 10.3
+- `[[E2B-ISO-RANGE]]` = a factor of 5 in eta
+- `[[E3-SLOPE]]` = 143.84
+- `[[E3-INTERCEPT]]` = -0.40 (implies L = -0.8)
 - `[[E3-LMAX]]` = PENDING
-- `[[E3-MOM-RATIO]]` = PENDING
+- `[[E3-MOM-RATIO]]` = 0.14
 - `[[E4-TABLE]]` = PENDING
 - `[[E4-OURS-MEAN]]` = PENDING
 - `[[E4-OURS-WORST]]` = PENDING
@@ -33,15 +33,13 @@ From 827 runs (10 from this round).
 - `[[E7-PLATEAU]]` = PENDING
 - `[[E7-BN]]` = PENDING
 
-0 of 30 resolved.
+5 of 30 resolved.
 
 ## Notes
 
-- E1: only the coarse e1_prelim ladder is available; tokens left PENDING until e1_fine finishes
-- E1 (coarse, do not quote): T=25 wd_interp=7.87e-04 (argmax=0.001, interior=True), T=100 wd_interp=8.99e-04 (argmax=0.001, interior=True)
-- E2b: no runs yet
-- E3: no runs yet
-- E4: oracle grid too thin in T=200 (0 lambda values)
+- E1: need >=2 training lengths with >= 6 lambda values each; have [(25, 3), (50, 8), (100, 3), (200, 3)]
+- E2b: 13 runs over 2 product levels, largest end-to-peak drop 10.29 points
+- E3: thresholds bracketed for 8 (beta, lambda) pairs; median bracket tightness 1.09x
 - E4: 0/6 settings have all 5 strategies; means below cover only those
 - E4: no setting has every strategy yet, nothing quotable
 - E5b: no runs yet
