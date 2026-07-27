@@ -1,16 +1,16 @@
 ## Table 1: Cross-Architecture Comparison (Experiment 1)
 
-| Architecture | Method | Accuracy (%) |
-|:---:|:---:|:---:|
-| ResNet-18 | SGD | 73.22 ± 0.15 |
-| ResNet-18 | SGD+WD | 76.60 ± 0.41 |
-| ResNet-18 | SGDM+WD | 77.30 ± 0.20 |
-| VGG-16 | SGD | 69.12 ± 0.64 |
-| VGG-16 | SGD+WD | 72.92 ± 0.41 |
-| VGG-16 | SGDM+WD | 73.00 ± 0.12 |
-| ResNet-50 | SGD | 72.64 ± 1.17 |
-| ResNet-50 | SGD+WD | 77.62 ± 0.78 |
-| ResNet-50 | SGDM+WD | 77.31 ± 0.37 |
+| Architecture | Method | η* | Accuracy (%) |
+|:---:|:---:|:---:|:---:|
+| ResNet-18 | SGD | 0.1 | 73.22 ± 0.15 |
+| ResNet-18 | SGD+WD | 0.5 | 76.60 ± 0.41 |
+| ResNet-18 | SGDM+WD | 0.1 | 77.30 ± 0.20 |
+| VGG-16 | SGD | 0.1 | 69.12 ± 0.64 |
+| VGG-16 | SGD+WD | 1.0 | 72.92 ± 0.41 |
+| VGG-16 | SGDM+WD | 0.1 | 73.00 ± 0.12 |
+| ResNet-50 | SGD | 0.1 | 72.64 ± 1.17 |
+| ResNet-50 | SGD+WD | 1.0 | 77.62 ± 0.78 |
+| ResNet-50 | SGDM+WD | 0.1 | 77.31 ± 0.37 |
 
 ## Table 2: Optimal λ* at Each η (Experiment 2, SGDM, B=128)
 
@@ -47,4 +47,4 @@
 | ResNet-50 | 64 | 0.05 | 5e-04 | 77.38 ± 0.14 |
 | ResNet-50 | 128 | 0.1 | 1e-03 | 77.34 ± 0.27 |
 | ResNet-50 | 256 | 0.2 | 5e-04 | 77.12 ± 0.28 |
-| ResNet-50 | 512 | 0.4 | 1e-03 | 74.96 ± 0.01 |
+| ResNet-50 | 512 | 0.4 | 5e-04 | 76.69 ± 0.00 |

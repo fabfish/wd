@@ -1,0 +1,226 @@
+{
+  "config": {
+    "method": "SGDM+WD",
+    "dataset": "cifar10",
+    "num_layers": 3,
+    "hidden_dim": 512,
+    "batch_size": 128,
+    "lr": 0.01,
+    "wd": 0.0003,
+    "momentum": 0.5,
+    "epochs": 30,
+    "seed": 42
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.879583843688965,
+      "train_acc": 34.004,
+      "test_loss": 1.6754080141067504,
+      "test_acc": 41.71
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.6155615057754518,
+      "train_acc": 43.252,
+      "test_loss": 1.5592893186569214,
+      "test_acc": 45.11
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.513383942298889,
+      "train_acc": 47.04,
+      "test_loss": 1.4885119075775146,
+      "test_acc": 47.79
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.4409709409713745,
+      "train_acc": 49.804,
+      "test_loss": 1.4491053775787353,
+      "test_acc": 49.56
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.3846490836334229,
+      "train_acc": 51.908,
+      "test_loss": 1.4245701002120972,
+      "test_acc": 49.89
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.336343620147705,
+      "train_acc": 53.576,
+      "test_loss": 1.389817130279541,
+      "test_acc": 51.31
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.2950387623596191,
+      "train_acc": 55.22,
+      "test_loss": 1.3709000862121583,
+      "test_acc": 52.19
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.2581824591445923,
+      "train_acc": 56.592,
+      "test_loss": 1.360319469642639,
+      "test_acc": 52.45
+    },
+    {
+      "epoch": 9,
+      "train_loss": 1.2243328020858764,
+      "train_acc": 57.884,
+      "test_loss": 1.3437015102386474,
+      "test_acc": 52.7
+    },
+    {
+      "epoch": 10,
+      "train_loss": 1.1939485860061645,
+      "train_acc": 58.896,
+      "test_loss": 1.3308688613891602,
+      "test_acc": 53.22
+    },
+    {
+      "epoch": 11,
+      "train_loss": 1.165383881187439,
+      "train_acc": 59.978,
+      "test_loss": 1.3241427158355712,
+      "test_acc": 53.34
+    },
+    {
+      "epoch": 12,
+      "train_loss": 1.138317240447998,
+      "train_acc": 60.88,
+      "test_loss": 1.3174027223587037,
+      "test_acc": 53.75
+    },
+    {
+      "epoch": 13,
+      "train_loss": 1.1136584428024292,
+      "train_acc": 61.744,
+      "test_loss": 1.3193735229492187,
+      "test_acc": 53.58
+    },
+    {
+      "epoch": 14,
+      "train_loss": 1.0910699671936035,
+      "train_acc": 62.882,
+      "test_loss": 1.3130623081207276,
+      "test_acc": 54.01
+    },
+    {
+      "epoch": 15,
+      "train_loss": 1.0699181719207764,
+      "train_acc": 63.496,
+      "test_loss": 1.3052514818191527,
+      "test_acc": 54.41
+    },
+    {
+      "epoch": 16,
+      "train_loss": 1.0496734242630006,
+      "train_acc": 64.41,
+      "test_loss": 1.3043790481567383,
+      "test_acc": 54.04
+    },
+    {
+      "epoch": 17,
+      "train_loss": 1.0323201880264283,
+      "train_acc": 65.128,
+      "test_loss": 1.301008173751831,
+      "test_acc": 54.33
+    },
+    {
+      "epoch": 18,
+      "train_loss": 1.015988179397583,
+      "train_acc": 65.718,
+      "test_loss": 1.2954306943893432,
+      "test_acc": 54.85
+    },
+    {
+      "epoch": 19,
+      "train_loss": 1.001468007659912,
+      "train_acc": 66.236,
+      "test_loss": 1.2993230136871339,
+      "test_acc": 54.44
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.988180288772583,
+      "train_acc": 66.902,
+      "test_loss": 1.2949696636199952,
+      "test_acc": 55.02
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.9773336929321289,
+      "train_acc": 67.318,
+      "test_loss": 1.2879165588378907,
+      "test_acc": 55.0
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.9673748034858703,
+      "train_acc": 67.626,
+      "test_loss": 1.2906436113357544,
+      "test_acc": 55.23
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.9586875964355469,
+      "train_acc": 67.94,
+      "test_loss": 1.2873523189544678,
+      "test_acc": 55.11
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.9517674858283997,
+      "train_acc": 68.41,
+      "test_loss": 1.2869200496673583,
+      "test_acc": 55.08
+    },
+    {
+      "epoch": 25,
+      "train_loss": 0.9457394479179382,
+      "train_acc": 68.556,
+      "test_loss": 1.2848072261810304,
+      "test_acc": 55.28
+    },
+    {
+      "epoch": 26,
+      "train_loss": 0.9412332029724121,
+      "train_acc": 68.742,
+      "test_loss": 1.2853092098236083,
+      "test_acc": 55.46
+    },
+    {
+      "epoch": 27,
+      "train_loss": 0.9377093787384033,
+      "train_acc": 68.948,
+      "test_loss": 1.2845482965469361,
+      "test_acc": 55.37
+    },
+    {
+      "epoch": 28,
+      "train_loss": 0.9352134878540039,
+      "train_acc": 69.056,
+      "test_loss": 1.2840582895278931,
+      "test_acc": 55.43
+    },
+    {
+      "epoch": 29,
+      "train_loss": 0.9335671064949036,
+      "train_acc": 69.122,
+      "test_loss": 1.283924893760681,
+      "test_acc": 55.36
+    },
+    {
+      "epoch": 30,
+      "train_loss": 0.9326787665176391,
+      "train_acc": 69.126,
+      "test_loss": 1.2838974014282227,
+      "test_acc": 55.36
+    }
+  ]
+}

@@ -61,7 +61,7 @@ def run_single_experiment_worker(method, batch_size, lr, wd, momentum, epochs, s
 
     print(f"Running: {method} | BS={batch_size} | LR={lr} | WD={wd} | Mom={momentum}")
 
-    best_test_acc, final_test_acc, final_train_loss = train_model(
+    best_test_acc, final_test_acc, final_train_loss, _ = train_model(
         model, train_loader, test_loader, optimizer, scheduler,
         device, epochs=epochs, use_amp=use_amp, log_interval=log_interval
     )

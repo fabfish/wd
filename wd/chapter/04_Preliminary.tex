@@ -1,0 +1,86 @@
+\section{Preliminary}
+%The necessary notations, definitions of stability, and generalization are given in this section.
+
+\subsection{Problem Setup}
+
+Let $F(\theta, z)$ be a loss function that measures the loss of the predicted value of the parameter $\theta$ at a given sample $z$. There is an unknown distribution $\mathcal{D}$ over examples from some space $\mathcal{Z}$, and a sample dataset $S=(z_1, z_2,..., z_n)$ of $n$ examples i.i.d. drawn from $\mathcal{D}$. Then the \emph{population risk} and \emph{empirical risk} are defined as 
+\begin{equation*}
+\textbf{Population Risk:}  \min_\theta \{R_\mathcal{D}[\theta]=E_ {z \sim \mathcal{D}}F(\theta; z) \}; \ 
+\textbf{Empirical Risk:}  \min_\theta \{ R_S [\theta]= \frac{1}{n} \sum_{i=1}^{n}F(\theta; z_i) \}.
+\end{equation*}
+%$R_\mathcal{D}[w]=E_ {z \sim \mathcal{D}}F(w; z)$.
+%We receive a sample dataset $S=(z_1, z_2,..., z_n)$ of $n$ examples i.i.d. drawn from $\mathcal{D}$ and define the $empirical$ $risk$ of as $R_S [w]= \frac{1}{n} \sum_{i=1}^{n}F(w; z_i)$. 
+ We define the generalization error of a model $\theta$ is as $\epsilon_{gen}=R_\mathcal{D}[\theta] - R_S [\theta]$. 
+ %And we define the optimization error as $\epsilon_{opt}(w)= E[R_S[w]] - E[R_S[w_\star^S]]$, where $w_\star^S=\mathop{\arg\min}_w R_S(w)$ denotes the $w$ that minimizes empirical risk. Based on the risk decomposition, we have $E[R[w]] \leq E[R_S[w_\star^S]] +\epsilon_{opt}+\epsilon_{gen}$.
+ Moreover, we assume function $F$ satisfies the following \emph{Lipschitz} and \emph{smoothness} assumption.
+
+\begin{definition}[Lipschitz]
+For a fixed parameter $z\in Z$, a function $F(u,z):u\in\Omega \subset R^n \rightarrow R$ is said to be \textit{Lipschitz continuous} if there exists a constant $G\geq 0$ such that 
+    \begin{equation}\label{eq:l-lipschitz}
+     \vert F(u;z)-F(v;z)\vert \leq G\Vert u-v\Vert,\quad \forall u, v \in \Omega,
+    \end{equation}
+where $\Vert\cdot\Vert$ denotes the Euclidean norm. And it implies that $\Vert\nabla F(u,z)\Vert \leq G$ if $F\in C^1(\Omega)$. %Furthermore, if the constant $G$ can be chosen independently of $z \in Z$, we say that $F(u, z)$ is \textit{uniformly Lipschitz} in $u$ with respect to $z$. 
+\end{definition}
+
+\begin{definition}[$L$-smooth]
+For a fixed parameter $z\in Z$, a function $F(u,z):u\in\Omega \subset R^n \rightarrow R$ is said to be \textit{$L$-smooth} if there exists a constant $L\geq 0$ such that 
+    \begin{equation}\label{eq:beta-smooth}
+     \Vert\nabla F(u,z)-\nabla F(v,z)\Vert \leq L\Vert u-v\Vert,\quad \forall u, v \in \Omega,
+    \end{equation} 
+where $L$ is uniform for $z$ and $\Vert\cdot\Vert$ be Euclidean norm.
+\end{definition}
+
+\begin{definition}[$\mu$-strongly convex]
+A differentiable function $F: \Omega \rightarrow R$ is said to be \textit{$\mu$-strongly convex} if there exists a constant $\mu >0$ such that
+    \begin{equation}\label{eq:beta-smooth}
+     F(u) \geq F(v) + \langle\nabla F(v), u-v \rangle + \frac{\mu}{2} \Vert u-v \Vert^2, \quad \forall u, v \in \Omega.
+    \end{equation}   
+\end{definition}
+
+\begin{definition}[convex function]
+A differentiable function $F: \Omega \rightarrow R$ is said to be \textit{convex} if satisfies
+    \begin{equation}\label{eq:convex-function}
+     F(u) \geq F(v) + \langle\nabla F(v), u-v \rangle, \quad \forall u, v \in \Omega.
+    \end{equation}  
+\end{definition}
+
+\subsection{Weight Decay and Weight Averaging}
+
+\textbf{SGD} as a basic algorithm for solving the empirical risk minimization problem, is defined as 
+\begin{equation}\label{SGD-rules}
+   \theta_{t+1} = \theta_{t} - \eta \nabla_\theta F(\theta_{t},z_{i_t}),
+\end{equation} 
+where $\eta > 0 $ is the learning rate, $\nabla_\theta F(\theta_{t},z_{i_t})$ denotes the stochastic gradient w.r.t. $\theta$ and $z_{i_t}$ is the sample chosen from dataset $S$ by sampling with replacement in iteration $t$. 
+
+%Picking $i_t \sim \text{Uniform}\left\{1, \cdots, n \right\}$ at each step is commonly explored in analyzing the stability \cite{hardt2016train,xiao2022stability}. 
+
+\textbf{SGDM} introduces an additional momentum term $m$, with the following updates
+\begin{equation}\label{SGDM-rules}
+\theta_{t+1} = \theta_{t} - \eta m_{t}, \quad m_{t} = \beta_{t} m_{t-1} + (1 - \beta_t) \nabla_{\theta} F(\theta_t, z_{i_t}),
+\end{equation} 
+where $0 \leq \beta_t \leq 1$ and $\nabla_{\theta} F(\theta_t, z_{i_t})$ denote the stochastic gradient with respect to $\theta$.
+
+\textbf{Weight Decay} for the basic optimizer can be expressed as
+\begin{equation}\label{SGD-DW-rules}
+   \theta_{t+1} = (1-\lambda\eta)\theta_{t} - \eta u_t,
+\end{equation} 
+where $\lambda \in (0,1)$ is the weight decay coefficient. If $u_t = \nabla_\theta F(\theta_{t},z_{i_t})$, then Eq. \ref{SGD-DW-rules} degenerates into SGD with $L_2$ regularization. If $u_t =m_t$, where $m_t=\beta m_{t-1}+(1-\beta)\nabla_\theta F(\theta_{t},z_{i_t})$, we obtain the SGD with Momentum and Weight Decay (SGDM-WD).
+
+\textbf{SWA} obtains flatter solutions on the landscape by averaging points along the SGD training trajectory, with the formula defined as  
+\begin{equation}\label{SWA*-rules}
+    \bar{\theta}_{T}=\frac{1}{T} ((T-1)\bar{\theta}_{T-1} +\theta_{T}).
+\end{equation}
+where $\theta_T$ is the $T$-th parameter in the SGD's training process. This algorithm \cite{izmailov2018averaging} has become a standard tool used to enhance generalization performance.
+
+% {\bf Theorem 1.1} If $g:\mathbb{I} \longmapsto \mathbb{V}$ is differentiable at every point in $\mathbb{I}$, then 
+% \begin{equation}
+% 	\Vert F(u) -F(v) \Vert \leq \vert u - v \vert \sup \left\{\Vert g^{\prime}(v+t(u-v))\Vert, 0\leq t\leq 1 \right\};  u,v\in \mathbb{I}.  
+% \end{equation}
+
+% {\bf Corollary 1.1} For any $u,u^{\prime} \in \mathbb{I} $ and a neural network $f(\cdot)$, we have
+% \begin{equation}
+% 	\Vert f(u) - f(u^{\prime}) \Vert_2 \leq \Vert u - u^{\prime} \Vert_2 \sup\limits_{u^{\prime\prime} \in conv(\mathbb{I})} \Vert J(u^{\prime\prime})\Vert_2. 
+% \end{equation}
+
+
+

@@ -1,0 +1,9 @@
+\begin{abstract}
+Regularization techniques like weight decay enhance generalization but introduce a hyperparameter $\lambda$, thereby disrupting the pre-existing equilibrium of learning rate $\eta$ and batch size $B$. While prior research has established scaling laws for $\eta$ and $B$, $\lambda$ is often treated as a static constant, a practice that overlooks its profound impact on optimization dynamics. In this work, we propose a stability-based framework to unify the configuration of these hyperparameters. Motivated by the observation that both explicit weight decay and implicit weight averaging (e.g., SWA) target flat minima, we introduce the "Regularization Equivalence" hypothesis as a heuristic principle: distinct regularization mechanisms achieving comparable generalization should satisfy equivalent constraints. By aligning the uniform stability bounds of these mechanisms, we derive a Stability Conservation Law, which predicts the scaling relation $\lambda \propto \frac{1}{\eta T}$, which aligns with recent empirical studies modeling AdamW as an EMA. We further quantify the coupling of batch size, showing that optimal $\lambda \times \eta$ scales with $B$. Empirically, we validated our theoretical heuristic findings and the proposed scaling laws across diverse architectures, ranging from ResNet-18 on vision tasks to the Qwen3-0.6B language model.
+
+%Extensive experiments on ResNet-18 and Large Language Models (Qwen) with LoRA fine-tuning demonstrate that our proposed scaling laws—despite their heuristic theoretical origin—enable precise, zero-shot hyperparameter transfer across diverse training regimes.
+
+%. Experimental results demonstrate that our proposed laws enable robust performance transfer across diverse training configurations.}
+\end{abstract}
+
+

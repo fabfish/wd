@@ -1,0 +1,362 @@
+
+% \newpage
+% \onecolumn
+% \appendix
+
+
+% \icmltitle{Supplementary Material for \\ ``On the Scaling Law of Weight Decay: A Stability Perspective via Regularization Equivalence''}
+
+\paragraph{Limitation.} 
+While our current theoretical analysis is grounded in convex assumptions for tractability, the robust empirical alignment across non-convex architectures (e.g., LLMs) suggests the proposed laws capture fundamental optimization dynamics. Future work aims to rigorously extend this stability framework to non-convex settings.
+
+\section{Proof of Some Basic Properties}
+\label{sec:app-a}
+
+
+% \subsection{Proof of Eq.~\eqref{SWA-update}}\label{pro-SWA}
+% % Proof of Eq.~\eqref{SWA-update}.
+% Using the definition of $\bar{w}_T$ gives
+% \begin{equation}\label{eq:app1.1}
+%   \begin{aligned}
+%     \bar{w}_T = \frac{1}{T} \left(\sum_{t=1}^{T-1}w_{t} + w_{T}\right) =\frac{T-1}{T}\bar{w}_{T-1} + \frac{1}{T}w_{T},  
+%   \end{aligned}
+% \end{equation} 
+% combining the update rule of gradient
+% \begin{equation}\label{eq:app1.2}
+%      w_T = \bar{w}_{T-1} - \frac{\alpha}{T-1}\sum_{i=1}^{T-1} i \cdot \nabla g(w_{i},z_{i+1}),
+% \end{equation}
+% we then have 
+% \begin{equation}\label{eq:app1.3}
+%   \bar{w}_T = \bar{w}_{T-1} - \frac{\alpha}{T(T-1)}\sum_{i=1}^{T-1} i \cdot \nabla g(w_{i},z_{i+1}).
+% \end{equation}
+
+\subsection{Proof of Lemma \ref{lemma3.6}}\label{pro-lemma}  
+
+\paragraph{\emph{Non}-expansive.} Function is convexity and $\beta$-smoothness that implies 
+\begin{equation}\label{eq:app2.2}
+     \begin{aligned}
+      \langle \nabla F(\theta_1) -\nabla F(\theta_2), \theta_1 - \theta_2 \rangle \geq \frac{1}{\beta} \Vert \nabla F(\theta_1) -\nabla F(\theta_2)\Vert^2 .
+     \end{aligned}
+\end{equation}
+If $\eta \leq \frac{2}{\beta}$, we conclude that
+\begin{equation}\label{eq:app2.3}
+     \begin{aligned}
+      \Vert \theta_{T+1} - \theta_{T+1}^{\prime}\Vert &= \sqrt{\Vert \theta_{T} - \alpha \nabla F(\theta_{T}) - \theta_{T}^{\prime} + \eta \nabla F(\theta_{T}^{\prime})\Vert^2}  \\
+      &=\sqrt{\Vert \theta_{T} - \theta_{T}^{\prime} \Vert^2 - 2\eta\langle \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime}), \theta_T- \theta_T^{\prime} \rangle +\eta^2 \Vert \nabla F(\theta_{T}) - \nabla F(\theta_{T}^{\prime})\Vert^2} \\
+      &\leq \sqrt{\Vert \theta_T- \theta_T^{\prime}\Vert^2 - \left(\frac{2\eta}{\beta} -\eta^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2} \\
+      &\leq \Vert \theta_T- \theta_T^{\prime}\Vert.
+     \end{aligned}
+\end{equation}
+
+
+\section{Generalization Bound under Convexity}\label{sec:app-convex}
+
+\subsection{Proof of Theorem \ref{thm:sgd-WD}}\label{sec:app-thm4.1}
+Next, we first present the generalization bound for SGD-WD based on the formulation \eqref{SGD-DW-rules}:
+\begin{equation}
+  \begin{aligned}
+   \theta_t =  \theta_{t-1} - \eta (\nabla F(\theta_{t-1},z_{t}) + \lambda \theta_{t-1} ) = (1-\lambda \eta) \theta_{t-1} - \eta \nabla F(\theta_{t-1},z_{t}).
+  \end{aligned}
+ \end{equation}
+
+First, we consider that the different samples are selected to update with probability $\frac{1}{n}$ at the step $T+1$.  
+\begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t}))\Vert\\
+    &\leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2 \eta G,
+  \end{aligned}
+ \end{equation}
+where the inequality follows from the triangle inequality, Lipschitz assumption for the target function $F$.
+
+Second, the same samples are selected with probability $1-\frac{1}{n}$ at step $T+1$. 
+ \begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t}))\Vert\\
+    &\leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert.
+  \end{aligned}
+ \end{equation}
+This is because the objective function is convex and smooth, enabling the entire update process to exhibit $(1-\lambda\eta)$-expansion. As shown in the following analysis: Function is convexity and $\beta$-smoothness, if $\eta \leq \frac{2}{2\lambda+\beta}$, we conclude that
+
+\begin{equation}\label{eq:app2.3}
+     \begin{aligned}
+      \Vert \theta_{T+1} - &\theta_{T+1}^{\prime}\Vert = \sqrt{\Vert (1-\lambda\eta)\theta_{T} - \eta \nabla F(\theta_{T}) - (1-\lambda\eta)\theta_{T}^{\prime} + \eta \nabla F(\theta_{T}^{\prime})\Vert^2}  \\
+      &=\sqrt{(1-\lambda\eta)^2\Vert \theta_{T} - \theta_{T}^{\prime} \Vert^2 - 2\eta (1-\lambda\eta)\langle \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime}), \theta_T- \theta_T^{\prime} \rangle +\eta^2 \Vert \nabla F(\theta_{T}) - \nabla F(\theta_{T}^{\prime})\Vert^2} \\
+      &\leq \sqrt{(1-\lambda\eta)^2\Vert \theta_T- \theta_T^{\prime}\Vert^2 - \left(\frac{2\eta (1-\lambda\eta)}{\beta} -\eta^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2} \\
+      &\leq (1-\lambda\eta)\Vert \theta_T- \theta_T^{\prime}\Vert,
+     \end{aligned}
+\end{equation}
+where the first inequality imposes stricter requirements on the learning rate of $\frac{2\eta (1-\lambda\eta)}{\beta} -\eta^2 \geq 0$.
+
+Let $\delta_{T}=\Vert\theta_T- \theta_T^{\prime}\Vert$, we obtain the expectation based on the above analysis 
+  \begin{equation}
+  \begin{aligned}
+    \mathbb{E}\left[\delta_{T}\right] &\leq (1-\frac{1}{n})(1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + \frac{1}{n}\left((1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + 2\eta G\right)\\
+    &\leq (1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + \frac{2\eta G}{n}
+  \end{aligned}
+ \end{equation}
+recursively, we can get 
+    \begin{equation}
+     \begin{aligned}
+      \mathbb{E}\left[\delta_{T}\right] \leq \frac{2\eta G}{n} \sum_{t=0}^{T}(1-\lambda \eta)^t \leq \frac{2G}{\lambda n}.
+     \end{aligned}
+    \end{equation}
+
+Plugging this back into Eq.~\eqref{convex-basic}, we obtain
+ \begin{equation}\label{eq:2.2.1}
+  \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert L(\theta_T;z) - L(\theta^{\prime}_T;z)\vert \leq \frac{2G^2}{\lambda n}.
+ \end{equation}
+And we finish the proof.
+
+\subsection{Proof of Theorem \ref{thm:sgdm}}\label{sec:app-thm:sgdm}
+
+We set $u_t = m_t$ and $\lambda=0$ in Eq. \ref{SGD-DW-rules}, yielding the following update formula for SGDM: 
+\begin{equation}
+  \begin{aligned}
+   \theta_t = \theta_{t-1} - \eta m_t = \theta_{t-1} - \eta (\beta m_{t-1}+(1-\beta)\nabla F(\theta_{t-1},z_t)),
+  \end{aligned}
+ \end{equation}
+where $m_t = \beta m_{t-1}+(1-\beta)\nabla F(\theta_{t-1},z_t)$ denotes the momentum.
+
+As demonstrated in the proof above, at step T+1, we need to consider two distinct sampling scenarios. First, we consider that the different samples are selected with probability $\frac{1}{n}$ at step $T+1$.  
+\begin{equation}\label{sgdm}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert  (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (m_t - m_t^{\prime})\Vert\\
+   &= \Vert (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (1-\beta)(\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t})) + \eta \beta(m_{t-1} - m_{t-1}^{\prime})\Vert\\
+    &\leq \Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2\eta(1-\beta)G + 2\eta \beta\Vert m_{t-1}\Vert,
+  \end{aligned}
+ \end{equation}
+where the first inequality follows from the triangle inequality and the Lipschitz assumption.
+
+Under this setting, unlike SGD, we need to find the upper bound for $\mathbb{E} \Vert m_t\Vert$. Then, we have 
+\begin{equation}\label{m-t}
+  \begin{aligned}
+   \mathbb{E} \Vert m_t\Vert &=  \mathbb{E} \Vert (1-\beta)m_{t-1} + \beta \nabla F(\theta_{t-1},z_t)\Vert \\
+   &\leq (1-\beta)\mathbb{E} \Vert m_{t-1} \Vert + \beta \Vert\nabla F(\theta_{t-1},z_t)\Vert \\
+   &= (1-\beta)\mathbb{E} \Vert (1-\beta)m_{t-2} + \beta \nabla F(\theta_{t-2},z_{t-1}) \Vert + \beta \Vert\nabla F(\theta_{t-1},z_t)\Vert \\
+   &\cdots \\
+   &\leq \sum_{i=0}^{t}(1-\beta)^i\beta G = G(1-(1-\beta)^t),
+  \end{aligned}
+ \end{equation}
+
+Therefore, combining Eq. \ref{sgdm} and \ref{m-t}, we have
+\begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert \leq \Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2\eta \tau_\beta G,
+  \end{aligned}
+ \end{equation}
+where $\tau_\beta\in(0,1)$ is a very small constant dependent on $\beta$, with $\tau_\beta=[1-(1-\beta)^t]\beta+(1-\beta)$. In fact, as $t\rightarrow \infty$, $\tau_\beta \rightarrow 1$. We retain the explicit expression of this coefficient to reflect its dependence on the parameter $\beta$.
+
+Second, the same samples are selected to update with probability $1-\frac{1}{n}$ at the step $T+1$. 
+ \begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (1-\beta)(\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t})) + \eta \beta(m_{t-1} - m_{t-1}^{\prime})\Vert\\
+    &\leq \Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert,
+  \end{aligned}
+ \end{equation}
+where the first inequality is due to the non-expansive property of a convex function, as shown in the following proof.
+
+We first determine the learning rate that satisfies the non-expansion property for the objective function.
+\begin{equation}\label{eq:app2.3}
+     \begin{aligned}
+      \Vert \theta_{T+1} - &\theta_{T+1}^{\prime}\Vert = \Vert ((\theta_{T}-\theta_{T}^{\prime}) + \eta(1-\beta) (\nabla F(\theta_{T})-\nabla F(\theta_{T}^{\prime}))
+      +\eta\beta(m_t-m_t^{\prime})\Vert  \\
+      &\leq \sqrt{\Vert \theta_{T} - \theta_{T}^{\prime} \Vert^2 - 2\eta (1-\beta)\langle \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime}), \theta_T- \theta_T^{\prime} \rangle +\eta^2(1-\beta)^2 \Vert \nabla F(\theta_{T}) - \nabla F(\theta_{T}^{\prime})\Vert^2}\\& + \eta\beta\Vert m_t-m_t^{\prime}\Vert\\
+      &\leq \sqrt{\Vert \theta_T- \theta_T^{\prime}\Vert^2 - \left(\frac{2\eta (1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2} + 2\eta\beta G \\
+      &\leq \Vert \theta_T- \theta_T^{\prime}\Vert - \frac{\left(\frac{2\eta (1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2}{2\Vert \theta_T- \theta_T^{\prime}\Vert} + 2\eta\beta G,
+     \end{aligned}
+\end{equation}
+where the last inequality comes from the first-order Taylor expansion $\sqrt{a^2-b}\leq a-\frac{b}{2a}$. 
+
+Let $\frac{\left(\frac{2\eta (1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2}{2\Vert \theta_T- \theta_T^{\prime}\Vert} \geq  2\eta\beta G$, we obtain the desired learning rate $\eta \leq \frac{2}{L(1-\beta)}$. Then, we have the conclusion the target function is convexity and $\beta$-smoothness, if $\eta \leq \frac{2}{L(1-\beta)}$, we conclude that $\Vert \theta_{T+1} - \theta_{T+1}^{\prime}\Vert \leq \Vert \theta_T- \theta_T^{\prime}\Vert$. And, we obtain the expectation based on the above analysis 
+  \begin{equation}
+  \begin{aligned}
+    \mathbb{E}\left[\delta_{T}\right] &\leq (1-\frac{1}{n})\mathbb{E}\left[\delta_{T-1}\right] + \frac{1}{n}\left(\mathbb{E}\left[\delta_{T-1}\right] + 2\eta\tau_{\beta} G\right)\\
+    &\leq \mathbb{E}\left[\delta_{T-1}\right] + \frac{2\eta\tau_{\beta} G}{n}
+  \end{aligned}
+ \end{equation}
+recursively, we can get 
+    \begin{equation}
+     \begin{aligned}
+      \mathbb{E}\left[\delta_{T}\right] \leq \frac{2\eta\tau_{\beta} G T}{n} .
+     \end{aligned}
+    \end{equation}
+
+Plugging this back into Eq.~\eqref{convex-basic}, we obtain
+ \begin{equation}\label{eq:2.2.1}
+  \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert F(\theta_T;z) - F(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta}\eta G^2 T}{n}.
+ \end{equation}
+And we finish the proof.
+
+\subsection{Proof of Theorem \ref{thm:sgdm-WD}}\label{sec:app-thm:sgdm-wd}
+
+We set $u_t = m_t$ in Eq. \ref{SGD-DW-rules}, yielding the following update formula for SGDM-WD: 
+\begin{equation}
+  \begin{aligned}
+   \theta_t = & \theta_{t-1} - \eta (m_t + \lambda \theta_{t-1} ) = (1-\lambda \eta) \theta_{t-1} - \eta m_t \\
+   = & (1-\lambda \eta) \theta_{t-1} - \eta (\beta m_{t-1}+(1-\beta)\nabla F(\theta_{t-1},z_t)),
+  \end{aligned}
+ \end{equation}
+where $m_t = \beta m_{t-1}+(1-\beta)\nabla F(\theta_{t-1},z_t)$ denotes the momentum.
+
+As demonstrated in the proof above, at step T+1, we need to consider two distinct sampling scenarios. First, we consider that the different samples are selected with probability $\frac{1}{n}$ at step $T+1$.  
+\begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (m_t - m_t^{\prime})\Vert\\
+   &= \Vert (1-\lambda \eta) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (1-\beta)(\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t})) + \eta \beta(m_{t-1} - m_{t-1}^{\prime})\Vert\\
+    &\leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2\eta(1-\beta)G + 2\eta \beta\Vert m_{t-1}\Vert \\
+    &\leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2\eta \tau_\beta G,
+  \end{aligned}
+ \end{equation}
+where the first inequality follows from the triangle inequality and the Lipschitz assumption.
+
+% Under this setting, unlike SGD-WD, we need to find the upper bound for $\mathbb{E} \Vert m_t\Vert$. Then, we have 
+% \begin{equation}\label{m-t}
+%   \begin{aligned}
+%    \mathbb{E} \Vert m_t\Vert &=  \mathbb{E} \Vert (1-\beta)m_{t-1} + \beta \nabla F(\theta_{t-1},z_t)\Vert \\
+%    &\leq (1-\beta)\mathbb{E} \Vert m_{t-1} \Vert + \beta \Vert\nabla F(\theta_{t-1},z_t)\Vert \\
+%    &= (1-\beta)\mathbb{E} \Vert (1-\beta)m_{t-2} + \beta \nabla F(\theta_{t-2},z_{t-1}) \Vert + \beta \Vert\nabla F(\theta_{t-1},z_t)\Vert \\
+%    &\cdots \\
+%    &\leq \sum_{i=0}^{t}(1-\beta)^i\beta G = G(1-(1-\beta)^t),
+%   \end{aligned}
+%  \end{equation}
+
+% Therefore, combining Eq. \ref{sgdm-theta} and \ref{m-t}, we have
+% \begin{equation}
+%   \begin{aligned}
+%    \Vert \theta_t -\theta_t^{\prime} \Vert \leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2\eta \tau_\beta G,
+%   \end{aligned}
+%  \end{equation}
+% where $\tau_\beta\in(0,1)$ is a very small constant dependent on $\beta$, with $\tau_\beta=[1-(1-\beta)^t]\beta+(1-\beta)$. In fact, as $t\rightarrow \infty$, $\tau_\beta \rightarrow 1$. We retain the explicit expression of this coefficient to reflect its dependence on the parameter $\beta$.
+
+Second, the same samples are selected to update with probability $1-\frac{1}{n}$ at the step $T+1$. 
+ \begin{equation}
+  \begin{aligned}
+   \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta (1-\beta)(\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t})) + \eta \beta(m_{t-1} - m_{t-1}^{\prime})\Vert\\
+    &\leq (1-\lambda \eta)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert,
+  \end{aligned}
+ \end{equation}
+where the first inequality is due to the non-expansive property of a convex function, as shown in the following proof.
+
+We first determine the learning rate that satisfies the non-expansion property for the objective function.
+\begin{equation}\label{eq:app2.3}
+     \begin{aligned}
+      &\Vert \theta_{T+1} - \theta_{T+1}^{\prime}\Vert = \Vert (1-\lambda\eta)(\theta_{T}-\theta_{T}^{\prime}) + \eta(1-\beta) (\nabla F(\theta_{T})-\nabla F(\theta_{T}^{\prime}))
+      +\eta\beta(m_t-m_t^{\prime})\Vert  \\
+      &\leq \sqrt{(1-\lambda\eta)^2\Vert \theta_{T} - \theta_{T}^{\prime} \Vert^2 - 2\eta (1-\lambda\eta)(1-\beta)\langle \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime}), \theta_T- \theta_T^{\prime} \rangle +\eta^2 \Vert \nabla F(\theta_{T}) - \nabla F(\theta_{T}^{\prime})\Vert^2}\\& + \eta\beta\Vert m_t-m_t^{\prime}\Vert\\
+      &\leq \sqrt{(1-\lambda\eta)^2\Vert \theta_T- \theta_T^{\prime}\Vert^2 - \left(\frac{2\eta (1-\lambda\eta)(1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2} + 2\eta\beta G \\
+      &\leq (1-\lambda\eta)\Vert \theta_T- \theta_T^{\prime}\Vert - \frac{\left(\frac{2\eta (1-\lambda\eta)(1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2}{2(1-\lambda\eta)\Vert \theta_T- \theta_T^{\prime}\Vert} + 2\eta\beta G,
+     \end{aligned}
+\end{equation}
+where the last inequality comes from the first-order Taylor expansion $\sqrt{a^2-b}\leq a-\frac{b}{2a}$. 
+
+Let $\frac{\left(\frac{2\eta (1-\lambda\eta)(1-\beta)}{L} -\eta^2(1-\beta)^2 \right) \Vert \nabla F(\theta_{T}) -\nabla F(\theta_{T}^{\prime})\Vert^2}{2(1-\lambda\eta)\Vert \theta_T- \theta_T^{\prime}\Vert} \geq  2\eta\beta G$, we obtain the desired learning rate $\eta \leq 2/(2\lambda+L\Gamma_{\beta})$, where $\Gamma_{\beta}\in(0,1)$ is a constant depends on the the momentum coefficient $\beta$. $\Gamma_{\beta}\in(0,1)$ is because the expression $\Gamma_{\beta}=\frac{1-\beta}{1-2\beta G/L(1-\beta)\Vert\theta_{t-1}-\theta_{t-1}^{\prime}\Vert}$ contains $\Vert\theta_{t-1}-\theta_{t-1}^{\prime}\Vert$ in its denominator, which is far greater than $2\beta G$. 
+
+Then, we have the conclusion the target function is convexity and $\beta$-smoothness, if $\eta \leq \frac{2}{2\lambda+L\Gamma_{\beta}}$, we conclude that $\Vert \theta_{T+1} - \theta_{T+1}^{\prime}\Vert \leq (1-\lambda\eta)\Vert \theta_T- \theta_T^{\prime}\Vert$. And, we obtain the expectation based on the above analysis 
+  \begin{equation}
+  \begin{aligned}
+    \mathbb{E}\left[\delta_{T}\right] &\leq (1-\frac{1}{n})(1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + \frac{1}{n}\left((1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + 2\eta\tau_{\beta} G\right)\\
+    &\leq (1-\lambda \eta)\mathbb{E}\left[\delta_{T-1}\right] + \frac{2\eta\tau_{\beta} G}{n}
+  \end{aligned}
+ \end{equation}
+recursively, we can get 
+    \begin{equation}
+     \begin{aligned}
+      \mathbb{E}\left[\delta_{T}\right] \leq \frac{2\eta\tau_{\beta} G}{n} \sum_{t=0}^{T}(1-\lambda \eta)^t \leq \frac{2\tau_{\beta}G}{\lambda n}.
+     \end{aligned}
+    \end{equation}
+
+Plugging this back into Eq.~\eqref{convex-basic}, we obtain
+ \begin{equation}\label{eq:2.2.1}
+  \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert L(\theta_T;z) - L(\theta^{\prime}_T;z)\vert \leq \frac{2\tau_{\beta}G^2}{\lambda n}.
+ \end{equation}
+And we finish the proof.
+
+\section{Experiments}\label{Appendix:exp}
+
+\textbf{Dataset and model.}
+\emph{Vision setting (Exp.~1--3).}
+We use CIFAR-100~\cite{krizhevsky2009learning}: 60k $32{\times}32$ color images, 100 classes, 50k train / 10k test. Training uses random crop, random horizontal flip and normalization. Test uses the same normalization without augmentation. The model is ResNet-18 adapted for CIFAR (no initial max-pooling). We train for 100 epochs with PyTorch cosine learning-rate schedule and mixed precision (AMP).
+
+\emph{LLM setting (Exp.~4).}
+We adopt Qwen3-0.6B~\cite{qwen3} as the pretrained backbone and conduct parameter-efficient fine-tuning on MathInstruct~\cite{yue2023mammoth} using LoRA~\cite{hu2021loralowrankadaptationlarge}, implemented within the LLaMA-Factory framework~\cite{zheng2024llamafactory}.
+Training examples are formatted as instruction--response pairs and optimized in causal language model fashion using the model's native tokenizer, with a fixed maximum sequence length.
+To assess out-of-distribution generalization, we evaluate on SVAMP \citep{patel2021nlp} via exact-match accuracy of the final numeric answer. All evaluations use a fixed prompting setup (0-shot) and an identical decoding protocol, held constant across all other hyperparameter configurations to ensure a controlled and fair comparison.
+In Figure~\ref{fig:LLM1}, the small batch size is set to 32, whereas the large batch size is set to 128.
+
+\textbf{Methodology.}
+For the vision setting (Exp.~1--3), we compare four optimizer variants: plain \textbf{SGD}; \textbf{SGDM} (SGD with momentum coefficient $\beta$); \textbf{SGD+WD} (SGD with weight decay $\lambda$); and \textbf{SGDM+WD} (SGD with both $\beta$ and $\lambda$). Here $\eta$ is the learning rate, $\lambda$ is the weight-decay (WD) coefficient, and $\beta$ is the momentum coefficient in the velocity update $m_t \leftarrow \beta\cdot m_{t-1} + (1-\beta)\nabla F(\theta_t)$ (PyTorch convention). For each variant we run grid search over $\eta$; for WD variants we also search over $\lambda$, and for momentum variants we fix or sweep $\beta$ as noted in the results. Core grids are extended with finer sweeps to locate stability boundaries. All reported $(\eta^*,\lambda^*)$ and accuracies correspond to the configurations that achieve the best test performance in the figures.
+
+For the LLM setting (Exp.~4), we perform a controlled sweep over learning rate $\eta$ and weight decay $\lambda$ for LoRA fine-tuning, while holding the remaining factors fixed (LoRA hyperparameters and schedule). We report SVAMP performance for stable runs to identify the high-accuracy region over the $(\eta,\lambda)$  for a given bitch size.
+
+
+
+
+
+% \subsection{Proof of Theorem \ref{thm:nonconvex}}
+% \label{sec:app-proof-thm5.1}
+
+% First, we consider that the different sample are selected to update with probability $\frac{1}{n}$ at the step $T+1$.  
+% \begin{equation}
+%   \begin{aligned}
+%    \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta_t) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta_t (\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t}))\Vert\\
+%     &\leq (1-\lambda \eta_t)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + 2 \eta_t G,
+%   \end{aligned}
+%  \end{equation}
+% where the proof follows from the Eq.~\eqref{SWA-update}, triangle inequality, $\Vert \alpha \nabla g(w_T,z_{T+1}) \Vert \leq \alpha L$ for step $T+1$ step. And $\frac{\alpha}{T(T+1)}\sum_{i=1}^{T-1} i
+%      \cdot \Vert \nabla g(w_{i},z_{i+1}) - \nabla g(w^{\prime}_i,z_{i+1}) \Vert$ will be controlled in the late.
+
+% Second, another situation need be considered in case of the same sample are selected to update with probability $1-\frac{1}{n}$ at the step $T+1$. 
+%  \begin{equation}
+%   \begin{aligned}
+%    \Vert \theta_t -\theta_t^{\prime} \Vert &= \Vert (1-\lambda \eta_t) (\theta_{t-1} - \theta_{t-1}^{\prime}) + \eta_t (\nabla F(\theta_{t-1}^{\prime},z_{t}^{\prime}) - \nabla F(\theta_{t-1},z_{t}))\Vert\\
+%     &\leq (1-\lambda \eta_t)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert + \eta_t\beta\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert \\
+%     &\leq (1+(\beta -\lambda)\eta_t)\Vert\theta_{t-1} - \theta_{t-1}^{\prime}\Vert,
+%   \end{aligned}
+%  \end{equation}
+% where $\Vert \nabla g(w_{T+1}) - \nabla g(w_{T+1}^{\prime}) \Vert$ is controlled by $(1+\alpha\beta)$-expansive property of non-convex function in the second inequality.
+
+% Then we obtain the expectation consider the above analysis 
+%  \begin{equation}
+%     \begin{aligned}
+%      \mathbb{E}\left[\delta_{T+1}\right] &\leq (1-\frac{1}{n})(1+(\beta -\lambda)\eta_t)\mathbb{E}\left[\delta_{T}\right]+ \frac{1}{n}\left(\mathbb{E}\left[\delta_{T}\right]+ 2\eta_t G\right)\\ 
+%      &\leq \left(1+(1-\frac{1}{n})\left(1+(\beta -\lambda)\eta_t\right)\right)\mathbb{E}[\delta_{T}] + \frac{2\eta_t G}{n}\\
+%     \end{aligned}
+%    \end{equation}
+% let $\eta_t = \frac{c}{t}$, then
+%   \begin{equation}
+%  \begin{aligned}
+%      &= \left(1+(1-\frac{1}{n})\frac{c(\beta-\lambda)}{t}\right) \delta_{t} + \frac{2c G}{nt}\\
+%      &\leq \exp\left((1-\frac{1}{n})\frac{c(\beta-\lambda)}{t}\right) \delta_{t} + \frac{2c G}{nt}.
+%     \end{aligned}
+%    \end{equation}
+
+% Using the fact that $\delta_{t_0}=0$, we can unwind this recurrence relation from $T$ down to $t_0+1$.
+%   \begin{equation}
+%     \begin{aligned}
+%      \mathbb{E}[\delta_{T}] &\leq \sum_{t=t_0 +1}^{T} \left( \prod_{k=t+1}^{T}\exp\left((1-\frac{1}{n})\frac{c(\beta-\lambda)}{k}\right)\right)\frac{2c G}{nt}\\
+%      &= \sum_{t=t_0 +1}^{T} \exp\left((1-\frac{1}{n})(\beta -\lambda)c \sum_{k=t+1}^{T}\frac{1}{k}\right)\frac{2c G}{nt}\\
+%      &\leq \sum_{t=t_0 +1}^{T} \exp\left(\log(\frac{T}{t}) \cdot (1-\frac{1}{n})(\beta -\lambda)c \right)\frac{2c G}{nt}\\
+%      &\leq T^{(1-\frac{1}{n})(\beta -\lambda)c} \cdot \sum_{t=t_0 +1}^{T} \left(\frac{1}{t}\right)^{(1-\frac{1}{n})(\beta -\lambda)c+1} \cdot \frac{2cG}{n}\\
+%      &\leq \frac{1}{(1-\frac{1}{n})(\beta -\lambda)c} \cdot \frac{2cG}{n} \cdot \left(\frac{T}{t_0}\right)^{(1-\frac{1}{n})(\beta -\lambda)c}\\
+%      &\leq \frac{2G}{(n-1)(\beta -\lambda)} \cdot \left(\frac{T}{t_0}\right)^{(\beta -\lambda)c}
+%     \end{aligned}
+%    \end{equation}
+% Plugging this back into Eq.~\eqref{nonconvex-basic}, we obtain
+%  \begin{equation}\label{eq:app2.2.3}
+%   \mathbb{E}|g(\bar{w}_T;z)-g(\bar{w}^{\prime}_T;z)| \leq \frac{t_0}{n} + \frac{2G^2}{(n-1)(\beta -\lambda)} \cdot \left(\frac{T}{t_0}\right)^{(\beta -\lambda)c}.
+%  \end{equation}
+% By taking the extremum, we obtain the minimum  
+%  \begin{equation}\label{eq:app2.2.4}
+%     t_0 = \left(2cG^2\right)^{\frac{1}{(\beta -\lambda)c+1}}\cdot T^{\frac{(\beta -\lambda)c}{(\beta -\lambda)c+1}}
+%    \end{equation}
+% finally, this setting get
+%  \begin{equation}\label{eq:app2.2.5}
+%   \epsilon_{gen} = \epsilon_{stab} = \mathbb{E}\vert g(\bar{w}_T;z)-g(\bar{w}^{\prime}_T;z)\vert \leq \frac{1+\frac{1}{(\beta -\lambda)c+1}}{n-1}\left(2cG^2\right)^{\frac{1}{(\beta -\lambda)c+1}}\cdot T^{\frac{(\beta -\lambda)c}{(\beta -\lambda)c+1}}.
+%  \end{equation}
+% to simplify, omitting constant factors that depend on $\beta$, c
+% and L, we get 
+%    \begin{equation}\label{eq:app2.2.6}
+%     \epsilon_{stab} \lessapprox \frac{T^{\frac{\beta c}{\beta c+2}}}{n} .
+%    \end{equation}
+% And we finish the proof.
+

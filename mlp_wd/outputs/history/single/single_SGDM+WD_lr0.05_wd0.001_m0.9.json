@@ -1,0 +1,51 @@
+{
+  "config": {
+    "method": "SGDM+WD",
+    "dataset": "cifar10",
+    "num_layers": 3,
+    "hidden_dim": 512,
+    "batch_size": 128,
+    "lr": 0.05,
+    "wd": 0.001,
+    "momentum": 0.9,
+    "epochs": 5,
+    "seed": 42
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.703172453994751,
+      "train_acc": 39.488,
+      "test_loss": 1.583095069694519,
+      "test_acc": 44.42
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.5354326874542237,
+      "train_acc": 45.856,
+      "test_loss": 1.5441980653762817,
+      "test_acc": 45.3
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.385483939552307,
+      "train_acc": 50.964,
+      "test_loss": 1.416376463508606,
+      "test_acc": 50.79
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.1960055498886109,
+      "train_acc": 57.546,
+      "test_loss": 1.3552002286911011,
+      "test_acc": 53.07
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.0167841406059266,
+      "train_acc": 64.126,
+      "test_loss": 1.2765658987045287,
+      "test_acc": 55.72
+    }
+  ]
+}

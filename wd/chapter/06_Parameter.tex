@@ -1,0 +1,130 @@
+\section{Generalization-Oriented Parameter Coupling Relationship}
+% \begin{figure*}[t]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/lambda.png}
+%     \caption{Optimal test accuracy and corresponding learning rates for SGD, SGDM, SGD-WD, and SGDM-WD. Left: Learning rate versus weight decay, where each entry indicates the best test accuracy achieved for a given hyperparameter pair. Middle: The solid blue curve connects five observed points; the red dashed curve is fitted using five observations; the green dashed curve represents the theoretically predicted inverse relationship between parameters $\lambda$ and $\eta$. Right: Test accuracy plotted against the joint configuration of $\lambda$ and $\eta$.}
+%     \label{fig:WD and LR}
+%     \vspace{-0.8em} 
+% \end{figure*}
+
+
+\begin{tcolorbox}
+\textbf{Q2:} Can we derive a quantitative scaling Law via uniform stability theory that precisely reveals the intrinsic coupling mechanism between $\lambda$, $\eta$, $B$, and other parameters?
+\end{tcolorbox}
+
+\citet{wang2025setadamwsweightdecay} model AdamW as an Exponential Moving Average (EMA). Through formal analogy, they derived an explicit relationship among $\lambda$, $\eta$, and $T$: $\lambda = \frac{1}{\eta T}$, implying an inverse proportionality between the learning rate and weight decay when the number of iterations $T$ is fixed. 
+
+Building on the "Regularization Equivalence" hypothesis proposed in this work, we seek to quantify the interplay between hyperparameters through the lens of Uniform Stability. Instead of treating hyperparameters in isolation, we postulate that SGD-WD and SWA should satisfy comparable stability constraints to achieve identical generalization. This theoretical alignment allows us to derive the implicit coupling relationship, laying the mathematical foundation for our research.
+
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}[t]{0.40\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/exp2_heatmap_r18.png}
+        \caption{
+        Anti-diagonal band in $\eta$--$\lambda$ heatmap.
+        % . The high-accuracy region forms a clear anti-diagonal band.
+        % , consistent with the stability bound $\eta(1+\lambda)<2/L$.
+        }
+        \label{fig:WD and LR-heatmap}
+    \end{subfigure}
+    % \hfill
+    \begin{subfigure}[t]{0.36\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/exp2_train_curve.png}
+        \caption{Train loss vs.\ joint product $\eta\times\lambda$.
+        % (each curve fixes one $\lambda$). 
+        % Stars mark per-curve minima.
+        }
+        \label{fig:WD and LR-train}
+    \end{subfigure}
+    
+    % \hfill
+    % \begin{subfigure}[t]{0.30\linewidth}
+    %     \centering
+    %     \includegraphics[width=\linewidth]{figures/exp2_eta_lambda_smooth.png}
+    %     \caption{Best test accuracy vs.\ $\eta\times\lambda$. All fixed-$\lambda$ curves peak inside the same narrow band.
+    %     % (dashed grey), directly verifying $\lambda\approx C/(\eta T)$.
+    %     }
+    %     \label{fig:WD and LR-smooth}
+    % \end{subfigure}
+
+\caption{Coupled effect of learning rate $\eta$ and weight decay $\lambda$. 
+(a) The full $\eta$--$\lambda$ heatmap; the optimal $\lambda^{*}$ decreases monotonically with $\eta$. 
+(b)~Train loss plotted against the joint product $\eta\times\lambda$: each fixed-$\lambda$ curve attains its minimum at the same $\eta\times\lambda$. 
+(c)~Best test accuracy vs. $\eta\times\lambda$ : refer to Figure~\ref{fig:lambda}.
+% : every curve peaks inside the same band, confirming Eq.~\eqref{coupling:lamda}.
+}
+
+    \label{fig:WD and LR}
+    \vspace{-0.8em} 
+\end{figure}
+
+\subsection{Coupling of $\lambda$ and $\eta$}
+We first present the generalized bound for the SWA.
+
+\begin{lemma}{\rm (\citet[Theorem 4.1]{pmlr-v235-wang24bl})}\label{thm:SWA}
+Assume that the loss function $F(\theta;z)$ is convex, Lipschitz, and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SWA with step sizes $\eta \leq \frac{2}{L}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ without replacement. Then, SWA has uniform stability of
+\begin{equation}
+  \epsilon_{gen} = \mathbb{E}\vert F(\bar{\theta}_T;z)-F(\bar{\theta}^{\prime}_T;z)\vert \leq \frac{\eta G^2 T}{n}.
+ \end{equation}
+\end{lemma}
+
+\begin{remark}
+Lemma \ref{thm:SWA} shows that under the assumption of convexity, the bound of SWA is half that of SGD, implying an improvement in generalization performance. This is a well-established result, and its detailed proof can be found in \cite{pmlr-v235-wang24bl,hardt2016train,xiao2022stability}. 
+\end{remark}
+
+By bridging the generalization bounds of SGD-WD (Theorem \ref{thm:sgd-WD}) and SWA (Lemma \ref{thm:SWA}) under the Regularization Equivalence hypothesis, we equate their stability constraints to obtain the following coupling relationship:
+\begin{equation}\label{coupling:lamda}
+\lambda \approx \frac{C}{S}, \qquad S \;:=\; \sum_{t<T}\eta_t, %\implies \lambda \eta T \approx \text{Constant} 
+\end{equation}
+where $S$ is the total step-size budget consumed over training and $C$ subsumes constant factors. It captures the dependency relationship between $\eta$ and $\lambda$ that must be followed to maintain system stability across varying training durations.
+
+We state the coupling in terms of $S$ rather than $\eta T$ deliberately. For a constant step size $S=\eta T$ and Eq.~\eqref{coupling:lamda} reduces to the familiar $\lambda \approx C/(\eta T)$. For cosine annealing to zero, stepped once per epoch, $\sum_{k<T}\tfrac{1}{2}\left(1+\cos(\pi k/T)\right) = (T+1)/2$ exactly, so $S = \eta T/2$ and the same relation reads $\lambda \approx 2C/(\eta T)$. The factor of two that distinguishes these two statements is therefore a property of the schedule, not of the analysis, and writing the law in terms of $S$ removes the ambiguity. It also yields a prediction that is directly testable: at matched $\eta$ and $T$, a constant-step-size run should prefer half the weight decay of a cosine run.
+
+\begin{remark}[Scope of the claim]\label{rem:heuristic}
+Equating two upper bounds does not locate an optimum: bounds may be loose by different amounts, and nothing forces the maximizer of the true generalization performance to lie where two envelopes cross. What the argument does determine is how that crossing point \emph{scales} in $\eta$, $T$ and $B$, because the loose constants enter multiplicatively and are absorbed into the single prefactor $C$. We therefore treat Eq.~\eqref{coupling:lamda} as a heuristic with a derived exponent and a fitted constant. The exponents are falsifiable, and Section~\ref{sec:experiments} measures each of them; $C$ is calibrated once and is not predicted by the analysis.
+\end{remark}
+
+\begin{remark}
+Eq.~\eqref{coupling:lamda} predicts that for a fixed iteration $T$, $\lambda$ must scale inversely with $\eta$. This theoretical derivation corroborates recent empirical findings in \cite{wang2025setadamwsweightdecay,bergsma2025powerlinesscalinglaws}. \textcolor{red}{As visualized in the left of Fig. \ref{fig:WD and LR}, our experimental data aligns well with this theoretical curve $1/x$, confirming that the heuristic alignment of stability bounds successfully captures the intrinsic coupling.}
+\end{remark}
+
+\begin{remark}
+Eq.~\eqref{coupling:lamda} suggests that $\eta$ and $\lambda$ play commensurate roles in the system. This implies that extreme concurrent configurations of these parameters will destabilize the training process. \textcolor{red}{As demonstrated in the left and right of Figure \ref{fig:WD and LR}, the model attains optimal generalization only when the joint product of these hyperparameters (e.g., $\eta \cdot \lambda$) is maintained within an appropriate interval.}
+\end{remark}
+
+\begin{remark}[The product is necessary but not sufficient]\label{rem:twosided}
+Eq.~\eqref{coupling:lamda} constrains the product, but it is not the only constraint the analysis imposes. Theorem~\ref{thm:sgd-WD} also requires $\eta \leq 2/(2\lambda + L)$, a ceiling on the step size that \emph{tightens} as $\lambda$ grows. The admissible region is therefore the intersection of a band and a ceiling rather than a one-dimensional curve, and the two hyperparameters are not interchangeable along the band: for a fixed product, small $\eta$ fails to consume enough of the step budget within $T$ iterations, while large $\eta$ crosses the ceiling. This is the sense in which weight decay is not a redundant knob that could be absorbed into the learning rate, and it distinguishes our account from analyses that constrain the product alone. Section~\ref{sec:experiments} measures the accuracy profile along a line of constant $\eta\lambda$ and confirms that it is not flat.
+\end{remark}
+
+ \subsection{Coupling of $\lambda$, $\eta$ and $B$}
+To explicitly incorporate the batch size $B$, we rewrite the total iterations as $T = T_{epo} \cdot (n/B)$. Substituting this into Eq.~\eqref{coupling:lamda} yields the batch-dependent coupling relationship:
+\begin{equation}\label{coupling:Batch}
+\lambda \approx \frac{B}{\eta n T_{epo}}.
+\end{equation}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/batch.png}
+    \caption{Coupling effects among hyperparameters at optimal performance after introducing batch size $B=32$ (left) and $128$ (right), respectively. Top: For a fixed $\lambda$, the left and right subplots compare model performance across different $\eta$ with $B$. Middle: Comparison of the optimal performance against the joint values of $\lambda\times\eta$. Bottom: For a fixed $\eta$, the left and right subplots compare model performance across different weight decay values $\lambda$ with $B$.}
+    \label{fig:batch}
+    \vspace{-1em}  
+\end{figure*}
+ 
+\begin{remark}
+Eq.~\eqref{coupling:Batch} reveals a fundamental compensation mechanism between explicit and implicit regularization. Small-batch training introduces significant gradient noise, acting as a strong implicit regularizer. As $B$ increases, this noise diminishes, creating a "regularization deficit." Consequently, to conserve total stability, the explicit weight decay $\lambda$ (and learning rate $\eta$) must be scaled up proportionally to compensate. This theoretical insight perfectly matches the empirical trends in Figure~\ref{fig:batch}, where increasing $B$ from 32 to 128 necessitates shifting the optimal $\lambda$ from $5\text{e-}4$ to $1\text{e-}3$.
+\end{remark}
+
+\textbf{Answer to Q2:} As shown in Eq. \ref{coupling:lamda} and \ref{coupling:Batch}, $\lambda$ acts as a counterweight to $\eta \cdot T$, requiring an inverse adjustment to maintain equilibrium, as validated by experience in Figure \ref{fig:WD and LR}. When Batch Size $B$ is introduced, it acts as a scaling factor: larger batches reduce implicit noise, necessitating a proportional increase in the joint magnitude of $\lambda$ and $\eta$ to preserve the stability, as shown in the Figure \ref{fig:batch} and Figure \ref{fig:LLM1} (the latter verified using LLM).
+
+
+% \begin{remark}
+% This scaling law offers actionable guidance for constrained scenarios. In resource-limited regimes (small $B$), one should reduce the joint product $\lambda \cdot \eta$ to prevent over-regularization (since noise is already high). Conversely, in throughput-prioritized regimes (large $B$), one can explore a larger $\lambda \cdot \eta$ product to accelerate convergence without sacrificing stability, consistent with the results in Figure \ref{fig:batch} (Middle).
+% \end{remark}
+
+% \begin{remark}
+% Under practical constraints, such as limited computational resources where only small batch sizes are feasible, the proposed scaling law suggests selecting $\lambda\times\eta$ at lower values to ensure better test performance. In contrast, when computational resources are sufficient and efficiency is prioritized, a larger $\lambda\times\eta$ can be explored, which is consistent with the trend shown in the middle of Figure \ref{fig:batch}.
+% \end{remark}
+

@@ -1,0 +1,135 @@
+\section{Generalization Analysis}
+
+\begin{tcolorbox}
+\textbf{Q1:} From the perspective of stability, how does the introduction of the weight decay fundamentally reshape the stability bound of the learning algorithm? To maintain optimal system performance, what dependencies must other hyperparameters exhibit? 
+\end{tcolorbox}
+
+In fact, \citet{10.5555/2986916.2987033} have offered a preliminary answer assuming a linear network, showing that weight decay significantly enhances generalization by suppressing irrelevant weight components and mitigating the impact of noise. However, this conclusion cannot be extended to parameter-dependent theoretical studies (e.g., involving $\lambda, \eta, T$), precluding further analysis of coupling among hyperparameters. Consequently, we investigate the theoretical properties of the weight decay algorithm based on stability, which can build the parameter-dependent bounds.
+
+%Establishing a generalization error bound for certain algorithm and using it to find variable dependencies is a primary means of studying generalization ability. 
+
+\subsection{Stability and Generalization Definition}
+This section derives generalization bounds for various algorithms via \emph{uniform stability}. We start by outlining the theoretical connection between generalization and stability.
+First, we introduce the following notions of \emph{uniform stability} and \emph{the expected generalization error}.
+\begin{definition}[$\epsilon$-Uniformly Stable]
+A randomized algorithm $A$ is $\epsilon$-uniformly stable if for all data sets $S, S^{\prime} \in Z^{n}$ such that $S$ and $S^{\prime}$ differ in at most one example, we have
+    \begin{equation}\label{E-stab}
+     \mathop{sup}\limits_{z\in Z}\left\{\mathbb{E}_{A}\left[F(A_S;z)-F(A_{S^{\prime}};z)\right] \right\} \leq \epsilon.
+    \end{equation}
+\end{definition}
+
+We define the expected generalization error of a model $\theta = A_S$, obtaining via a randomized algorithm $A$, as
+\begin{equation}\label{D-gen}
+\mathbb{E}_{S,A}\left[R_{S}\left[A_S\right]-R_\mathcal{D}\left[A_S\right]\right]. 
+\end{equation}
+
+By leveraging the concept of \emph{uniform stability}, \citet{hardt2016train} provide the generalization bound for the SGD algorithm based on the following theorem.
+\begin{theorem}{\rm (Generalization in Expectation, \citet[Theorem 2.2]{hardt2016train})}\label{E-gen}
+Let $A$ be $\epsilon$-uniformly stable. Then,
+    \begin{equation}
+     \vert\mathbb{E}_{S,A}\left[R_{S}\left[A_S\right]-R_\mathcal{D}\left[A_S\right]\right]\vert \leq \epsilon.
+    \end{equation}
+\end{theorem}
+
+%In SGD, the main sources of randomness include the model itself and the random selection of data. Therefore, we need to take expectations on both $A$ and $S$. 
+\begin{remark}
+Here, the expectation is taken only over the internal randomness of $A$. Theorem \ref{E-gen} implies that an algorithm with uniform stability exhibits small generalization error. Therefore, the generalization bound can be determined through controlling the algorithm's uniform stability.   
+\end{remark}
+
+%We recall the important theorem that uniform stability implies \emph{generalization in expectation} \cite{hardt2016train}. The proof is based on \citet[Lemma 7]{bousquet2002stability} and very similar to \citet[Lemma 11]{shalev2010learnability}.
+
+Stability investigates the impact of input perturbations on model outputs. To characterize this, we analyze the update states of the original and perturbed sequences. Let $S$ and $S^{\prime}$ denote two datasets differing by a single sample. After running the optimizer for $T$ steps on $S$ and $S^{\prime}$, the resulting parameters are denoted as $\theta_T$ and $\theta_T^{\prime}$. Therefore, $\mathbb{E}\vert F(\theta_T;z)-F(\theta_T^{\prime};z)\vert$ reflects the algorithm's stability under perturbations. We employ the Lipschitz property of the loss function and then obtain
+\begin{equation}\label{convex-basic}
+\mathbb{E}\vert F(\theta_T;z)-F(\theta_T^{\prime};z)\vert \leq G \mathbb{E}\Vert \theta_T -\theta^{\prime}_T \Vert
+ \end{equation}
+for all $\theta_T$ and $\theta_T^{\prime}$.
+This implies that we will further transform the problem of obtaining the generalization bound via the stability bound into one of controlling parameter differences. 
+
+Next, we consider the algorithm's expansion properties and establish stability bounds based on them.
+
+\begin{lemma}{\rm (\citet[Lemma 3.6]{hardt2016train})}
+\label{lemma3.6}
+Assume that the function $F$ is $L$-smooth and convex. Then for any $\eta \leq \frac{2}{L}$, we have $\Vert \theta_{T+1}-\theta_{T+1}^{\prime} \Vert \leq \Vert \theta_{T}-\theta_{T}^{\prime}\Vert.$
+\end{lemma}
+
+\begin{remark}
+Lemma \ref{lemma3.6} indicates that when a convex function satisfies smoothness, and the step size is sufficiently small, perturbations exert minimal influence on the optimizer, and gradient updates exhibit non-expansive behavior. The proof is detailed in Appendix \ref{pro-lemma}. Further results can be found in papers \citep{hardt2016train,xiao2022stability}.    
+\end{remark}
+
+%The next section will derive generalization bounds for different algorithms based on the properties of gradient updates.
+
+\subsection{Generalization bounds for algorithms}
+
+\begin{lemma}{\rm (\citet[Theorem 3.8]{hardt2016train})}\label{thm:sgd}
+Assume that the loss function $F(\theta;z)$ is convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGD with learning rate $\eta \leq \frac{2}{L}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGD has uniform stability of
+\begin{equation}
+  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2\eta G^2 T}{n}.
+ \end{equation}
+\end{lemma}
+
+\begin{remark}
+Lemma \ref{thm:sgd} establishes a generalization upper bound dependent on the learning rate $\eta$ and the number of iterations $T$, facilitating the analysis of optimal parameter settings. Furthermore, given that \citet{pmlr-v180-zhang22b} identified this upper bound $\mathcal{O}(T/n)$ as also being the lower bound, it provides a theoretical foundation for comparing the generalization improvements of decay algorithms.    
+\end{remark}
+
+\begin{theorem}\label{thm:sgd-WD}
+Assume that the loss function $F(w;z)$ is convex, Lipschitz and $L$-smooth for all given $z\in\mathcal{Z}$ with sizes $n$. Suppose we run SGD-WD with weight decay coefficient $\lambda \in (0,1)$ and learning rate $\eta \leq \frac{2}{2\lambda +L}$ for $T$ steps, where each step samples $z_i$ from $\mathcal{Z}$ uniformly with replacement. Then, SGD-WD has uniform stability of 
+\begin{equation}
+  \epsilon_{gen} = \mathbb{E}\vert F(\theta_T;z)-F(\theta^{\prime}_T;z)\vert \leq \frac{2G^2}{\lambda n}.
+ \end{equation}
+\end{theorem}
+
+
+\noindent
+\begin{minipage}[t]{0.5\textwidth}
+
+    \vspace{0pt} % 顶部对齐锚点
+
+
+\begin{remark}
+Theorem \ref{thm:sgd-WD} presents a bound $\mathcal{O}(1/n)$, which is tighter than the bound $\mathcal{O}(T/n)$ in Lemma \ref{thm:sgd}. Unlike the linear growth with respect to iterations $T$ in SGD, SGD-WD achieves a smaller constant upper bound, indicating that weight decay significantly improves generalization. This indicates that weight decay is not merely a regularization technique; rather, it alters the optimization dynamics, steering the algorithm toward regions with improved stability. This insight underlies our connection to SWA, which similarly seeks flatter, more stable regions of the landscape. 
+\end{remark}
+
+\begin{remark}\label{remark 2}
+The tighter bound of SGD-WD is primarily attributed to the weight decay coefficient $\lambda$, which induces the $(1-\lambda\eta)$-expansive property in the algorithm, denoted $\Vert \theta_t-\theta^{\prime}_t\Vert \leq (1-\lambda\eta)\Vert \theta_{t-1} - \theta^{\prime}_{t-1}\Vert$. This aligns with the theoretical properties of SGD under the strong convexity assumption \cite{hardt2016train}, yielding an equivalent upper bound. However, a key distinction is that SGD-WD necessitates a smaller learning rate to satisfy the expansive condition under convexity, which is essential for convergence. For the detailed proof, please refer to appendix \ref{sec:app-thm4.1}.    
+\end{remark}
+    
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \vspace{0pt} % 顶部对齐锚点
+    \centering
+    \includegraphics[width=\textwidth]{figures/performance.jpg} 
+    \captionof{figure}{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+    \label{fig:performance}
+\end{minipage}
+
+\vspace{1em}
+
+
+% \begin{wrapfigure}{r}{0.4\textwidth}
+% \vspace{-12pt}
+% \includegraphics[width=0.40\textwidth]
+% {figures/performance.jpg} 
+% \vspace{-15pt}
+% \caption{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+% \vspace{-.2cm}
+% \label{fig:performance}
+% \end{wrapfigure}
+
+
+% \begin{figure}[htbp] % [h]表示尽量放在当前位置，[t]表示如果放不下就放在页顶
+%     \centering
+%     % 调整宽度：0.8\linewidth 表示占行宽的80%，你可以改成 1.0 让它占满
+%     \includegraphics[width=0.98\linewidth]{figures/performance.jpg} 
+    
+%     \vspace{-0.2cm} % 如果觉得标题离图片太远，可以用负值拉近一点
+    
+%     \caption{The comparison of SGD, SGD-WD, SGDM, and SGDM-WD in optimal accuracy and corresponding learning rates.}
+%     \label{fig:performance}
+%     \vspace{-0.2cm} % 调整图片下方的空白，节省空间
+% \end{figure}
+Additionally, we conduct a study and comparison of SGDM and SGDM-WD using stability analysis, and obtain the same theoretical results: the introduction of $\lambda$ yields a tighter bound and a more restrictive condition on $\eta$. Due to space constraints, we place the detailed content in the \textbf{Appendix \ref{gen_SGDM}}.
+
+\textbf{Answer to Q1:} As demonstrated by Lemma \ref{thm:sgd} and Theorems \ref{thm:sgd-WD}, \ref{thm:sgdm} and \ref{thm:sgdm-WD}, weight decay not only enhances the generalization capability of base optimizers but also imposes new requirements on learning rate setting. Specifically, SGD-WD and SGDM-WD show better performance than SGD and SGDM, and their learning rates at optimal performance are lower than those of SGD and SGDM, which is verified in Figure \ref{fig:performance}. This prompts us to rethink the coupling between $\lambda$ and $\eta$.
+
+% \vspace{0.5cm}
