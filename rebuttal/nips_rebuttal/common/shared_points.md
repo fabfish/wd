@@ -155,8 +155,8 @@ The honest calibration uses the regime where the timescale is binding —
 small `η` or short `T` — where `C = λ* S` is stable near order one (at
 `η = 0.02`: `C ∈ {0.52, 1.30, 1.02}` across `T = 25, 100, 200`).
 
-Sensitivity at fixed `T` on CIFAR: wrong by 3× costs `[[E5B-3X]]` points; by
-10×, `[[E5B-10X]]`.
+Sensitivity at fixed `T` on CIFAR (exact `sum_lr`): wrong by 3× costs **15.1**
+points; by 10×, **69.7** — driven by overshooting `C`. Undershoot is cheap.
 
 **E5c (dataset + optimizer).** Wave-0 does not vary the dataset or the
 optimizer family. We therefore re-ran the Fig. 1 stability-boundary protocol

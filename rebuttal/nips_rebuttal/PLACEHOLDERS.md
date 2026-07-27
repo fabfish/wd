@@ -29,8 +29,8 @@ value of every token that can already be resolved.
 | `[[E4-DEFAULT-MEAN]]` | E4 | mean gap to oracle, fixed lambda=5e-4 | pending |
 | `[[E4-KOSSON-MEAN]]` | E4 | mean gap to oracle, constant `eta*lambda` | pending |
 | `[[E4-WANG-MEAN]]` | E4 | mean gap to oracle, `1/(eta*T)` | pending |
-| `[[E5B-3X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 3 | pending (factor mis-calibrated) |
-| `[[E5B-10X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 10 | pending (factor mis-calibrated) |
+| `[[E5B-3X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 3 | resolved (15.11) |
+| `[[E5B-10X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 10 | resolved (69.74) |
 | `[[E5C-C-SGD]]` | **E5c** MNIST-MLP | fitted C under SGD (mom=0) | resolved (0.44) |
 | `[[E5C-C-SGDM]]` | **E5c** MNIST-MLP | fitted C under SGDM (mom=0.9) | resolved (0.32) |
 | `[[E5C-C-RATIO]]` | E5c | max(C)/min(C) across SGD/SGDM (vs E5a range) | resolved (1.38×) |

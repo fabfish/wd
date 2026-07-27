@@ -130,9 +130,12 @@ residual drift across batch sizes reported in Q2 is the largest single source
 of variation.
 
 **How much does being wrong cost (CIFAR)?** We sweep `C` deliberately wrong by
-factors of 3 and 10 at two settings: `[[E5B-3X]]` and `[[E5B-10X]]` accuracy
-points respectively. The optimum in `lambda` is broad, which is why a rule
-that is order-of-magnitude correct is useful and a fixed default is not: the
+factors of 3 and 10 at two settings (`η=0.1`, `T∈{25,100}`), using the exact
+cosine step budget `S`. The worst accuracy loss is **15.1** points at 3× and
+**69.7** points at 10× — almost entirely from *overshooting* `C` (too much
+weight decay). Undershooting by the same factors costs far less. The optimum
+in `lambda` is therefore broad on the low side, which is why a rule that is
+order-of-magnitude correct remains useful while a fixed default is not: the
 default's error grows with the mismatch in `eta` and `T`, while ours does not.
 
 **Across datasets and optimizers (E5c).** Wave-0 is all CIFAR-100 / SGDM. To

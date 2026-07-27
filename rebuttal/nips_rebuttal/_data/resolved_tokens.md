@@ -1,6 +1,6 @@
 # Resolved placeholder values
 
-From 1116 runs (315 from this round).
+From 1124 runs (323 from this round).
 
 - `[[E1-T-SLOPE]]` = -0.226
 - `[[E1-T-CI]]` = [-0.28, -0.17]
@@ -24,8 +24,8 @@ From 1116 runs (315 from this round).
 - `[[E4-KOSSON-MEAN]]` = PENDING
 - `[[E4-WANG-MEAN]]` = PENDING
 - `[[E4-ZERO-MEAN]]` = PENDING
-- `[[E5B-3X]]` = PENDING
-- `[[E5B-10X]]` = PENDING
+- `[[E5B-3X]]` = 15.11
+- `[[E5B-10X]]` = 69.74
 - `[[E6B-LAMBDA-SLOPE]]` = PENDING
 - `[[E6B-GAP-SGD]]` = 24.3 points
 - `[[E6B-GAP-SGDM]]` = 23.8 points
@@ -33,15 +33,7 @@ From 1116 runs (315 from this round).
 - `[[E7-PLATEAU]]` = PENDING
 - `[[E7-BN]]` = PENDING
 
-15 of 30 resolved.
-
-
-- `[[E5C-C-SGD]]` = 0.44
-- `[[E5C-C-SGDM]]` = 0.32
-- `[[E5C-C-RATIO]]` = 1.38x
-- `[[E5C-3X]]` = 0.018 test-loss
-- `[[E5C-10X]]` = 0.083 test-loss
-- `[[E5C-FIG]]` = outputs/plots/nips26/e5c_mnist_mlp_C.png
+17 of 30 resolved.
 
 ## Notes
 
@@ -53,7 +45,5 @@ From 1116 runs (315 from this round).
 - E2b: 13 runs over 2 product levels, largest end-to-peak drop 10.29 points
 - E3: NaN-divergence brackets for 14 (beta, lambda) pairs; median tightness 2.88x; median eta*lambda at boundary 0.431
 - E4: 0/6 settings complete; headline tokens left PENDING (partial table in _data/e4_transfer_table.md)
-- E5b: 8 mis-specified runs analysed
+- E5b: 16 mis-specified runs analysed
 - E6b: 20 runs
-- E5b: factors landed near {0.16, 0.54, 5, 16} (approx S); do not fill 3x/10x tokens until exact sum_lr re-run. Undershoot cheap; overshoot asymmetric.
-- E5c MNIST-MLP: C_sgd=0.44, C_sgdm=0.32 (ratio 1.38x); wrong-C costs 0.018/0.083 test-loss at 3x/10x.
