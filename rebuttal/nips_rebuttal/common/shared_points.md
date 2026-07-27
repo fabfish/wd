@@ -148,12 +148,20 @@ Measurable structural predictions:
 ## S6. The constant, and how much it matters
 
 Wave-0 `C = λ* · S` at fixed `T = 100`: geometric mean **1.48**, spread
-x/1.70 across 65 settings. Under the two-constraint reading, `C` estimated
-from long-`T` / large-`η` runs is contaminated by the floor (implied `C`
-grows with `T` when `λ*` cannot fall). The honest calibration uses the
-regime where the timescale is binding — small `η` or short `T` — where
-`C = λ* S` is stable near order one (at `η = 0.02`: `C ∈ {0.52, 1.30, 1.02}`
-across `T = 25, 100, 200`).
+x/1.70 across 65 settings (CIFAR-100, SGDM, three architectures). Under the
+two-constraint reading, `C` estimated from long-`T` / large-`η` runs is
+contaminated by the floor (implied `C` grows with `T` when `λ*` cannot fall).
+The honest calibration uses the regime where the timescale is binding —
+small `η` or short `T` — where `C = λ* S` is stable near order one (at
+`η = 0.02`: `C ∈ {0.52, 1.30, 1.02}` across `T = 25, 100, 200`).
 
-Sensitivity at fixed `T`: wrong by 3× costs `[[E5B-3X]]` points; by 10×,
-`[[E5B-10X]]`.
+Sensitivity at fixed `T` on CIFAR: wrong by 3× costs `[[E5B-3X]]` points; by
+10×, `[[E5B-10X]]`.
+
+**E5c (dataset + optimizer).** Wave-0 does not vary the dataset or the
+optimizer family. We therefore re-run the Fig. 1 stability-boundary protocol
+on a 3-layer MLP / MNIST (no BN), fit `C` under SGD and SGDM
+(`[[E5C-C-SGD]]`, `[[E5C-C-SGDM]]`, ratio `[[E5C-C-RATIO]]`), and measure the
+cost of factors 3 and 10 (`[[E5C-3X]]`, `[[E5C-10X]]`; figure
+`[[E5C-FIG]]`). Usefulness needs order-of-magnitude `C`, which E5a+E5c
+support.

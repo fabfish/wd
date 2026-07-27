@@ -116,22 +116,33 @@ as opposed to its scaling.
 
 ## Q5. How sensitive is the rule to the hidden constant?
 
-This was the right thing to ask, and we had not measured it. Two answers.
+This was the right thing to ask, and we had not measured it. Two answers,
+then a third that covers the axes the Wave-0 CIFAR sweeps do not.
 
-**How much does `C` actually vary?** Fitting `C = lambda* * sum_t eta_t`
-independently in 65 settings that already exist in our sweeps -- three
-architectures, five batch sizes from 32 to 512, learning rates from 0.001 to
-0.5, two seeds -- gives a geometric mean of **1.48**, a multiplicative standard
-deviation of **x/1.70**, and a range of 0.17 to 2.99. By architecture:
-ResNet-18 1.42, ResNet-50 1.42, VGG-16 1.72. So `C` is stable to roughly a
-factor of two across architectures, and the residual drift across batch sizes
-reported in Q2 is the largest single source of variation.
+**How much does `C` actually vary (architectures, fixed dataset/optimizer)?**
+Fitting `C = lambda* * sum_t eta_t` independently in 65 settings that already
+exist in our sweeps -- three architectures, five batch sizes from 32 to 512,
+learning rates from 0.001 to 0.5, two seeds -- gives a geometric mean of
+**1.48**, a multiplicative standard deviation of **x/1.70**, and a range of
+0.17 to 2.99. By architecture: ResNet-18 1.42, ResNet-50 1.42, VGG-16 1.72.
+So `C` is stable to roughly a factor of two across architectures, and the
+residual drift across batch sizes reported in Q2 is the largest single source
+of variation.
 
-**How much does being wrong cost?** We sweep `C` deliberately wrong by factors
-of 3 and 10 at two settings: `[[E5B-3X]]` and `[[E5B-10X]]` accuracy points
-respectively. The optimum in `lambda` is broad, which is why a rule that is
-order-of-magnitude correct is useful and a fixed default is not: the default's
-error grows with the mismatch in `eta` and `T`, while ours does not.
+**How much does being wrong cost (CIFAR)?** We sweep `C` deliberately wrong by
+factors of 3 and 10 at two settings: `[[E5B-3X]]` and `[[E5B-10X]]` accuracy
+points respectively. The optimum in `lambda` is broad, which is why a rule
+that is order-of-magnitude correct is useful and a fixed default is not: the
+default's error grows with the mismatch in `eta` and `T`, while ours does not.
+
+**Across datasets and optimizers (E5c).** Wave-0 is all CIFAR-100 / SGDM. To
+cover the remaining axes in the question we repeat the Fig. 1 protocol on a
+3-layer MLP trained on MNIST (SGD and SGDM, cosine, no BatchNorm): fitted
+`C` under SGD is `[[E5C-C-SGD]]` and under SGDM is `[[E5C-C-SGDM]]`
+(cross-optimizer ratio `[[E5C-C-RATIO]]`); mis-specifying that `C` by 3× / 10×
+costs `[[E5C-3X]]` / `[[E5C-10X]]` (test-loss relative to the calibrated
+rule; see `[[E5C-FIG]]`). The practical claim is therefore: usefulness needs
+`C` stable to about a factor of two, not to 1%, and E5a+E5c support that.
 
 ---
 

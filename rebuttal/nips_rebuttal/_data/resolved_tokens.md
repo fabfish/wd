@@ -47,3 +47,4 @@ From 1116 runs (315 from this round).
 - E4: 0/6 settings complete; headline tokens left PENDING (partial table in _data/e4_transfer_table.md)
 - E5b: 8 mis-specified runs analysed
 - E6b: 20 runs
+- E5b: factors landed near {0.16, 0.54, 5, 16} (approx S); do not fill 3x/10x tokens until exact sum_lr re-run. Undershoot cheap; overshoot asymmetric.
