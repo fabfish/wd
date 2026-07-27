@@ -1,6 +1,6 @@
 # Resolved placeholder values
 
-From 1097 runs (295 from this round).
+From 1116 runs (315 from this round).
 
 - `[[E1-T-SLOPE]]` = -0.226
 - `[[E1-T-CI]]` = [-0.28, -0.17]
@@ -27,13 +27,13 @@ From 1097 runs (295 from this round).
 - `[[E5B-3X]]` = PENDING
 - `[[E5B-10X]]` = PENDING
 - `[[E6B-LAMBDA-SLOPE]]` = PENDING
-- `[[E6B-GAP-SGD]]` = PENDING
-- `[[E6B-GAP-SGDM]]` = PENDING
+- `[[E6B-GAP-SGD]]` = 24.3 points
+- `[[E6B-GAP-SGDM]]` = 23.8 points
 - `[[E7-DIVERGENCE-RATIO]]` = PENDING
 - `[[E7-PLATEAU]]` = PENDING
 - `[[E7-BN]]` = PENDING
 
-13 of 30 resolved.
+15 of 30 resolved.
 
 ## Notes
 
@@ -46,4 +46,4 @@ From 1097 runs (295 from this round).
 - E3: NaN-divergence brackets for 14 (beta, lambda) pairs; median tightness 2.88x; median eta*lambda at boundary 0.431
 - E4: 0/6 settings complete; headline tokens left PENDING (partial table in _data/e4_transfer_table.md)
 - E5b: 8 mis-specified runs analysed
-- E6b: no runs yet
+- E6b: 20 runs
