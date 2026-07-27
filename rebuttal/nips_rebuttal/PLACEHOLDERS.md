@@ -59,11 +59,8 @@ These are in the drafts as literal values, from Wave 0 (no new training):
 - `log eta*` vs `log(1-beta)` slope: 1.24 [0.80, 2.32] without weight decay,
   0.72 [0.58, 0.93] with it
 
-## E5b note (CIFAR, interim)
+## E5b note (CIFAR)
 
-Eight mis-specified runs exist, but the planned factors `{0.1, 1/3, 3, 10}`
-landed near `{0.16, 0.54, 5, 16}` because `S` was approximated as
-`η·T·(50000/B)/2` instead of `sum_lr`. Do **not** fill `[[E5B-3X]]` /
-`[[E5B-10X]]` from those numbers. Qualitative note in the report: undershooting
-C is cheap (≤~5 pp at ~0.5×); overshooting is asymmetric and can be large.
-Exact 3×/10× tokens wait for a corrected re-run (after E5c).
+Re-ran with exact `sum_lr`. Tokens filled: `[[E5B-3X]]=15.11`,
+`[[E5B-10X]]=69.74` (worst accuracy drop across the two `(η,T)` settings).
+Asymmetry: undershooting `C` by 3–10× costs ≤~5 pp; overshooting dominates.
