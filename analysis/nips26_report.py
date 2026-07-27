@@ -41,36 +41,27 @@ def _series_optima(df, group_col, acc_col='best_test_acc'):
 
 def e1(df, tokens, notes, min_ladder=6):
     """
-    Prefer the dense ladder (e1_fine / e1_full). The coarse e1_prelim ladder
-    steps by up to 5x and cannot resolve the predicted ~8x shift in lambda*
-    between T=25 and T=200; quoting its slope would be misleading.
+    Training-length sweep on the dense lambda ladder.
+
+    Merge e1_prelim + e1_fine (+ e1_full when present): they share one code path
+    and together give eight lambda values at each T. Do not mix in legacy CSVs
+    here -- those used a different GradScaler lifecycle.
     """
     base = df[(df.model == 'resnet18') & (df.batch_size == 128)
               & (df.momentum == 0.9) & (df.wd > 0) & (df.seed == 42)
               & (df.scheduler == 'cosine')]
-
     main = base[np.isclose(base.lr, 0.1)].copy()
-    # Prefer dense-ladder runs when available; fall back to everything only if
-    # the dense series is empty (should not happen once the queue advances).
     if 'exp' in main.columns:
-        dense = main[main['exp'].isin(['e1_fine', 'e1_full'])]
-        if not dense.empty:
-            main = dense
-        else:
-            notes.append("E1: only the coarse e1_prelim ladder is available; "
-                         "tokens left PENDING until e1_fine finishes")
-            # Still report qualitative notes, but do not fill headline tokens.
-            opt_coarse = _series_optima(main, 'epochs')
-            if not opt_coarse.empty:
-                notes.append(
-                    "E1 (coarse, do not quote): "
-                    + ", ".join(
-                        f"T={int(r.epochs)} wd_interp={r.wd_interp:.2e} "
-                        f"(argmax={r.wd_argmax:g}, interior={r.interior})"
-                        for r in opt_coarse.itertuples()))
+        same_path = main[main['exp'].isin(['e1_prelim', 'e1_fine', 'e1_full'])]
+        if same_path.empty:
+            notes.append("E1: no same-code-path T-sweep runs yet")
             return None
+        main = same_path
 
-    # Require each T to have a dense enough ladder before fitting.
+    # One row per (T, lambda): keep the better of any duplicates.
+    main = (main.sort_values('best_test_acc', ascending=False)
+                .drop_duplicates(['epochs', 'wd'], keep='first'))
+
     counts = main.groupby('epochs')['wd'].nunique()
     usable_T = counts[counts >= min_ladder].index
     main = main[main['epochs'].isin(usable_T)]
@@ -91,9 +82,25 @@ def e1(df, tokens, notes, min_ladder=6):
 
     if len(opt) >= 2:
         lo, hi = opt.iloc[0], opt.iloc[-1]
-        drift = (lo['wd_interp'] * 0.1) / (hi['wd_interp'] * 0.1)
+        drift = float(lo['wd_interp'] / hi['wd_interp'])
         tokens['E1-PRODUCT-DRIFT'] = (
-            f"{drift:.2f} (from T={int(lo['epochs'])} to T={int(hi['epochs'])})")
+            f"{drift:.2f}x in eta*lambda "
+            f"(T={int(lo['epochs'])} to T={int(hi['epochs'])}; "
+            f"prediction ours=8x, equilibrium=1x)")
+
+    # Flag the scientific outcome plainly.
+    argmaxes = sorted(opt['wd_argmax'].unique())
+    notes.append(
+        f"E1 OUTCOME: interpolated slope {fit['slope']:.3f} "
+        f"[{fit['lo']:.2f}, {fit['hi']:.2f}] over T in "
+        f"{list(opt['epochs'].astype(int))}; grid argmax "
+        f"{'identical' if len(argmaxes) == 1 else 'varies'} "
+        f"at {argmaxes}. Ours predicts -1, equilibrium predicts 0.")
+    if fit['hi'] > -0.5:
+        notes.append(
+            "E1: slope is incompatible with lambda ∝ 1/T; "
+            "treat as a negative result against our discriminator "
+            "and closer to the rotational-equilibrium account.")
 
     # second learning rate arm
     low = base[np.isclose(base.lr, 0.02)]
@@ -132,25 +139,28 @@ def e1(df, tokens, notes, min_ladder=6):
     ax.set_xscale('log')
     ax.set_xlabel(r'weight decay $\lambda$')
     ax.set_ylabel('best test accuracy (%)')
-    ax.set_title(r'(a) The optimum in $\lambda$ shifts with training length'
+    ax.set_title(r'(a) Accuracy against $\lambda$ at each training length'
                  '\n' r'ResNet-18 / CIFAR-100, $\eta=0.1$, $B=128$')
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
     ax = axes[1]
-    ax.plot(opt['epochs'], opt['wd_interp'], 'o', ms=10, label=r'measured $\lambda^*$')
+    ax.plot(opt['epochs'], opt['wd_interp'], 'o', ms=10, label=r'interpolated $\lambda^*$')
+    ax.plot(opt['epochs'], opt['wd_argmax'], 's', ms=7, color='C1',
+            label=r'grid argmax $\lambda^*$')
     xs = np.array([opt['epochs'].min(), opt['epochs'].max()], dtype=float)
     ax.plot(xs, np.exp(fit['intercept']) * xs ** fit['slope'], 'r-', lw=2.2,
             label=f"fit slope {fit['slope']:.2f} [{fit['lo']:.2f}, {fit['hi']:.2f}]")
     anchor = float(opt['wd_interp'].iloc[0]) * float(opt['epochs'].iloc[0])
     ax.plot(xs, anchor / xs, 'k--', lw=1.6, label=r'ours: slope $-1$')
-    ax.plot(xs, [float(opt['wd_interp'].iloc[0])] * 2, ls=':', color='purple', lw=1.8,
+    ax.plot(xs, [float(opt['wd_argmax'].iloc[0])] * 2, ls=':', color='purple', lw=1.8,
             label=r'rotational equilibrium: slope $0$')
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlabel('training length T (epochs)')
     ax.set_ylabel(r'optimal weight decay $\lambda^*$')
-    ax.set_title(r'(b) $\lambda^*$ against $T$: the discriminating test')
+    ax.set_title(r'(b) $\lambda^*$ against $T$: the discriminating test'
+                 '\n(negative for slope $-1$)')
     ax.grid(alpha=0.3, which='both')
     ax.legend(fontsize=8)
 
@@ -223,18 +233,26 @@ def e2b(df, tokens, notes):
 # E3: the learning-rate ceiling
 # --------------------------------------------------------------------------
 
-def e3(df, tokens, notes, acc_floor=5.0):
+def e3(df, tokens, notes):
+    """
+    Locate the explosion boundary using the NaN/divergence flag only.
+
+    An accuracy floor mixes in over-regularization (loss stuck at log(#classes)
+    with no explosion), which is not the L-smooth stability ceiling the theory
+    talks about. At large lambda that contamination produces a spurious slope
+    near 1/(eta*lambda) rather than the predicted slope of 1.
+    """
     d = df[(df.exp == 'e3')] if 'exp' in df.columns else pd.DataFrame()
     if d.empty:
         notes.append("E3: no runs yet")
         return None
     d = d.copy()
-    d['stable'] = (d['diverged'].astype(int) == 0) & (d['best_test_acc'] >= acc_floor)
+    d['exploded'] = d['diverged'].astype(int) == 1
 
     rows = []
     for (momentum, wd), g in d.groupby(['momentum', 'wd']):
-        stable = g[g['stable']]['lr']
-        unstable = g[~g['stable']]['lr']
+        stable = g[~g['exploded']]['lr']
+        unstable = g[g['exploded']]['lr']
         if stable.empty or unstable.empty:
             continue
         lo = float(stable.max())
@@ -243,9 +261,11 @@ def e3(df, tokens, notes, acc_floor=5.0):
             continue
         hi = float(higher.min())
         rows.append(dict(momentum=momentum, wd=wd, eta_max=np.sqrt(lo * hi),
-                         bracket_lo=lo, bracket_hi=hi, tightness=hi / lo))
+                         bracket_lo=lo, bracket_hi=hi, tightness=hi / lo,
+                         product=np.sqrt(lo * hi) * wd))
     if not rows:
-        notes.append("E3: no bracketed thresholds yet")
+        notes.append("E3: no NaN-divergence brackets yet "
+                     "(most high-lambda failures are under-fitting, not explosion)")
         return None
     b = pd.DataFrame(rows).sort_values(['momentum', 'wd'])
     b.to_csv(TABLE_DIR / 'e3_boundary.csv', index=False)
@@ -259,15 +279,15 @@ def e3(df, tokens, notes, acc_floor=5.0):
                     fmt='o', ms=7, capsize=3, label=rf'$\beta$ = {momentum:g}')
         if len(g) >= 3:
             slope, intercept = np.polyfit(g['wd'], 1.0 / g['eta_max'], 1)
-            xs = np.linspace(0, g['wd'].max(), 50)
+            xs = np.linspace(0, max(g['wd'].max(), 1e-6), 50)
             ax.plot(xs, intercept + slope * xs, lw=1.8,
                     label=rf'  fit: $1/\eta_{{max}}$ = {slope:.2f}$\lambda$ + {intercept:.2f}')
             if np.isclose(momentum, 0.0):
                 tokens['E3-SLOPE'] = f"{slope:.2f}"
                 tokens['E3-INTERCEPT'] = f"{intercept:.2f} (implies L = {2 * intercept:.1f})"
     ax.set_xlabel(r'weight decay $\lambda$')
-    ax.set_ylabel(r'$1/\eta_{max}$')
-    ax.set_title('Divergence boundary against weight decay\n'
+    ax.set_ylabel(r'$1/\eta_{max}$ (NaN-divergence)')
+    ax.set_title('Explosion boundary against weight decay\n'
                  r'theory: $1/\eta_{max} = \lambda + L/2$')
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
@@ -283,8 +303,16 @@ def e3(df, tokens, notes, acc_floor=5.0):
         if not merged.empty:
             ratio = float(np.exp(np.mean(np.log(merged['eta_max_9'] / merged['eta_max_0']))))
             tokens['E3-MOM-RATIO'] = f"{ratio:.2f}"
-    notes.append(f"E3: thresholds bracketed for {len(b)} (beta, lambda) pairs; "
-                 f"median bracket tightness {b['tightness'].median():.2f}x")
+    msg = (f"E3: NaN-divergence brackets for {len(b)} (beta, lambda) pairs; "
+           f"median tightness {b['tightness'].median():.2f}x")
+    if (b.wd > 0).any():
+        msg += (f"; median eta*lambda at boundary "
+                f"{b.loc[b.wd > 0, 'product'].median():.3g}")
+    notes.append(msg)
+    if (b.wd > 0).sum() < 3:
+        notes.append("E3 CAUTION: few positive-lambda explosion brackets; "
+                     "high-lambda runs mostly underfit without NaN. "
+                     "Do not overclaim the slope-1 test.")
     return b
 
 
@@ -333,24 +361,26 @@ def e4(df, tokens, notes, min_oracle_points=5):
         notes.append("E4: no transfer cells available yet")
         return None
 
-    t = pd.DataFrame(records)
-    complete = [c for c, g in t.groupby('config')
-                if g['strategy'].nunique() == len(STRATEGIES)]
-    if len(complete) < len(TRANSFER_CONFIGS):
-        notes.append(f"E4: {len(complete)}/{len(TRANSFER_CONFIGS)} settings have "
-                     f"all {len(STRATEGIES)} strategies; means below cover only those")
-    t = t[t['config'].isin(complete)]
-    if t.empty:
-        notes.append("E4: no setting has every strategy yet, nothing quotable")
-        return None
-    t.to_csv(TABLE_DIR / 'e4_transfer.csv', index=False)
-    pivot = t.pivot_table(index='config', columns='strategy', values='gap')
+    t_all = pd.DataFrame(records)
+    t_all.to_csv(TABLE_DIR / 'e4_transfer.csv', index=False)
+    pivot = t_all.pivot_table(index='config', columns='strategy', values='gap')
     pivot = pivot.reindex(columns=[s for s in STRATEGIES if s in pivot.columns])
     (TABLE_DIR / 'e4_transfer_table.md').write_text(
         "Accuracy gap to the per-setting oracle, in percentage points "
-        "(lower is better)\n\n" + pivot.round(2).to_markdown())
-    tokens['E4-TABLE'] = "see _data/e4_transfer_table.md"
+        "(lower is better). Partial until all six settings are complete.\n\n"
+        + pivot.round(2).to_markdown())
 
+    complete = [c for c, g in t_all.groupby('config')
+                if g['strategy'].nunique() == len(STRATEGIES)]
+    if len(complete) < len(TRANSFER_CONFIGS):
+        notes.append(
+            f"E4: {len(complete)}/{len(TRANSFER_CONFIGS)} settings complete; "
+            f"headline tokens left PENDING "
+            f"(partial table in _data/e4_transfer_table.md)")
+        return t_all
+
+    t = t_all[t_all['config'].isin(complete)]
+    tokens['E4-TABLE'] = "see _data/e4_transfer_table.md"
     for strategy in STRATEGIES:
         g = t[t['strategy'] == strategy]
         if g.empty:
@@ -361,8 +391,7 @@ def e4(df, tokens, notes, min_oracle_points=5):
         if strategy == 'ours':
             tokens['E4-OURS-WORST'] = f"{g['gap'].max():.2f}"
 
-    notes.append(f"E4: {len(t)} of {len(TRANSFER_CONFIGS) * len(STRATEGIES)} "
-                 f"cells resolved ({missing} still missing)")
+    notes.append(f"E4: all {len(TRANSFER_CONFIGS)} settings complete")
     return t
 
 

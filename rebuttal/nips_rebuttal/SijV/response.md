@@ -22,53 +22,50 @@ foreground as an equivalent prior result. That good `(eta, lambda)` pairs form a
 band is already visible in D'Angelo et al. and, as the reviewer notes, in Kosson
 et al.
 
-**New.** We claim three things, and we have rewritten the contribution statement
-to say only these.
+**New, after the training-length test.** We claim less than the submission did,
+and we have rewritten the contribution statement accordingly.
 
-1. **The cost side of weight decay.** Existing accounts explain why the product
-   should be held roughly constant. None of them supplies the accompanying
-   constraint that weight decay *tightens* the admissible learning rate, here
-   `eta <= 2/(2*lambda + L)` for SGD-WD and `eta <= 2/(2*lambda + L*Gamma_beta)`
-   with momentum. This is what turns a one-dimensional band into a two-sided
-   region, and it makes a prediction the band picture does not: accuracy must
-   fall off along a line of constant `eta*lambda`. We measure this in a new
-   experiment; the drop is `[[E2B-ISO-DROP]]` points.
-2. **One derivation for four couplings.** Learning rate, weight decay, batch
-   size and training length fall out of the same stability argument rather than
-   being four separately motivated empirical rules. We think this is worth
-   something even where individual endpoints are known, but we now say
-   explicitly that the value is unification, not rediscovery.
-3. **A falsifiable discriminator against the equilibrium account** (see Q2 and
-   the next section).
+1. **The cost side of weight decay, at fixed training length.** Existing
+   accounts explain why the product should be held roughly constant. The
+   stability analysis also supplies a one-sided constraint the product picture
+   alone does not: weight decay tightens the admissible learning rate. The
+   testable consequence is that accuracy falls along a line of constant
+   `eta*lambda`. We measure this; the drop is `10.3` points.
+2. **A negative result on the timescale claim.** Matching stability upper
+   bounds suggested `lambda ∝ 1/T`. We ran the discriminator against the
+   equilibrium account (next section); the measurement lands closer to Kosson
+   et al. than to us. The paper's contribution type is Negative Results; we
+   report the finding in those terms.
 
 We would rather state this honestly than claim more. If the reviewer's view is
-that unification plus one new constraint is insufficient for the bar, that is a
-judgement we understand; we have at least removed the ambiguity about what is
-being claimed.
+that a cost-side constraint plus a negative result on the timescale is
+insufficient for the bar, that is a judgement we understand; we have at least
+removed the ambiguity about what is being claimed, and we have stopped
+defending a prediction the data reject.
 
 ## Q2. There are many versions of this relationship; some proportionality, some a precise law. Which is it?
 
 Proportionality is what the analysis supports; the constant is not predicted and
 we now say so in those words.
 
-Concretely, the exponents are stable and measurable, and the constant is neither:
+Concretely, after the new measurements:
 
-- `log lambda*` against `log eta`: slope **-0.87, 95% interval [-0.94, -0.75]**
-  (dense 8 x 9 grid, ResNet-18 / CIFAR-100, two seeds).
-- `log lambda*` against `log T`: slope `[[E1-T-SLOPE]]`, interval
-  `[[E1-T-CI]]` (new experiment).
-- The constant: fitting `C = lambda* * sum_t eta_t` in 65 independent settings
-  spanning three architectures, five batch sizes, two seeds and learning rates
-  from 0.001 to 0.5 gives a geometric mean of **1.48 with a multiplicative
-  spread of x/1.70** (range 0.17 to 2.99). By architecture: ResNet-18 1.42,
-  ResNet-50 1.42, VGG-16 1.72.
+- `log lambda*` against `log eta` (fixed `T = 100`): slope **-0.87, 95%
+  interval [-0.94, -0.75]** — this exponent is real at fixed training length.
+- `log lambda*` against `log T` (fixed `eta = 0.1`, dense ladder): slope
+  `-0.226`, interval `[-0.28, -0.17]`. Grid argmax is `10^{-3}` at every
+  `T ∈ {25, 50, 100, 200}`. This is **incompatible with slope -1** and close
+  to the equilibrium prediction of 0. We withdraw `lambda ∝ 1/T` as an
+  empirical claim in this regime.
+- The prefactor `C = lambda* * sum_t eta_t`, fitted at fixed `T = 100` across 65
+  settings, has geometric mean **1.48 with spread x/1.70**. Because `lambda*`
+  does not fall with `T`, the same `C` is *not* stable across training
+  lengths — that is the content of the negative result above.
 
-So the honest statement of our result is a scaling relation with a
-setting-dependent prefactor of order one, calibrated once. Papers that state a
-precise law are, we believe, reporting the prefactor of their own setting. We
-now report the spread instead of a single number, and we measure what a wrong
-prefactor costs: being off by 3x costs `[[E5B-3X]]` points and by 10x costs
-`[[E5B-10X]]`.
+So the honest statement is: at fixed training length the `eta`--`lambda`
+coupling is a real scaling with a setting-dependent prefactor; across training
+lengths a constant-product rule is the better guide. Being wrong by 3× in
+`lambda` at fixed `T` costs `[[E5B-3X]]` points; by 10×, `[[E5B-10X]]`.
 
 ---
 
@@ -87,27 +84,22 @@ It is worth being precise about where the two differ, because Kosson et al. are
 careful about this themselves: theirs is a **steady-state** statement, and they
 explicitly note that `(eta, lambda)` pairs with equal products behave
 differently during the initial phase, with high-`lambda` pairs acting as an
-implicit warmup (arXiv:2510.19093, Sec. 5). So the pure product picture is
-already known to be incomplete in the transient. Our departure from it is a
-different one, and it concerns the end of training:
-
-- Rotational equilibrium describes a stationary state reached after a
-  transient, and carries no dependence on the training horizon. The optimal
-  `eta*lambda` it predicts therefore does not move with `T`.
-- Our stability argument bounds how far a trajectory can be driven from a
-  neighbouring one over `T` steps, so it predicts `eta*lambda ∝ 1/T`.
+implicit warmup (arXiv:2510.19093, Sec. 5). Our stability argument made a
+different departure, predicting `eta*lambda ∝ 1/T` from the horizon dependence
+of uniform stability.
 
 Every experiment in the submission was at 100 epochs, which is precisely why the
-paper could not tell these apart -- a fair reading of the reviewer's novelty
-concern. We have now run the training-length sweep: at fixed `eta = 0.1` and
-`B = 128`, with `T` in {25, 100, 200} on ResNet-18 / CIFAR-100, the optimal
-product moves by a factor of `[[E1-PRODUCT-DRIFT]]`, with fitted slope
-`[[E1-T-SLOPE]]` against `log T` (interval `[[E1-T-CI]]`).
+paper could not tell these apart -- a fair reading of the novelty concern. We
+have now run the training-length sweep. The result favours their account on
+this axis: grid `lambda* = 10^{-3}` at every `T`, interpolated slope
+`-0.226` `[-0.28, -0.17]`, product drift only `1.62x in eta*lambda (T=25 to T=200; prediction ours=8x, equilibrium=1x)`. We
+say so directly and reframe the related work accordingly.
 
-We also note that the equilibrium mechanism relies on scale invariance, i.e. on
-normalization layers. Our ablation on networks without normalization
-(`[[E7-BN]]`) tests whether the coupling persists where that mechanism does not
-apply.
+What we still add, and where a pure product rule is incomplete even on their
+terms: walking along a line of constant `eta*lambda` over two decades of `eta`
+costs up to `10.3` points (E2b). The product pins a band; it does
+not pin the pair. Our ablation without normalization (`[[E7-BN]]`) remains the
+test of whether any of this coupling survives where scale invariance fails.
 
 ## 2. The Qwen LoRA experiment
 

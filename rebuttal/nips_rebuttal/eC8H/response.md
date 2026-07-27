@@ -14,9 +14,12 @@ challenge in the whole review set. We address it first, with new experiments.
 The reviewer's argument is that if `lambda * eta` should scale as `1/T`, then
 one can fix `lambda`, tune `eta`, and never think about weight decay again.
 
-This is correct at a *fixed* training length and *fixed* everything else, and we
-should have said so. It stops being correct as soon as either changes, for two
-distinct reasons. We now have measurements for both.
+We take this in two parts. First: even at fixed training length, fixing
+`lambda` and tuning only `eta` is *not* equivalent to tuning both — that is
+1a and 1b below, and those measurements stand. Second: the submitted paper
+suggested the coupling also moves with `T`. We tested that directly (1c); the
+`1/T` dependence is **not** supported, and we report that as a negative
+result rather than lean on it.
 
 ### 1a. A fixed weight decay cannot track the best achievable accuracy
 
@@ -45,8 +48,8 @@ give slope 0.
 
 If only the product mattered, one could slide along `eta * lambda = const` at no
 cost. Experiment E2b walks that line over two decades of `eta`, holding the
-product at its optimal value. Accuracy falls by `[[E2B-ISO-DROP]]` points at the
-ends, staying within one point of its peak only over `[[E2B-ISO-RANGE]]`.
+product at its optimal value. Accuracy falls by `10.3` points at the
+ends, staying within one point of its peak only over `a factor of 5 in eta`.
 
 The reason is that the product is not the only constraint. Our analysis gives a
 *second*, one-sided constraint that prior work does not: weight decay tightens
@@ -55,18 +58,23 @@ make progress within the budget; large `eta` crosses that boundary. The good
 region is the intersection of a band and a ceiling, which is two-dimensional
 information, so two knobs are genuinely needed.
 
-### 1c. The training length is the case where a fixed `lambda` is simply wrong
+### 1c. Training length: a negative result on `λ ∝ 1/T`
 
-See the shared point S1: at fixed `eta = 0.1`, varying `T` over {25, 100, 200}
-moves the optimal weight decay from `[[E1-T-LAMBDA-25]]` to
-`[[E1-T-LAMBDA-200]]`, with fitted slope `[[E1-T-SLOPE]]` against `log T`
-(95% interval `[[E1-T-CI]]`). A practitioner who changes the epoch budget and
-leaves `lambda` at its default is off by that factor, and compensating through
-`eta` alone is exactly the move that 1b shows is not free.
+The submitted paper implied that the optimum should move as `1/T`. We ran the
+missing sweep (ResNet-18 / CIFAR-100, `η = 0.1`, dense `λ` ladder,
+`T ∈ {25, 50, 100, 200}`). The grid argmax is `λ* = 10^{-3}` at every `T`.
+Interpolated slope of `log λ*` against `log T`: `-0.226`, 95% interval
+`[-0.28, -0.17]` (optima `0.0012` / `0.000877` /
+`0.000737`). The optimal product moves by only
+`1.62x in eta*lambda (T=25 to T=200; prediction ours=8x, equilibrium=1x)`, against 8× predicted by `λ ∝ 1/T`.
 
-We have rewritten the limitation section around this: the claim is not that
-`lambda` must be tuned by grid search, it is that `lambda` must *move*, and our
-rule says where to move it without any search.
+So on the training-length axis the reviewer's redundancy concern is closer to
+right than our submission was: a fixed `λ` near `10^{-3}` tracks the optimum
+across this range of `T`, and the data favour a constant-product picture
+(Kosson et al.) over a timescale picture. We have rewritten the limitation
+section around 1a–1b (why `λ` is still not absorbed into `η` at fixed `T`) and
+we explicitly withdraw the `1/T` claim as an empirical prediction in this
+regime.
 
 ---
 
@@ -125,10 +133,12 @@ under test: `lambda*` scales as `(1-beta)` (measured slope
 
 ## 4. Summary of changes
 
-- New training-length experiment establishing the `1/T` dependence (S1).
-- New envelope analysis quantifying what a fixed weight decay costs (1a).
-- New iso-product experiment showing the product is not sufficient (1b).
-- New empirical stability probe in a deep network (2).
+- New training-length experiment: **negative** for `λ ∝ 1/T` (1c); we report it
+  as such and withdraw that prediction.
+- Envelope analysis quantifying what a fixed weight decay costs at fixed `T` (1a).
+- Iso-product experiment showing the product alone is not sufficient (1b): drop
+  of `10.3` points.
+- Empirical stability probe in a deep network (2).
 - Momentum analysis and a new momentum arm with train-test gaps (3).
-- The limitation section rewritten so that it states the scope of the redundancy
-  argument accurately instead of overclaiming.
+- Limitation section rewritten: `λ` is not absorbed into `η` at fixed `T`, but
+  it also does not need to track `T` the way the submission claimed.

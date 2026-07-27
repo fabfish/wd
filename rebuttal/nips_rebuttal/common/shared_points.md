@@ -3,56 +3,71 @@
 Reusable text. Each reviewer only sees their own response, so repeating these is
 expected; keeping one copy here is so the versions do not drift apart.
 
+**Status note (2026-07-27).** Experiment E1 is in. The training-length
+discriminator that several of these blocks previously framed as decisive came
+out against our `λ ∝ 1/T` prediction and closer to the rotational-equilibrium
+account. The drafts below have been rewritten around that fact. Do not paste an
+older version that still claims a slope of -1.
+
 ---
 
-## S1. The one experiment the paper was missing
+## S1. The training-length experiment (negative for λ ∝ 1/T)
 
 Every experiment in the submission was run at a single training length of 100
-epochs. That is the reason several of the criticisms land, and we have now
-fixed it.
+epochs. At fixed `T`, our rule `λ* = C/(η T)`, a constant-product rule
+`η λ = const`, and a well-chosen fixed `λ` are numerically hard to tell apart.
+They make opposite predictions once `T` varies:
 
-At fixed `T`, the following three rules are numerically indistinguishable:
+- ours: `log λ*` against `log T` has slope -1
+- constant product (Kosson et al.): slope 0
 
-- ours, `lambda* = C / (eta * T)`
-- a constant optimal product, `eta * lambda = const`
-- a well-chosen fixed `lambda` combined with tuning `eta`
+We therefore ran the missing sweep: ResNet-18 / CIFAR-100, SGDM, `η = 0.1`,
+`B = 128`, cosine schedule, dense weight-decay ladder
+`{1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2}`, and `T ∈ {25, 50, 100, 200}`,
+all from one code path.
 
-They stop being indistinguishable the moment `T` varies, and they make
-*opposite* predictions:
+**Result.** The grid argmax is `λ* = 10^{-3}` at every training length. The
+log-parabola interpolation gives slope `-0.226` with 95% bootstrap
+interval `[-0.28, -0.17]`, and interpolated optima
+`0.0012` / `0.000877` / `0.000737` at
+`T = 25/100/200`. The optimal product `η λ*` moves by only
+`1.62x in eta*lambda (T=25 to T=200; prediction ours=8x, equilibrium=1x)`, against an 8× movement predicted by `λ ∝ 1/T`.
 
-- ours: `log lambda*` falls with slope -1 against `log T`
-- constant product: slope 0
-- fixed `lambda`: slope 0, and `eta*` must absorb the change instead
+We treat this as a **negative result** against the `1/T` discriminator that the
+submission implied and that our rebuttal set out to test. On this axis the data
+are much closer to the rotational-equilibrium account than to ours. The paper's
+stated contribution type is Negative Results; we will report the finding in
+those terms rather than retrofit the theory.
 
-We therefore ran a training-length sweep on ResNet-18 / CIFAR-100 at fixed
-`eta = 0.1`, `B = 128`, with `T` in {25, 100, 200} and a weight-decay ladder
-that lines up exactly with the existing 100-epoch grid. The measured slope is
-`[[E1-T-SLOPE]]` with 95% bootstrap interval `[[E1-T-CI]]`, and the optimal
-weight decay moves from `[[E1-T-LAMBDA-25]]` at `T = 25` to
-`[[E1-T-LAMBDA-200]]` at `T = 200`.
+What the same sweep still shows: the accuracy peak in `λ` is broad but real
+(moving from `5e-4` to `5e-3` costs several points at every `T`), so weight
+decay continues to matter — it just does not move with `T` the way a
+stability-timescale argument predicts.
 
 ---
 
 ## S2. Restating the law in terms of the summed step size
 
-We adopt a change of statement that removes an inconsistency Reviewer SijV
-correctly spotted (Eq. 16 says `1/(eta*T)`, the conclusion says `2/(eta*T)`).
+We still adopt a change of statement that removes an inconsistency Reviewer
+SijV correctly spotted (Eq. 16 says `1/(η T)`, the conclusion says `2/(η T)`).
 
-The quantity the coupling is really about is the total step budget
+The natural quantity is the total step budget
 
-    S = sum_{t<T} eta_t
+    S = sum_{t<T} η_t
 
-so that the law reads
+so that a timescale rule would read `λ* = C / S`. For constant step size
+`S = η T`; for cosine annealing to zero, stepped once per epoch,
+`sum_{k<T} ½(1 + cos(π k/T)) = (T+1)/2`, so `S = η T/2` and the same rule
+reads `2C/(η T)`. The stray factor of two was a schedule difference, not a
+typo.
 
-    lambda* = C / S.
-
-For a constant schedule `S = eta*T`. For cosine annealing to zero, stepped once
-per epoch, `sum_{k<T} 0.5*(1 + cos(pi*k/T)) = (T+1)/2`, so `S = eta*T/2` and the
-same law reads `lambda* = 2C/(eta*T)`. The stray factor of two was the
-difference between a constant and a decayed schedule, not a typo, and writing
-the law in terms of `S` removes the ambiguity. It also yields a prediction we
-test directly: at matched `eta` and `T`, a constant-LR run should prefer half
-the weight decay of a cosine run. Measured ratio: `[[E1-SCHED-RATIO]]`.
+E1 changes what we claim about this form: because `λ*` did not scale as `1/S`
+in the sweep above, we no longer present `λ* = C/S` as an empirically supported
+coupling across training lengths. We keep the `S`-based statement only as the
+correct reading of the *submitted* equations, and as the form that makes the
+schedule ambiguity disappear. The constant-LR vs cosine prediction
+(`[[E1-SCHED-RATIO]]`) remains a test of that bookkeeping and is reported
+separately.
 
 ---
 
@@ -63,106 +78,108 @@ We were wrong to omit this line of work and now discuss it explicitly
 
 Kosson et al. analyse scale-invariant parameters, where the weight norm reaches
 an equilibrium at which weight decay shrinkage balances gradient growth. The
-equilibrium norm goes as `sqrt(eta/lambda)` and the magnitude of the relative
-update in the steady state depends only on the product `eta*lambda`, which is
-why the recommendation is to hold `eta*lambda` constant.
+equilibrium norm goes as `√(η/λ)` and the relative update in the steady state
+depends on the product `η λ`, which is why the recommendation is to hold
+`η λ` constant. That account is a *steady-state* statement and carries no
+dependence on the training horizon.
 
-The two accounts are complementary rather than competing. It is worth being
-precise about where they differ, because Kosson et al. are themselves careful
-here: their claim is a *steady-state* one, and they explicitly observe that
-`(eta, lambda)` pairs with the same product behave differently during the
-initial phase, with high-`lambda` pairs acting like an implicit warmup
-(arXiv:2510.19093, Sec. 5). So the product picture is already known not to be
-the whole story in the transient.
+Our rebuttal was designed to separate the two accounts by varying `T`. The
+measurement (S1) lands on their side of that particular question: the optimal
+product barely moves across an 8× range in `T`. We say so directly, and we
+reframe the related-work discussion accordingly: on the training-length axis,
+rotational equilibrium is the better guide to the optimum we measure.
 
-Our claim is a different departure from the product picture, and it concerns the
-end of training rather than the beginning:
+Two points of contact remain where the accounts are not the same claim, and
+where our measurements still add something:
 
-- The equilibrium argument describes a stationary state reached after a
-  transient, and carries no dependence on the training horizon. It therefore
-  predicts an optimal `eta*lambda` that does not move with `T`.
-- Our stability argument bounds how far the iterate can be driven from a
-  neighbouring trajectory over `T` steps, so it predicts
-  `eta*lambda ∝ 1/T`.
+1. **Along a line of constant `η λ`, accuracy is not flat** (E2b). Holding the
+   product fixed and walking `η` over two decades costs up to
+   `10.3` points. A pure product rule is therefore necessary but
+   not sufficient for choosing the pair; the learning-rate ceiling and the
+   under-fitting floor both bite. Measured usable range within 1 point of the
+   peak: `a factor of 5 in eta`.
+2. **A fixed default `λ` is dominated by the envelope** (E2a, from data already
+   in the submission). Coupling `λ` to `η` at fixed `T` keeps accuracy within
+   2.8 points across two decades of learning rate; `λ = 5e-4` gives up 1.44
+   points on average and 3.77 at worst, and no fixed choice does better than
+   3.77 worst-case.
 
-Experiment E1 measures this directly: the optimal product moves by a factor of
-`[[E1-PRODUCT-DRIFT]]` between `T = 25` and `T = 200`, where the equilibrium
-account predicts no movement at all.
-
-We also note that the equilibrium mechanism requires scale invariance, i.e.
-normalization layers. Our ablation without normalization (`[[E7-BN]]`) tests
-whether the coupling survives where the equilibrium argument does not apply.
+So the correction E1 forces is specific: we withdraw the claim that the
+optimum moves as `1/T`. We do not withdraw the claim that weight decay is a
+load-bearing, non-redundant hyperparameter, nor the claim that the product
+alone does not pin down the pair.
 
 ---
 
 ## S4. Honest accounting of what is new
 
-Asked directly, our view is:
+Asked directly, our view after E1 is:
 
-**Not new.** The stability machinery is Hardt et al.'s. That a strongly convex
-regularizer converts an `O(eta*T/n)` stability bound into a `T`-independent one
-is a standard consequence. The resulting `lambda ~ 1/(eta*T)` coincides
-numerically with Wang and Aitchison's AdamW-as-EMA timescale. The observation
-that good `(eta, lambda)` pairs lie on a band is in D'Angelo et al. and in
-Kosson et al.
+**Not new, and in one place wrong as a prediction.** The stability machinery is
+Hardt et al.'s. That a strongly convex regularizer converts an `O(η T/n)`
+stability bound into a `T`-independent one is standard. The resulting
+`λ ~ 1/(η T)` coincides with Wang and Aitchison's AdamW-as-EMA timescale, and
+our direct test of that `1/T` dependence on ResNet-18 / CIFAR-100 fails
+(S1). The observation that good `(η, λ)` pairs lie on a band is in D'Angelo et
+al. and in Kosson et al.; the band's weak dependence on `T` is what E1 finds,
+in line with Kosson.
 
-**New.** Three things.
+**What we still claim.**
 
-1. The *cost* side of weight decay. Prior work explains why `eta*lambda` should
-   be held roughly constant; none of it gives the accompanying constraint that
-   weight decay tightens the admissible learning rate to
-   `eta <= 2/(2*lambda + L)`. That constraint is what makes the coupling a
-   two-sided one rather than a one-dimensional band, and it is what E2b
-   measures.
-2. A single derivation that produces the learning-rate, weight-decay, batch-size
-   and training-length couplings together, from one stability argument, rather
-   than as four separate empirical rules.
-3. The `1/T` dependence as a *falsifiable* discriminator against the
-   equilibrium account, which we now test (S1, S3).
+1. **The cost side of weight decay, at fixed training length.** Prior work
+   explains why `η λ` should be held roughly constant. The stability analysis
+   also supplies a one-sided constraint that the product picture alone does
+   not: weight decay tightens the admissible learning rate. E2b measures the
+   consequence — accuracy falls along an iso-product line.
+2. **Weight decay is not absorbed into tuning `η`.** The envelope analysis
+   (E2a) quantifies what a fixed default costs against a `λ` that is allowed
+   to move with `η`.
+3. **A negative result on the timescale claim.** Matching stability upper
+   bounds suggested `λ ∝ 1/T`; the measurement says otherwise in this regime.
+   We report that rather than defend it.
 
-We have rewritten the contribution statement to say this plainly rather than
-leaving the reader to work out the overlap.
+We have rewritten the contribution statement to say this plainly.
 
 ---
 
 ## S5. What the theory claims outside the convex setting
 
-We agree the convex, `L`-smooth analysis does not transfer as a theorem. What we
-claim is that two of its structural predictions are measurable in deep networks,
-and we now measure them.
+We agree the convex, `L`-smooth analysis does not transfer as a theorem. After
+E1 and E3 we are more specific about what survives measurement.
 
-1. **The learning-rate ceiling.** The bound `eta <= 2/(2*lambda + L)` rearranges
-   to `1/eta_max = lambda + L/2`, a straight line in `lambda` whose intercept is
-   an effective smoothness. Experiment E3 locates the empirical divergence
-   threshold by bisection for seven weight decays and finds slope
-   `[[E3-SLOPE]]` and intercept `[[E3-INTERCEPT]]`, against a top Hessian
-   eigenvalue of `[[E3-LMAX]]` measured by power iteration.
-2. **The stability mechanism itself.** Experiment E7a trains pairs of networks on
-   datasets differing in exactly one example and tracks
-   `||theta_t - theta'_t||`. Without weight decay this grows with `t`; with
-   weight decay the theory says it saturates. Measured ratio at the end of
-   training: `[[E7-DIVERGENCE-RATIO]]`.
+1. **The learning-rate ceiling.** True NaN-divergence thresholds are clean at
+   `λ = 0` and tighten once momentum is added (`[[E3-MOM-RATIO]]` against a
+   prediction of `1-β = 0.1`). At large positive `λ`, however, training fails
+   by under-fitting (loss stuck at `log #classes`) long before it explodes, so
+   the linear test `1/η_max = λ + L/2` is not cleanly identified in that
+   regime. We report the explosion brackets we have (`[[E3-SLOPE]]`,
+   `[[E3-INTERCEPT]]`) and state this limitation explicitly rather than claim
+   a slope-1 verification.
+2. **The stability mechanism itself.** Experiment E7a (leave-one-out trajectory
+   pairs) remains the direct probe of whether weight decay saturates
+   `‖θ_t - θ'_t‖`. Status: `[[E7-DIVERGENCE-RATIO]]`.
 
-What we do not claim: that the constant `C` is predicted by the theory. It is
-fitted once (see S6), and the paper now says so in those words.
+What we do not claim: that the constant `C` is predicted by the theory, or that
+`λ* = C/S` holds across training lengths (see S1).
 
 ---
 
 ## S6. The constant, and how much it matters
 
-The exponents come from the analysis; the constant does not. We therefore
-measured it rather than asserting it.
+The Wave-0 estimate of `C = λ* · S` was taken entirely at fixed `T = 100`.
+Fitting it in 65 settings (three architectures, five batch sizes, two seeds)
+gave a geometric mean of `C = 1.48` with multiplicative spread x/1.70. That
+number is still the right summary of *cross-architecture, cross-batch*
+variation at fixed training length.
 
-Fitting `C = lambda* * S` independently in 65 settings that already exist in our
-sweeps -- three architectures (ResNet-18, ResNet-50, VGG-16), five batch sizes
-(32 to 512), learning rates from 0.001 to 0.5, two seeds -- gives a geometric
-mean of `C = 1.48` with a multiplicative spread of x/1.70 and a full range of
-0.17 to 2.99. By architecture: ResNet-18 1.42, ResNet-50 1.42, VGG-16 1.72.
+E1 changes the interpretation across `T`: because `λ*` stays near `10^{-3}`
+while `S` grows with `T`, the implied `C` grows roughly in proportion to `T`
+rather than staying constant. So `C` is not a universal constant of the
+training horizon; treating it as one is exactly the mistake E1 exposes.
 
-The practical question is not how tight that spread is but how much a wrong `C`
-costs. Experiment E5b sweeps `C` deliberately wrong by factors of 3 and 10:
-being off by 3x costs `[[E5B-3X]]` accuracy points, and by 10x costs
-`[[E5B-10X]]`. This is the sense in which the rule is usable: the optimum in
-`lambda` is broad, so an order-of-magnitude-correct prediction captures most of
-the available accuracy, while a fixed default does not, because it is wrong by a
-factor that *grows* with the mismatch in `eta` and `T`.
+The practical question that remains well-posed is how much a wrong `λ` costs
+*at fixed `T`*. Experiment E5b sweeps the multiplier around a calibrated value:
+being off by 3× costs `[[E5B-3X]]` points, and by 10× costs `[[E5B-10X]]`.
+Combined with E2a, this is the sense in which a product-style rule (or even a
+decent fixed default) can be useful within a fixed training length, while a
+`1/T` extrapolation across training lengths is not.

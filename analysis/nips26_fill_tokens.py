@@ -46,10 +46,27 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--write', action='store_true',
                         help='actually edit the drafts (default: dry-run)')
+    parser.add_argument('--only', type=str, default='',
+                        help='comma-separated token prefixes to fill '
+                             '(e.g. E1,E2B). Empty = all resolved.')
+    parser.add_argument('--skip', type=str, default='',
+                        help='comma-separated token prefixes to skip '
+                             '(e.g. E4)')
     args = parser.parse_args()
 
     resolved = load_resolved()
-    print(f"{len(resolved)} resolved tokens available")
+    only = [p.strip().upper() for p in args.only.split(',') if p.strip()]
+    skip = [p.strip().upper() for p in args.skip.split(',') if p.strip()]
+
+    def allowed(token):
+        if skip and any(token.startswith(p) for p in skip):
+            return False
+        if only and not any(token.startswith(p) for p in only):
+            return False
+        return True
+
+    resolved = {k: v for k, v in resolved.items() if allowed(k)}
+    print(f"{len(resolved)} resolved tokens selected")
     for token, value in sorted(resolved.items()):
         print(f"  [[{token}]] = {value}")
 

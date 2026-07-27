@@ -22,20 +22,22 @@ is:
 - the exponents are derived, and are falsifiable;
 - the prefactor `C` is not derived, and is calibrated once from data.
 
-We have restated Section 5 as a heuristic with a derived exponent and a fitted
+We have restated Section 5 as a heuristic with derived exponents and a fitted
 constant, replacing the language that implied an optimality result. The
-compensating move is that we now *test* the exponents rather than only the
-qualitative band:
+compensating move is that we now *test* the exponents, including the one that
+fails:
 
-- `log lambda*` against `log eta`: slope **-0.87 [-0.94, -0.75]** on a dense
-  8 x 9 grid, two seeds.
-- `log lambda*` against `log T`: slope `[[E1-T-SLOPE]]` `[[E1-T-CI]]`, from a
-  new training-length sweep that the submission was missing entirely.
+- `log lambda*` against `log eta` (fixed `T`): slope **-0.87 [-0.94, -0.75]**
+  on a dense 8 x 9 grid, two seeds — holds.
+- `log lambda*` against `log T` (fixed `eta`): slope `-0.226`
+  `[-0.28, -0.17]` on a dense ladder over `T ∈ {25, 50, 100, 200}` — **fails**
+  relative to the predicted -1; grid argmax is identical at every `T`. We
+  report this as a negative result.
 - `log eta*` against `log(1-beta)`: slope 0.72 [0.58, 0.93] with weight decay.
 
-A heuristic that makes three quantitative predictions, each of which can fail,
-is a different object from one that only draws a band, and we have reorganised
-the paper around that distinction.
+A heuristic that states falsifiable exponents and then reports which of them
+survive is, we think, a different object from one that only draws a band, and
+we have reorganised the paper around that distinction.
 
 ## Q2. Novelty against AdamW timescales, batch-size scaling, and learning-rate-aware weight decay
 
@@ -44,17 +46,16 @@ Direct comparison, on assumptions, formula, and prediction:
 - **Wang and Aitchison (AdamW as EMA).** Assumption: AdamW's update is an
   exponential moving average with timescale `1/(eta*lambda)`; the timescale
   should match the training horizon. Formula: `lambda = 1/(eta*T)`. Prediction:
-  identical exponents to ours in `eta` and `T`. Difference: their argument is
-  specific to the EMA reading of decoupled AdamW and says nothing about the
-  batch size or about an admissible learning rate. Ours reaches the same
-  exponents for plain SGD and SGDM, where no EMA interpretation exists, and adds
-  the two items below.
+  identical exponents to ours in `eta` and `T`. Our training-length sweep
+  rejects that `1/T` dependence in this regime (slope `-0.226`); we
+  therefore no longer present Wang--Aitchison as independently confirmed by
+  our vision experiments, only as the closest formal cousin of the submitted
+  claim.
 - **Kosson et al. (rotational equilibrium).** Assumption: scale-invariant
   parameters reach an equilibrium norm. Formula: hold `eta*lambda` constant.
-  Prediction: **no dependence on `T`**, because an equilibrium is stationary.
-  This is the sharpest available difference from our account, and the new
-  training-length experiment tests it: measured slope `[[E1-T-SLOPE]]` where the
-  equilibrium account predicts 0.
+  Prediction: **no dependence on `T`**. This is the account our
+  training-length sweep supports: measured slope `-0.226`
+  `[-0.28, -0.17]` against their 0 and our -1. We say so directly.
 - **Batch-size scaling laws (McCandlish et al.; Bergsma et al.).** Assumption:
   gradient noise scale controls the useful batch size. Formula: `lambda` grows
   with `B`. Prediction: agrees with ours in direction. Difference: in our
@@ -142,9 +143,11 @@ error grows with the mismatch in `eta` and `T`, while ours does not.
 
 The reviewer's summary was that the contribution is "a unifying stability-based
 explanation rather than a fundamentally new hyperparameter law". After this
-round we would not dispute that framing, and we have rewritten the paper to
-claim it rather than more. What we would add is that the unification now comes
-with a prediction that separates it from the closest prior account (the `1/T`
-dependence, absent from the equilibrium picture), a constraint that prior
-accounts do not supply (the learning-rate ceiling, tested in Q4), and a
-comparison showing what the rule is worth against the alternatives (Q3).
+round we would not dispute that framing, and we go further: the one prediction
+that would have separated us from the closest prior account (`λ ∝ 1/T`) fails
+the training-length test, and we report that as a negative result. What we
+retain is the cost-side constraint (accuracy is not flat along an iso-product
+line: `10.3` points), the envelope evidence that a fixed default is
+dominated at fixed `T`, and a head-to-head transfer comparison (Q3) in which
+the constant-product rule is the strongest baseline once `T` varies — consistent
+with E1.

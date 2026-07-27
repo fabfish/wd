@@ -30,19 +30,20 @@ resulting `lambda ~ 1/(eta*T)` coincides with Wang and Aitchison's AdamW
 timescale. We have rewritten the contribution statement to say this rather than
 leaving the overlap for the reader to find.
 
-What we retain as new is narrower, and one part of it is newly testable. Prior
-accounts explain why the product should be held constant; none supplies the
-accompanying constraint that weight decay tightens the admissible learning rate,
-`eta <= 2/(2*lambda + L)`. And the two accounts disagree in one measurable
-place: rotational equilibrium is a statement about a stationary state and
-therefore predicts `eta*lambda = const` independent of the training horizon,
-while our stability argument predicts `eta*lambda ∝ 1/T`.
+What we retain is narrower, and one part of the submitted claim is now a
+**negative result**. Prior accounts explain why the product should be held
+constant; the stability analysis also supplies a one-sided constraint that the
+product picture alone does not (`eta <= 2/(2*lambda + L)`), with the testable
+consequence that accuracy falls along an iso-product line (measured drop
+`10.3` points). The two accounts disagree on training length:
+equilibrium predicts `eta*lambda = const`, our argument predicted
+`eta*lambda ∝ 1/T`.
 
-Every experiment in the submission was run at 100 epochs, which is exactly why
-the paper could not tell these apart. We have now run the training-length sweep:
-ResNet-18 / CIFAR-100, `eta = 0.1`, `B = 128`, `T` in {25, 100, 200}. Fitted
-slope of `log lambda*` against `log T`: `[[E1-T-SLOPE]]`, 95% bootstrap interval
-`[[E1-T-CI]]`, where the equilibrium account predicts 0 and ours predicts -1.
+We ran that discriminator: ResNet-18 / CIFAR-100, dense `lambda` ladder,
+`T ∈ {25, 50, 100, 200}`. Fitted slope `-0.226`, interval
+`[-0.28, -0.17]`; grid argmax identical at every `T`. The data favour Kosson et
+al. on this axis. We report the finding as a negative result against the
+submitted `1/T` claim and reframe the related work accordingly.
 
 ## 2. "The theoretical analysis may not support the experiments; it relies on assumptions such as L-smoothness"
 
@@ -51,14 +52,14 @@ as a theorem, and we have scoped the claim accordingly. Rather than assert that
 it transfers, we now measure the two structural predictions that can be checked
 directly.
 
-**The learning-rate ceiling.** The bound rearranges to `1/eta_max = lambda +
-L/2`, a straight line in `lambda` whose intercept identifies an effective
-smoothness. We locate the empirical divergence threshold by bisection in `eta`
-for seven weight decays, for SGD and for SGDM. Measured slope `[[E3-SLOPE]]`
-against a prediction of 1; intercept `[[E3-INTERCEPT]]` against a top Hessian
-eigenvalue of `[[E3-LMAX]]` obtained independently by power iteration; and the
-momentum ceiling scaling with `(1-beta)`, measured `[[E3-MOM-RATIO]]` against a
-prediction of 0.1.
+**The learning-rate ceiling.** We locate empirical thresholds by bisection in
+`eta`, counting only NaN/explosion (not under-fitting: at large `lambda` the
+loss sticks at `log #classes` without diverging, which is not the L-smooth
+ceiling). Explosion brackets are clean at `lambda = 0` and tighten with
+momentum (`[[E3-MOM-RATIO]]` against a prediction of 0.1). At large positive
+`lambda` the slope-1 test `1/eta_max = lambda + L/2` is not cleanly identified;
+we report what we have (`[[E3-SLOPE]]`, `[[E3-INTERCEPT]]`, Hessian
+`[[E3-LMAX]]`) and state this limitation rather than claim a verification.
 
 **The stability mechanism itself.** We train pairs of networks on datasets
 differing in exactly one example, with identical initialization and batch
@@ -130,16 +131,15 @@ whether the coupling persists where that mechanism does not apply.
 
 ## What changed, in one place
 
-- New: training-length sweep (the `1/T` discriminator), zero-tuning transfer
-  comparison against four alternative rules, divergence-boundary measurement
-  with an independent Hessian estimate, empirical stability probe, momentum arm
-  with train-test gaps, prefactor-sensitivity sweep.
-- Reframed: the coupling law is stated in terms of the total step budget
-  `sum_t eta_t`, which also resolves the `1/(eta*T)` versus `2/(eta*T)`
-  inconsistency between Eq. 16 and the conclusion (it was a schedule difference,
-  not a typo); Section 5 is labelled a heuristic with a derived exponent and a
-  fitted constant; the contribution statement states the overlap with prior work
-  directly.
-- Demoted: the Qwen LoRA experiment is no longer offered as validation, since we
-  agree with Reviewer SijV that weight decay is not load-bearing at standard
-  LoRA settings.
+- New measurements: training-length sweep (**negative** for `λ ∝ 1/T`),
+  iso-product walk (accuracy not flat: `10.3` points), zero-tuning
+  transfer against four rules, explosion-boundary brackets, momentum arm,
+  prefactor sensitivity.
+- Reframed: contribution type Negative Results is now load-bearing — we
+  withdraw the `1/T` empirical claim and align the training-length axis with
+  Kosson et al.; we keep the cost-side / non-redundancy claims at fixed `T`.
+  The `sum_t eta_t` restatement resolves the `1/(eta*T)` vs `2/(eta*T)`
+  bookkeeping inconsistency (schedule difference, not a typo). Section 5 is
+  labelled a heuristic; related work states the overlap directly.
+- Demoted: Qwen LoRA is no longer offered as validation (SijV is right that WD
+  is not load-bearing at standard LoRA settings).
