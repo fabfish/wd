@@ -494,13 +494,15 @@ def build_e5b(csv_path=DEFAULT_CSV):
     If a factor of three error in C costs a fraction of a percent, then the rule
     is usable even though C is not predicted from first principles.
     """
-    from analysis.nips26_lib import fit_reference_C  # noqa: E402
+    from analysis.nips26_lib import fit_reference_C, sum_lr as exact_sum_lr  # noqa: E402
     C = fit_reference_C(csv_path)
     cfgs = []
     for (lr, T, B) in [(0.1, 100, 128), (0.1, 25, 128)]:
-        sum_lr = lr * T * (50000 / B) / 2.0  # cosine-to-zero halves the sum
+        # Exact cosine budget (was previously approximated as eta*T*(N/B)/2,
+        # which shifted planned factors {0.1,1/3,3,10} to ~{0.16,0.54,5,16}).
+        S = float(exact_sum_lr(lr, T, B, scheduler='cosine'))
         for factor in [0.1, 1.0 / 3.0, 3.0, 10.0]:
-            wd = C * factor / sum_lr
+            wd = C * factor / S
             cfgs.append(make_cfg('e5b', lr=lr, wd=float(f"{wd:.4g}"),
                                  epochs=T, batch_size=B))
     return cfgs

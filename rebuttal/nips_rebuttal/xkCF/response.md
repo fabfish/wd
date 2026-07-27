@@ -138,11 +138,14 @@ default's error grows with the mismatch in `eta` and `T`, while ours does not.
 **Across datasets and optimizers (E5c).** Wave-0 is all CIFAR-100 / SGDM. To
 cover the remaining axes in the question we repeat the Fig. 1 protocol on a
 3-layer MLP trained on MNIST (SGD and SGDM, cosine, no BatchNorm): fitted
-`C` under SGD is `[[E5C-C-SGD]]` and under SGDM is `[[E5C-C-SGDM]]`
-(cross-optimizer ratio `[[E5C-C-RATIO]]`); mis-specifying that `C` by 3× / 10×
-costs `[[E5C-3X]]` / `[[E5C-10X]]` (test-loss relative to the calibrated
-rule; see `[[E5C-FIG]]`). The practical claim is therefore: usefulness needs
-`C` stable to about a factor of two, not to 1%, and E5a+E5c support that.
+`C` under SGD is **0.44** and under SGDM is **0.32** (cross-optimizer ratio
+**1.38×**). Relative to the CIFAR Wave-0 geo-mean 1.48 this is still order-one
+(about a factor of 3–5), consistent with “stable to a small constant factor”
+rather than architecture-specific fine-tuning. Mis-specifying that MNIST
+`C` by 3× / 10× costs **0.018** / **0.083** in best test loss relative to the
+calibrated rule (see `outputs/plots/nips26/e5c_mnist_mlp_C.png`). The
+practical claim is therefore: usefulness needs `C` stable to about a factor
+of a few, not to 1%, and E5a+E5c support that.
 
 ---
 

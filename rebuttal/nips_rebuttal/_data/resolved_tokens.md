@@ -35,6 +35,14 @@ From 1116 runs (315 from this round).
 
 15 of 30 resolved.
 
+
+- `[[E5C-C-SGD]]` = 0.44
+- `[[E5C-C-SGDM]]` = 0.32
+- `[[E5C-C-RATIO]]` = 1.38x
+- `[[E5C-3X]]` = 0.018 test-loss
+- `[[E5C-10X]]` = 0.083 test-loss
+- `[[E5C-FIG]]` = outputs/plots/nips26/e5c_mnist_mlp_C.png
+
 ## Notes
 
 - E1 soft-peak slope -0.280 [-0.39, -0.14]; values {25: 0.001304, 50: 0.000993, 100: 0.000806, 200: 0.000732}
@@ -48,3 +56,4 @@ From 1116 runs (315 from this round).
 - E5b: 8 mis-specified runs analysed
 - E6b: 20 runs
 - E5b: factors landed near {0.16, 0.54, 5, 16} (approx S); do not fill 3x/10x tokens until exact sum_lr re-run. Undershoot cheap; overshoot asymmetric.
+- E5c MNIST-MLP: C_sgd=0.44, C_sgdm=0.32 (ratio 1.38x); wrong-C costs 0.018/0.083 test-loss at 3x/10x.

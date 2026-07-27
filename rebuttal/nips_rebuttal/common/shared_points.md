@@ -159,9 +159,9 @@ Sensitivity at fixed `T` on CIFAR: wrong by 3× costs `[[E5B-3X]]` points; by
 10×, `[[E5B-10X]]`.
 
 **E5c (dataset + optimizer).** Wave-0 does not vary the dataset or the
-optimizer family. We therefore re-run the Fig. 1 stability-boundary protocol
-on a 3-layer MLP / MNIST (no BN), fit `C` under SGD and SGDM
-(`[[E5C-C-SGD]]`, `[[E5C-C-SGDM]]`, ratio `[[E5C-C-RATIO]]`), and measure the
-cost of factors 3 and 10 (`[[E5C-3X]]`, `[[E5C-10X]]`; figure
-`[[E5C-FIG]]`). Usefulness needs order-of-magnitude `C`, which E5a+E5c
-support.
+optimizer family. We therefore re-ran the Fig. 1 stability-boundary protocol
+on a 3-layer MLP / MNIST (no BN), fitted `C` under SGD (**0.44**) and SGDM
+(**0.32**, ratio **1.38×** vs each other; ~3–5× below the CIFAR geo-mean
+1.48), and measured the cost of factors 3 and 10 as **0.018** / **0.083**
+in best test loss (`outputs/plots/nips26/e5c_mnist_mlp_C.png`). Usefulness
+needs order-of-magnitude `C`, which E5a+E5c support.

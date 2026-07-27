@@ -31,12 +31,12 @@ value of every token that can already be resolved.
 | `[[E4-WANG-MEAN]]` | E4 | mean gap to oracle, `1/(eta*T)` | pending |
 | `[[E5B-3X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 3 | pending (factor mis-calibrated) |
 | `[[E5B-10X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 10 | pending (factor mis-calibrated) |
-| `[[E5C-C-SGD]]` | **E5c** MNIST-MLP | fitted C under SGD (mom=0) | pending |
-| `[[E5C-C-SGDM]]` | **E5c** MNIST-MLP | fitted C under SGDM (mom=0.9) | pending |
-| `[[E5C-C-RATIO]]` | E5c | max(C)/min(C) across SGD/SGDM (vs E5a range) | pending |
-| `[[E5C-3X]]` | E5c | cost of wrong C by ×3 (worse of under/over) | pending |
-| `[[E5C-10X]]` | E5c | cost of wrong C by ×10 (worse of under/over) | pending |
-| `[[E5C-FIG]]` | E5c | three-panel figure path | pending |
+| `[[E5C-C-SGD]]` | **E5c** MNIST-MLP | fitted C under SGD (mom=0) | resolved (0.44) |
+| `[[E5C-C-SGDM]]` | **E5c** MNIST-MLP | fitted C under SGDM (mom=0.9) | resolved (0.32) |
+| `[[E5C-C-RATIO]]` | E5c | max(C)/min(C) across SGD/SGDM (vs E5a range) | resolved (1.38×) |
+| `[[E5C-3X]]` | E5c | cost of wrong C by ×3 (worse of under/over) | resolved (0.018 test-loss) |
+| `[[E5C-10X]]` | E5c | cost of wrong C by ×10 (worse of under/over) | resolved (0.083 test-loss) |
+| `[[E5C-FIG]]` | E5c | three-panel figure path | resolved (`outputs/plots/nips26/e5c_mnist_mlp_C.png`) |
 | `[[E6B-LAMBDA-SLOPE]]` | E6b | slope of `log lambda*` against `log(1-beta)` (prediction: 1) | pending |
 | `[[E6B-GAP-SGD]]` | E6b | train-test accuracy gap, SGD+WD at its optimum | resolved (24.3) |
 | `[[E6B-GAP-SGDM]]` | E6b | train-test accuracy gap, SGDM+WD at its optimum | resolved (23.8) |

@@ -57,8 +57,13 @@ def get_mnist_loaders(
         transforms.Normalize(MNIST_MEAN, MNIST_STD),
     ])
     root = str(data_root)
-    train_dataset = datasets.MNIST(root=root, train=True, download=True, transform=transform)
-    test_dataset = datasets.MNIST(root=root, train=False, download=True, transform=transform)
+    # Prefer local files (download=True races under multi-process spawn and
+    # needs outbound HTTPS). Fall back to download only if raw/ is missing.
+    raw_ok = (Path(root) / "MNIST" / "raw" / "train-images-idx3-ubyte").exists() \
+        or (Path(root) / "MNIST" / "raw" / "train-images-idx3-ubyte.gz").exists()
+    download = not raw_ok
+    train_dataset = datasets.MNIST(root=root, train=True, download=download, transform=transform)
+    test_dataset = datasets.MNIST(root=root, train=False, download=download, transform=transform)
     return _make_loaders(train_dataset, test_dataset, batch_size, num_workers)
 
 
