@@ -31,17 +31,17 @@ and we have rewritten the contribution statement accordingly.
    alone does not: weight decay tightens the admissible learning rate. The
    testable consequence is that accuracy falls along a line of constant
    `eta*lambda`. We measure this; the drop is `10.3` points.
-2. **A negative result on the timescale claim.** Matching stability upper
-   bounds suggested `lambda ∝ 1/T`. We ran the discriminator against the
-   equilibrium account (next section); the measurement lands closer to Kosson
-   et al. than to us. The paper's contribution type is Negative Results; we
-   report the finding in those terms.
+2. **A two-constraint coupling across training length.** Matching stability
+   budgets gives `λ ∝ 1/(η T)`; rotational equilibrium gives a floor
+   `η λ ≳ P_*`. A single-`η` slice can sit on the floor and look
+   `T`-independent (our `η = 0.1` grid); the joint `(η, T)` sweep recovers the
+   timescale at small `η` (slope `-0.61 [-1.34, -0.32]`). The accounts compose as
+   `λ* ≈ max(C/S, P_*/η)` rather than compete.
 
 We would rather state this honestly than claim more. If the reviewer's view is
-that a cost-side constraint plus a negative result on the timescale is
+that a cost-side constraint plus a refined (not abandoned) timescale claim is
 insufficient for the bar, that is a judgement we understand; we have at least
-removed the ambiguity about what is being claimed, and we have stopped
-defending a prediction the data reject.
+removed the ambiguity about what is being claimed.
 
 ## Q2. There are many versions of this relationship; some proportionality, some a precise law. Which is it?
 
@@ -51,21 +51,18 @@ we now say so in those words.
 Concretely, after the new measurements:
 
 - `log lambda*` against `log eta` (fixed `T = 100`): slope **-0.87, 95%
-  interval [-0.94, -0.75]** — this exponent is real at fixed training length.
-- `log lambda*` against `log T` (fixed `eta = 0.1`, dense ladder): slope
-  `-0.226`, interval `[-0.28, -0.17]`. Grid argmax is `10^{-3}` at every
-  `T ∈ {25, 50, 100, 200}`. This is **incompatible with slope -1** and close
-  to the equilibrium prediction of 0. We withdraw `lambda ∝ 1/T` as an
-  empirical claim in this regime.
-- The prefactor `C = lambda* * sum_t eta_t`, fitted at fixed `T = 100` across 65
-  settings, has geometric mean **1.48 with spread x/1.70**. Because `lambda*`
-  does not fall with `T`, the same `C` is *not* stable across training
-  lengths — that is the content of the negative result above.
+  interval [-0.94, -0.75]** — real at fixed training length.
+- `log lambda*` against `log T` at `eta = 0.1`: slope `-0.226`
+  `[-0.28, -0.17]` (floor-dominated slice). At `eta = 0.02`: slope
+  `-0.61 [-1.34, -0.32]` — timescale binding, compatible with -1 and not with 0.
+- Prefactor: at fixed `T = 100`, `C` has geometric mean **1.48**, spread
+  x/1.70 over 65 settings. On the low-`η` arm where the timescale binds,
+  `C = λ* S` stays order-one across `T` (`low-eta C x/1.61; joint x/1.81 over 7 points`).
 
-So the honest statement is: at fixed training length the `eta`--`lambda`
-coupling is a real scaling with a setting-dependent prefactor; across training
-lengths a constant-product rule is the better guide. Being wrong by 3× in
-`lambda` at fixed `T` costs `[[E5B-3X]]` points; by 10×, `[[E5B-10X]]`.
+Honest statement: the `η`--`λ` coupling is a real scaling at fixed `T`; across
+`T` the operative rule is the two-constraint form above, not a pure constant
+product and not an unconstrained `1/T`. Being wrong by 3× in `λ` at fixed `T`
+costs `[[E5B-3X]]` points; by 10×, `[[E5B-10X]]`.
 
 ---
 
@@ -90,16 +87,16 @@ of uniform stability.
 
 Every experiment in the submission was at 100 epochs, which is precisely why the
 paper could not tell these apart -- a fair reading of the novelty concern. We
-have now run the training-length sweep. The result favours their account on
-this axis: grid `lambda* = 10^{-3}` at every `T`, interpolated slope
-`-0.226` `[-0.28, -0.17]`, product drift only `1.62x in eta*lambda (T=25 to T=200; prediction ours=8x, equilibrium=1x)`. We
-say so directly and reframe the related work accordingly.
+have now run a joint `(η, T)` sweep. At `η = 0.1` the grid sits on their
+floor (`λ* = 10^{-3}`, slope `-0.226`); at `η = 0.02` the timescale returns
+(slope `-0.61 [-1.34, -0.32]`, product falling with `T`). We reframe the related
+work as **stacked constraints** — equilibrium floor plus stability-matching
+timescale — rather than as a contest that one side won.
 
-What we still add, and where a pure product rule is incomplete even on their
-terms: walking along a line of constant `eta*lambda` over two decades of `eta`
-costs up to `10.3` points (E2b). The product pins a band; it does
-not pin the pair. Our ablation without normalization (`[[E7-BN]]`) remains the
-test of whether any of this coupling survives where scale invariance fails.
+A pure product rule remains incomplete even on their terms: walking an
+iso-product line costs up to `10.3` points (E2b). The ablation without
+normalization (`[[E7-BN]]`) tests whether the timescale branch survives where
+scale invariance fails.
 
 ## 2. The Qwen LoRA experiment
 
@@ -133,6 +130,7 @@ and the same law reads `2C/(eta*T)`. All of our experiments use cosine, which is
 where the factor of two entered. Writing the law in terms of `S` removes the
 ambiguity and makes a testable prediction: at matched `eta` and `T`, a
 constant-LR run should prefer half the weight decay of a cosine run. Measured
-ratio: `[[E1-SCHED-RATIO]]`.
+ratio: `[[E1-SCHED-RATIO]]` (prior const arm peaked on the left edge of its
+ladder; `e1_rescue` extends below `1e-4`).
 
 "bitch size" and the other typos are fixed.

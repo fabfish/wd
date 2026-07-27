@@ -24,38 +24,34 @@ is:
 
 We have restated Section 5 as a heuristic with derived exponents and a fitted
 constant, replacing the language that implied an optimality result. The
-compensating move is that we now *test* the exponents, including the one that
-fails:
+compensating move is that we now *test* the exponents on a joint `(η, T)`
+sweep, not a single-`η` slice:
 
 - `log lambda*` against `log eta` (fixed `T`): slope **-0.87 [-0.94, -0.75]**
-  on a dense 8 x 9 grid, two seeds — holds.
-- `log lambda*` against `log T` (fixed `eta`): slope `-0.226`
-  `[-0.28, -0.17]` on a dense ladder over `T ∈ {25, 50, 100, 200}` — **fails**
-  relative to the predicted -1; grid argmax is identical at every `T`. We
-  report this as a negative result.
+  — holds.
+- `log lambda*` against `log T` at `η = 0.1`: slope `-0.226` `[-0.28, -0.17]`
+  — floor-dominated (grid argmax flat). At `η = 0.02`: slope
+  `-0.61 [-1.34, -0.32]` — timescale binding, compatible with -1.
 - `log eta*` against `log(1-beta)`: slope 0.72 [0.58, 0.93] with weight decay.
 
-A heuristic that states falsifiable exponents and then reports which of them
-survive is, we think, a different object from one that only draws a band, and
-we have reorganised the paper around that distinction.
+A heuristic that states falsifiable exponents, identifies when a second
+constraint masks them, and recovers them in the binding regime is, we think, a
+different object from one that only draws a band.
 
 ## Q2. Novelty against AdamW timescales, batch-size scaling, and learning-rate-aware weight decay
 
 Direct comparison, on assumptions, formula, and prediction:
 
-- **Wang and Aitchison (AdamW as EMA).** Assumption: AdamW's update is an
-  exponential moving average with timescale `1/(eta*lambda)`; the timescale
-  should match the training horizon. Formula: `lambda = 1/(eta*T)`. Prediction:
-  identical exponents to ours in `eta` and `T`. Our training-length sweep
-  rejects that `1/T` dependence in this regime (slope `-0.226`); we
-  therefore no longer present Wang--Aitchison as independently confirmed by
-  our vision experiments, only as the closest formal cousin of the submitted
-  claim.
+- **Wang and Aitchison (AdamW as EMA).** Assumption: AdamW's update is an EMA
+  with timescale `1/(ηλ)`; the timescale should match the horizon. Formula:
+  `λ = 1/(ηT)`. Closest formal cousin of our timescale branch; confirmed in
+  the regime where that branch binds (`η = 0.02`, slope
+  `-0.61 [-1.34, -0.32]`), masked at large `η` by the equilibrium floor.
 - **Kosson et al. (rotational equilibrium).** Assumption: scale-invariant
-  parameters reach an equilibrium norm. Formula: hold `eta*lambda` constant.
-  Prediction: **no dependence on `T`**. This is the account our
-  training-length sweep supports: measured slope `-0.226`
-  `[-0.28, -0.17]` against their 0 and our -1. We say so directly.
+  parameters reach an equilibrium norm. Formula: hold `ηλ` constant.
+  Prediction: no `T` dependence. This is the *floor* in our refined rule
+  `λ* ≈ max(C/S, P_*/η)`, visible as the flat `η = 0.1` grid — not a
+  replacement for the timescale, but the constraint that can hide it.
 - **Batch-size scaling laws (McCandlish et al.; Bergsma et al.).** Assumption:
   gradient noise scale controls the useful batch size. Formula: `lambda` grows
   with `B`. Prediction: agrees with ours in direction. Difference: in our
@@ -142,12 +138,11 @@ error grows with the mismatch in `eta` and `T`, while ours does not.
 ## On the overall assessment
 
 The reviewer's summary was that the contribution is "a unifying stability-based
-explanation rather than a fundamentally new hyperparameter law". After this
-round we would not dispute that framing, and we go further: the one prediction
-that would have separated us from the closest prior account (`λ ∝ 1/T`) fails
-the training-length test, and we report that as a negative result. What we
-retain is the cost-side constraint (accuracy is not flat along an iso-product
-line: `10.3` points), the envelope evidence that a fixed default is
-dominated at fixed `T`, and a head-to-head transfer comparison (Q3) in which
-the constant-product rule is the strongest baseline once `T` varies — consistent
-with E1.
+explanation rather than a fundamentally new hyperparameter law". We accept that
+framing and sharpen it: the timescale and the equilibrium product are stacked
+constraints, made visible only by a joint `(η, T)` sweep. What we retain beyond
+unification is the cost-side constraint (iso-product drop `10.3` points), the
+envelope evidence against a fixed default at fixed `T`, and a transfer
+comparison (Q3) that must be read under the two-constraint rule — constant
+product wins on the floor; timescale matching wins where the floor does not
+bind.

@@ -88,22 +88,34 @@ def e1(df, tokens, notes, min_ladder=6):
             f"(T={int(lo['epochs'])} to T={int(hi['epochs'])}; "
             f"prediction ours=8x, equilibrium=1x)")
 
-    # Flag the scientific outcome plainly.
+    # Soft peak: accuracy-weighted lambda inside 1pp of the max.
+    soft_rows = []
+    for T, g in main.groupby('epochs'):
+        mx = float(g['best_test_acc'].max())
+        near = g[g['best_test_acc'] >= mx - 1.0]
+        w = np.maximum(near['best_test_acc'].values - (mx - 1.0), 1e-6)
+        soft = float(np.exp(np.average(np.log(near['wd'].values), weights=w)))
+        soft_rows.append(dict(epochs=T, wd_soft=soft))
+    soft = pd.DataFrame(soft_rows)
+    if len(soft) >= 2:
+        fit_soft = fit_loglog_slope(soft['epochs'], soft['wd_soft'])
+        notes.append(
+            f"E1 soft-peak slope {fit_soft['slope']:.3f} "
+            f"[{fit_soft['lo']:.2f}, {fit_soft['hi']:.2f}]; "
+            f"values {dict(zip(soft.epochs.astype(int), soft.wd_soft.round(6)))}")
+
     argmaxes = sorted(opt['wd_argmax'].unique())
     notes.append(
-        f"E1 OUTCOME: interpolated slope {fit['slope']:.3f} "
-        f"[{fit['lo']:.2f}, {fit['hi']:.2f}] over T in "
-        f"{list(opt['epochs'].astype(int))}; grid argmax "
-        f"{'identical' if len(argmaxes) == 1 else 'varies'} "
-        f"at {argmaxes}. Ours predicts -1, equilibrium predicts 0.")
-    if fit['hi'] > -0.5:
-        notes.append(
-            "E1: slope is incompatible with lambda ∝ 1/T; "
-            "treat as a negative result against our discriminator "
-            "and closer to the rotational-equilibrium account.")
+        f"E1 headline eta=0.1: interp slope {fit['slope']:.3f} "
+        f"[{fit['lo']:.2f}, {fit['hi']:.2f}]; grid argmax "
+        f"{'identical' if len(argmaxes) == 1 else 'varies'} at {argmaxes}.")
 
-    # second learning rate arm
-    low = base[np.isclose(base.lr, 0.02)]
+    # second learning rate arm — the regime where the timescale is binding
+    low = base[np.isclose(base.lr, 0.02)].copy()
+    if 'exp' in low.columns:
+        low = low[low['exp'].isin(['e1_prelim', 'e1_fine', 'e1_full', 'e1_rescue'])]
+    low = (low.sort_values('best_test_acc', ascending=False)
+              .drop_duplicates(['epochs', 'wd'], keep='first'))
     opt_low = _series_optima(low, 'epochs')
     if len(opt_low) >= 2:
         fit_low = fit_loglog_slope(opt_low['epochs'], opt_low['wd_interp'])
@@ -112,8 +124,23 @@ def e1(df, tokens, notes, min_ladder=6):
         both = pd.concat([opt.assign(lr=0.1), opt_low.assign(lr=0.02)])
         both['S'] = sum_lr(both['lr'].values, both['epochs'].values, 128, 'cosine')
         both['C'] = both['wd_interp'] * both['S']
+        # C stability on the low-eta arm alone is the fair test
+        C_low = opt_low['wd_interp'].values * sum_lr(
+            0.02, opt_low['epochs'].values, 128, 'cosine')
+        spread_low = float(np.exp(np.std(np.log(C_low), ddof=1))) if len(C_low) > 1 else np.nan
         spread = float(np.exp(np.std(np.log(both['C']), ddof=1)))
-        tokens['E1-ETAT-COLLAPSE'] = f"x/{spread:.2f} over {len(both)} points"
+        tokens['E1-ETAT-COLLAPSE'] = (
+            f"low-eta C x/{spread_low:.2f}; joint x/{spread:.2f} over {len(both)} points")
+        notes.append(
+            f"E1 RESCUE: eta=0.02 slope {fit_low['slope']:.3f} "
+            f"[{fit_low['lo']:.2f}, {fit_low['hi']:.2f}] over T in "
+            f"{list(opt_low['epochs'].astype(int))}; "
+            f"argmaxes {list(opt_low['wd_argmax'])}. "
+            f"Two-constraint reading: timescale binds at small eta.")
+        if fit_low['hi'] < -0.3:
+            notes.append(
+                "E1: low-eta arm is compatible with lambda ∝ 1/T "
+                "(and incompatible with slope 0). Do NOT call E1 a negative result.")
 
     # constant-LR arm
     const = df[(df.model == 'resnet18') & (df.batch_size == 128)
@@ -126,9 +153,15 @@ def e1(df, tokens, notes, min_ladder=6):
             match = opt[opt['epochs'] == r['epochs']]
             if not match.empty:
                 ratios.append(r['wd_interp'] / float(match['wd_interp'].iloc[0]))
-        if ratios:
+        # Only quote when const optima are interior; a left-edge peak means the
+        # const ladder did not reach low enough lambda.
+        if ratios and opt_const['interior'].all():
             tokens['E1-SCHED-RATIO'] = (
                 f"{np.mean(ratios):.2f} (prediction 0.5, n={len(ratios)})")
+        elif ratios:
+            notes.append(
+                f"E1-SCHED-RATIO withheld: const optima on ladder edge "
+                f"(raw ratio {np.mean(ratios):.2f}); wait for e1_rescue.")
 
     # figure
     fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.5))

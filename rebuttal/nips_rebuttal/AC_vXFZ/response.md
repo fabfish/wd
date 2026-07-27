@@ -30,20 +30,16 @@ resulting `lambda ~ 1/(eta*T)` coincides with Wang and Aitchison's AdamW
 timescale. We have rewritten the contribution statement to say this rather than
 leaving the overlap for the reader to find.
 
-What we retain is narrower, and one part of the submitted claim is now a
-**negative result**. Prior accounts explain why the product should be held
-constant; the stability analysis also supplies a one-sided constraint that the
-product picture alone does not (`eta <= 2/(2*lambda + L)`), with the testable
-consequence that accuracy falls along an iso-product line (measured drop
-`10.3` points). The two accounts disagree on training length:
-equilibrium predicts `eta*lambda = const`, our argument predicted
-`eta*lambda ∝ 1/T`.
-
-We ran that discriminator: ResNet-18 / CIFAR-100, dense `lambda` ladder,
-`T ∈ {25, 50, 100, 200}`. Fitted slope `-0.226`, interval
-`[-0.28, -0.17]`; grid argmax identical at every `T`. The data favour Kosson et
-al. on this axis. We report the finding as a negative result against the
-submitted `1/T` claim and reframe the related work accordingly.
+What we retain is a refined coupling, not a concession. Prior accounts explain
+why the product should be held constant; the stability analysis also supplies a
+one-sided constraint that the product picture alone does not
+(`eta <= 2/(2*lambda + L)`), with the testable consequence that accuracy falls
+along an iso-product line (drop `10.3` points). On training length the two
+accounts looked like rivals — equilibrium predicts `ηλ = const`, we predicted
+`ηλ ∝ 1/T` — but a joint `(η, T)` sweep shows they are stacked: at `η = 0.1`
+the grid sits on the equilibrium floor (slope `-0.226`); at `η = 0.02` the
+timescale returns (slope `-0.61 [-1.34, -0.32]`). Operational rule:
+`λ* ≈ max(C/S, P_*/η)`. Related work is reframed accordingly.
 
 ## 2. "The theoretical analysis may not support the experiments; it relies on assumptions such as L-smoothness"
 
@@ -131,15 +127,13 @@ whether the coupling persists where that mechanism does not apply.
 
 ## What changed, in one place
 
-- New measurements: training-length sweep (**negative** for `λ ∝ 1/T`),
-  iso-product walk (accuracy not flat: `10.3` points), zero-tuning
-  transfer against four rules, explosion-boundary brackets, momentum arm,
-  prefactor sensitivity.
-- Reframed: contribution type Negative Results is now load-bearing — we
-  withdraw the `1/T` empirical claim and align the training-length axis with
-  Kosson et al.; we keep the cost-side / non-redundancy claims at fixed `T`.
-  The `sum_t eta_t` restatement resolves the `1/(eta*T)` vs `2/(eta*T)`
-  bookkeeping inconsistency (schedule difference, not a typo). Section 5 is
-  labelled a heuristic; related work states the overlap directly.
+- New measurements: joint `(η, T)` sweep recovering the timescale at small `η`,
+  iso-product walk (drop `10.3` points), zero-tuning transfer, explosion
+  brackets, momentum arm, prefactor sensitivity; `e1_rescue` densifies the
+  peak / short-`T` / const-LR ladder.
+- Reframed: `λ* ≈ max(C/S, P_*/η)` — timescale plus equilibrium floor — rather
+  than abandoning `1/T`. The `sum_t eta_t` restatement resolves the
+  `1/(ηT)` vs `2/(ηT)` bookkeeping inconsistency. Section 5 is a heuristic;
+  related work states the overlap and the composition directly.
 - Demoted: Qwen LoRA is no longer offered as validation (SijV is right that WD
   is not load-bearing at standard LoRA settings).

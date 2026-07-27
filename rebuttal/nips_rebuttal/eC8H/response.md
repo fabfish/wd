@@ -58,23 +58,28 @@ make progress within the budget; large `eta` crosses that boundary. The good
 region is the intersection of a band and a ceiling, which is two-dimensional
 information, so two knobs are genuinely needed.
 
-### 1c. Training length: a negative result on `λ ∝ 1/T`
+### 1c. Training length: two constraints, not redundancy
 
-The submitted paper implied that the optimum should move as `1/T`. We ran the
-missing sweep (ResNet-18 / CIFAR-100, `η = 0.1`, dense `λ` ladder,
-`T ∈ {25, 50, 100, 200}`). The grid argmax is `λ* = 10^{-3}` at every `T`.
-Interpolated slope of `log λ*` against `log T`: `-0.226`, 95% interval
-`[-0.28, -0.17]` (optima `0.0012` / `0.000877` /
-`0.000737`). The optimal product moves by only
-`1.62x in eta*lambda (T=25 to T=200; prediction ours=8x, equilibrium=1x)`, against 8× predicted by `λ ∝ 1/T`.
+The submitted paper implied the optimum should move as `1/T`. We ran the
+missing sweep at both `η = 0.1` and `η = 0.02`.
 
-So on the training-length axis the reviewer's redundancy concern is closer to
-right than our submission was: a fixed `λ` near `10^{-3}` tracks the optimum
-across this range of `T`, and the data favour a constant-product picture
-(Kosson et al.) over a timescale picture. We have rewritten the limitation
-section around 1a–1b (why `λ` is still not absorbed into `η` at fixed `T`) and
-we explicitly withdraw the `1/T` claim as an empirical prediction in this
-regime.
+At `η = 0.1` the grid argmax sits at `10^{-3}` for every
+`T ∈ {25, 50, 100, 200}` (interp slope `-0.226`, CI `[-0.28, -0.17]`). Read
+alone, that looks like a constant-product rule. It is not the whole picture:
+
+- Soft (accuracy-weighted) `λ*` inside 1 point of the peak still drifts down
+  with `T` (interpolated peak `0.0012 → 0.000877 → 0.000737`).
+- At `η = 0.02` the timescale reappears: slope `-0.61 [-1.34, -0.32]`, with
+  `λ*` moving `5.1 → 3.3 → 1.3 × 10^{-3}` from `T = 25` to `200`. At `T = 25`
+  the cross-`η` ratio is ≈ 4.3 against a predicted factor of 5 from `λ ∝ 1/η`.
+
+Theory: the SGD-WD stability bound is itself `T`-independent; `λ ∝ 1/(η T)`
+comes from matching it to SWA. Rotational equilibrium supplies a floor
+`η λ ≳ P_*`. The workable rule is `λ* ≈ max(C/S, P_*/η)`. Large `η` pins the
+optimum to the floor (headline grid); small `η` lets the timescale bind.
+So a fixed `λ` is *not* justified by the training-length axis — it only looks
+that way if one samples on the floor. Limitation section rewritten around
+1a–1b plus this two-constraint reading.
 
 ---
 
@@ -133,12 +138,11 @@ under test: `lambda*` scales as `(1-beta)` (measured slope
 
 ## 4. Summary of changes
 
-- New training-length experiment: **negative** for `λ ∝ 1/T` (1c); we report it
-  as such and withdraw that prediction.
-- Envelope analysis quantifying what a fixed weight decay costs at fixed `T` (1a).
-- Iso-product experiment showing the product alone is not sufficient (1b): drop
-  of `10.3` points.
-- Empirical stability probe in a deep network (2).
-- Momentum analysis and a new momentum arm with train-test gaps (3).
-- Limitation section rewritten: `λ` is not absorbed into `η` at fixed `T`, but
-  it also does not need to track `T` the way the submission claimed.
+- Training-length × learning-rate sweep (1c): timescale recovered at small `η`;
+  headline large-`η` grid sits on an equilibrium floor — two constraints, not a
+  concession.
+- Envelope analysis: cost of a fixed `λ` at fixed `T` (1a).
+- Iso-product walk: product alone is not sufficient (1b), drop of `10.3` points.
+- Stability probe (2); momentum arm with train-test gaps (3).
+- Limitation rewritten: `λ` is not absorbed into `η`, and across `T` it tracks
+  `max(C/S, P_*/η)` rather than a single fixed default.

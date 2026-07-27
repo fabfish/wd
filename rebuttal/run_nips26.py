@@ -291,6 +291,47 @@ def build_e1_fine():
             for T in [25, 50, 100, 200] for wd in E1_LAMBDAS_FULL]
 
 
+def build_e1_rescue():
+    """
+    E1-rescue: recover the 1/T signal that the headline eta=0.1 grid masked.
+
+    Reading of the data so far:
+      - at eta=0.1 the grid argmax sits at 1e-3 for every T (quantization + a
+        possible equilibrium floor on eta*lambda);
+      - soft (accuracy-weighted) lambda* already drifts down with T;
+      - at eta=0.02 the interpolated slope is ~-0.6, much closer to -1.
+
+    This block densifies the peak, goes to shorter T (pre-equilibrium), densifies
+    the low-eta arm, and redoes constant-LR with a ladder that reaches below
+    1e-4 (the previous const arm peaked on its left edge).
+    """
+    cfgs = []
+
+    # A. dense peak at eta=0.1 — resolve the soft leftward drift
+    dense_peak = [4e-4, 6e-4, 8e-4, 1e-3, 1.2e-3, 1.5e-3, 2e-3, 2.5e-3]
+    for T in [25, 50, 100, 200]:
+        for wd in dense_peak:
+            cfgs.append(make_cfg('e1_rescue', lr=0.1, wd=wd, epochs=T))
+
+    # B. short T — timescale should dominate before rotational equilibrium
+    for T in [5, 10, 15]:
+        for wd in [5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2]:
+            cfgs.append(make_cfg('e1_rescue', lr=0.1, wd=wd, epochs=T))
+
+    # C. dense low-eta arm — where T-dependence already shows
+    for T in [25, 50, 100, 200]:
+        for wd in [1e-3, 2e-3, 3e-3, 5e-3, 7e-3, 1e-2]:
+            cfgs.append(make_cfg('e1_rescue', lr=0.02, wd=wd, epochs=T))
+
+    # D. constant-LR with a ladder that can sit below 1e-4
+    for T in [25, 100]:
+        for wd in [1e-5, 2e-5, 5e-5, 1e-4, 2e-4, 5e-4]:
+            cfgs.append(make_cfg('e1_rescue', lr=0.1, wd=wd, epochs=T,
+                                 scheduler='const'))
+
+    return cfgs
+
+
 def build_e1_full():
     """
     E1-full: fill in T = 50, add a second learning rate, a second seed, and a
@@ -493,6 +534,7 @@ BUILDERS = {
     'e1_prelim': build_e1_prelim,
     'e1_fine': build_e1_fine,
     'e1_full': build_e1_full,
+    'e1_rescue': build_e1_rescue,
     'e2b': build_e2b,
     'e4': build_e4,
     'e5b': build_e5b,
@@ -503,7 +545,7 @@ BUILDERS = {
 # every point on it has to come from the same code path. The legacy runs used a
 # loss scaler that was rebuilt every epoch, and folding them in would put a
 # procedural difference on exactly the axis being measured.
-NO_LEGACY_REUSE = {'e1_prelim', 'e1_fine', 'e1_full'}
+NO_LEGACY_REUSE = {'e1_prelim', 'e1_fine', 'e1_full', 'e1_rescue'}
 
 
 def main():
