@@ -169,7 +169,8 @@ def train_model(model, train_loader, test_loader, optimizer, scheduler,
 def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
                     device, epochs=100, use_amp=True, log_interval=10,
                     divergence_loss_threshold=None, divergence_check_epoch=3,
-                    probe_fn=None, keep_history=False, tag=""):
+                    probe_fn=None, keep_history=False, tag="",
+                    wd_schedule_fn=None):
     """
     Training loop for the coupling experiments.
 
@@ -181,6 +182,12 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
         quantity the coupling law is actually stated in (it equals eta*T for a
         constant schedule but eta*T/2 for cosine-to-zero)
       * exposes a probe hook for per-epoch diagnostics such as weight norms
+
+    wd_schedule_fn:
+        Optional callable ``wd_schedule_fn(epoch) -> float`` (0-based epoch).
+        When set, every epoch begins by writing that value into every
+        ``optimizer.param_groups[*]['weight_decay']``. Learning-rate scheduling
+        is unchanged (pass ``scheduler=None`` for a fixed learning rate).
 
     Returns:
         dict of summary metrics (plus 'history' when keep_history is set).
@@ -199,6 +206,11 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
     history = []
 
     for epoch in range(epochs):
+        if wd_schedule_fn is not None:
+            wd_now = float(wd_schedule_fn(epoch))
+            for group in optimizer.param_groups:
+                group['weight_decay'] = wd_now
+
         lr_this_epoch = optimizer.param_groups[0]['lr']
         sum_lr += lr_this_epoch * steps_per_epoch
 
@@ -227,16 +239,19 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
         if test_acc > best_test_acc:
             best_test_acc = test_acc
 
+        wd_this_epoch = optimizer.param_groups[0].get('weight_decay', 0.0)
         if probe_fn is not None:
             probe = probe_fn(epoch, model)
             if probe:
                 history.append({'epoch': epoch + 1, 'train_loss': train_loss,
                                 'train_acc': train_acc, 'test_acc': test_acc,
-                                'test_loss': test_loss, 'lr': lr_this_epoch, **probe})
+                                'test_loss': test_loss, 'lr': lr_this_epoch,
+                                'wd': wd_this_epoch, **probe})
         elif keep_history:
             history.append({'epoch': epoch + 1, 'train_loss': train_loss,
                             'train_acc': train_acc, 'test_acc': test_acc,
-                            'test_loss': test_loss, 'lr': lr_this_epoch})
+                            'test_loss': test_loss, 'lr': lr_this_epoch,
+                            'wd': wd_this_epoch})
 
         if epoch == epochs - 1:
             final_test_acc = test_acc

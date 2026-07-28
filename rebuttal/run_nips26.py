@@ -46,9 +46,12 @@ DEFAULT_CSV = RESULTS_DIR / 'nips26_runs.csv'
 RUN_KEY = ['model', 'dataset', 'method', 'batch_size', 'lr', 'wd', 'momentum',
            'epochs', 'scheduler', 'seed']
 
+# wd_sched is optional (E8); kept in CSV_FIELDS so appends stay column-aligned
+# after the E8 schema migration. Not part of RUN_KEY for E1–E7 dedup.
 CSV_FIELDS = RUN_KEY + [
-    'exp', 'sum_lr', 'best_test_acc', 'final_test_acc', 'final_train_loss',
-    'final_train_acc', 'final_test_loss', 'diverged', 'epochs_run', 'wall_time',
+    'wd_sched', 'exp', 'sum_lr', 'best_test_acc', 'final_test_acc',
+    'final_train_loss', 'final_train_acc', 'final_test_loss', 'diverged',
+    'epochs_run', 'wall_time',
 ]
 
 # CIFAR-100 starts at ln(100) = 4.6; twice that means the run is not coming back.
@@ -73,7 +76,9 @@ def make_cfg(exp, lr, wd, epochs, momentum=0.9, batch_size=128, model='resnet18'
         'model': model, 'dataset': dataset, 'method': method,
         'batch_size': int(batch_size), 'lr': float(lr), 'wd': float(wd),
         'momentum': float(momentum), 'epochs': int(epochs),
-        'scheduler': scheduler, 'seed': int(seed), 'exp': exp,
+        'scheduler': scheduler, 'seed': int(seed),
+        'wd_sched': 'fixed' if scheduler == 'const' else '',
+        'exp': exp,
         # Carried in the config rather than read from a module global, because
         # workers are spawned and would otherwise miss the command-line value.
         'num_workers': DEFAULT_NUM_WORKERS,
@@ -532,22 +537,55 @@ def build_e6b():
     return cfgs
 
 
+def build_e6b_lambda():
+    """
+    Dense lambda ladder at one scale-matched eta per momentum, so
+    E6B-LAMBDA-SLOPE can be fit (needs >=3 interior lambda* across beta).
+    """
+    cfgs = []
+    for beta in [0.0, 0.5, 0.9, 0.99]:
+        scale = 1.0 - beta
+        eta = 0.1 if beta == 0.0 else round(0.1 * scale / 0.1, 5)
+        base_wd = 1e-3 if beta == 0.0 else round(1e-3 * scale / 0.1, 8)
+        for f in [0.1, 0.3, 1.0, 3.0, 10.0]:
+            wd = float(f"{base_wd * f:.6g}")
+            if wd <= 0:
+                continue
+            cfgs.append(make_cfg('e6b', lr=eta, wd=wd, epochs=100, momentum=beta))
+    return cfgs
+
+
+def build_e1_sched():
+    """
+    Push the constant-LR ladder below 1e-5 at T=100 so E1-SCHED-RATIO is not
+    stuck on a left-edge peak.
+    """
+    cfgs = []
+    for T in [100]:
+        for wd in [1e-6, 2e-6, 5e-6]:
+            cfgs.append(make_cfg('e1_rescue', lr=0.1, wd=wd, epochs=T,
+                                 scheduler='const'))
+    return cfgs
+
+
 BUILDERS = {
     'e1_prelim': build_e1_prelim,
     'e1_fine': build_e1_fine,
     'e1_full': build_e1_full,
     'e1_rescue': build_e1_rescue,
+    'e1_sched': build_e1_sched,
     'e2b': build_e2b,
     'e4': build_e4,
     'e5b': build_e5b,
     'e6b': build_e6b,
+    'e6b_lambda': build_e6b_lambda,
 }
 
 # The E1 series measures how the optimum moves with the training length, so
 # every point on it has to come from the same code path. The legacy runs used a
 # loss scaler that was rebuilt every epoch, and folding them in would put a
 # procedural difference on exactly the axis being measured.
-NO_LEGACY_REUSE = {'e1_prelim', 'e1_fine', 'e1_full', 'e1_rescue'}
+NO_LEGACY_REUSE = {'e1_prelim', 'e1_fine', 'e1_full', 'e1_rescue', 'e1_sched'}
 
 
 def main():

@@ -101,8 +101,8 @@ predicts `η λ ∝ 1/T`. The right synthesis, forced by E1, is that the two are
 Evidence: at `η = 0.1` the product stays near `10^{-4}` across `T` (floor
 visible); at `η = 0.02` the product falls from `1.0 × 10^{-4}` to
 `2.6 × 10^{-5}` as `T` goes from 25 to 200 (timescale visible). Along a
-fixed-product line, accuracy is still not flat (`[[E2B-ISO-DROP]]` points over
-`[[E2B-ISO-RANGE]]`) — the floor pins the magnitude of the product, not the
+fixed-product line, accuracy is still not flat (`10.3` points over
+`a factor of 5 in eta`) — the floor pins the magnitude of the product, not the
 location on the iso-product line. Fixed-default costs at fixed `T` remain as
 in E2a (1.44 mean / 3.77 worst vs the envelope).
 
@@ -118,7 +118,7 @@ Kosson.
 **New / refined.**
 
 1. **Cost side at fixed `T`.** WD tightens the admissible learning rate; accuracy
-   falls along an iso-product line by `[[E2B-ISO-DROP]]` points (E2b). The
+   falls along an iso-product line by `10.3` points (E2b). The
    product is necessary but not sufficient.
 2. **Two-constraint coupling across `T`.** Matching stability budgets gives the
    timescale branch; rotational equilibrium gives the floor. E1's joint
@@ -134,11 +134,11 @@ We agree the convex, `L`-smooth analysis does not transfer as a theorem.
 Measurable structural predictions:
 
 1. **Learning-rate ceiling.** NaN-explosion brackets (not under-fitting) at
-   `λ = 0`, and tightening with momentum (`[[E3-MOM-RATIO]]` vs `1-β = 0.1`).
+   `λ = 0`, and tightening with momentum (`0.23` vs `1-β = 0.1`).
    At large positive `λ`, failure is mostly under-fitting; we do not overclaim
-   the slope-1 test (`[[E3-SLOPE]]`, `[[E3-INTERCEPT]]`, `[[E3-LMAX]]`).
+   the slope-1 test (`0.67`, `0.08 (implies L = 0.2)`, `417.4`).
 2. **Stability mechanism.** Leave-one-out trajectory pairs (E7a):
-   `[[E7-DIVERGENCE-RATIO]]`.
+   `1.10 (final ||theta-theta'|| at lambda=0 over lambda=1e-3)`.
 3. **Two-constraint coupling** (S1), which is an empirical structural claim
    about where the timescale is allowed to show up in deep nets with
    normalization.

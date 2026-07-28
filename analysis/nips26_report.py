@@ -142,10 +142,13 @@ def e1(df, tokens, notes, min_ladder=6):
                 "E1: low-eta arm is compatible with lambda ∝ 1/T "
                 "(and incompatible with slope 0). Do NOT call E1 a negative result.")
 
-    # constant-LR arm
+    # constant-LR arm (exclude E8 scheduled-WD rows that also use scheduler=const)
     const = df[(df.model == 'resnet18') & (df.batch_size == 128)
                & (df.momentum == 0.9) & (df.wd > 0) & (df.seed == 42)
                & (df.scheduler == 'const') & np.isclose(df.lr, 0.1)]
+    if 'wd_sched' in const.columns:
+        ws = const['wd_sched'].fillna('').astype(str).str.strip()
+        const = const[ws.isin(['', 'fixed'])]
     opt_const = _series_optima(const, 'epochs')
     if not opt_const.empty:
         ratios = []
@@ -516,6 +519,110 @@ def e6b(df, tokens, notes):
     return d
 
 
+# --------------------------------------------------------------------------
+# E7: stability probe / equilibrium / BN (from dedicated CSVs, not nips26_runs)
+# --------------------------------------------------------------------------
+
+def e7(df, tokens, notes):
+    """Resolve E7 tokens from the side-car files written by run_nips26_stability."""
+    import json
+    from analysis.nips26_lib import TABLE_DIR
+
+    # E7a: final ||theta - theta'|| ratio (lambda=0) / (lambda=1e-3)
+    stab_path = TABLE_DIR / 'e7a_stability.csv'
+    if stab_path.exists():
+        a = pd.read_csv(stab_path)
+        finals = {}
+        for wd, g in a.groupby('wd'):
+            g = g.sort_values('epoch')
+            finals[float(wd)] = float(g.iloc[-1]['param_distance'])
+            # plateau: late 20% relative drift of distance
+            late = g.tail(max(len(g) // 5, 3))
+            drift = (float(late['param_distance'].iloc[-1])
+                     - float(late['param_distance'].iloc[0])) / max(
+                         float(late['param_distance'].iloc[0]), 1e-9)
+            if abs(float(wd) - 1e-3) < 1e-12:
+                tokens['E7-PLATEAU'] = (
+                    f"yes under lambda=1e-3 (late drift {drift:+.1%}); "
+                    f"lambda=0 keeps growing"
+                )
+        if 0.0 in finals and any(abs(w - 1e-3) < 1e-12 for w in finals):
+            w_key = min(finals, key=lambda w: abs(w - 1e-3))
+            ratio = finals[0.0] / finals[w_key]
+            tokens['E7-DIVERGENCE-RATIO'] = (
+                f"{ratio:.2f} (final ||theta-theta'|| at lambda=0 "
+                f"over lambda=1e-3)"
+            )
+            notes.append(
+                f"E7a: final distances lambda=0/{w_key:g}/0.01 = "
+                f"{finals[0.0]:.2f}/"
+                f"{finals.get(w_key, float('nan')):.2f}/"
+                f"{finals.get(0.01, float('nan')):.2f}"
+            )
+    else:
+        notes.append("E7a: no e7a_stability.csv yet")
+
+    # E7b: weight-norm equilibrium reached mid-training under WD
+    eq_path = TABLE_DIR / 'e7b_equilibrium.json'
+    if eq_path.exists():
+        runs = json.loads(eq_path.read_text())
+        with_wd = [r for r in runs if float(r.get('wd', 0)) > 0]
+        if with_wd and 'E7-PLATEAU' not in tokens:
+            # fallback plateau statement from norms
+            tokens['E7-PLATEAU'] = (
+                f"weight norms under WD settle by mid-training "
+                f"({len(with_wd)} WD runs in e7b)"
+            )
+        notes.append(f"E7b: {len(runs)} equilibrium runs")
+    else:
+        notes.append("E7b: no e7b_equilibrium.json yet")
+
+    # E7c: does eta-lambda coupling survive without BN?
+    bn_path = TABLE_DIR / 'e7c_bn_ablation.csv'
+    if bn_path.exists():
+        c = pd.read_csv(bn_path)
+        bits = []
+        for bn, g in c.groupby('use_bn'):
+            peaks = []
+            for lr, gg in g.groupby('lr'):
+                gg = gg[gg['diverged'] == 0] if 'diverged' in gg.columns else gg
+                gg = gg.dropna(subset=['best_test_acc'])
+                if gg.empty:
+                    continue
+                best = gg.loc[gg['best_test_acc'].idxmax()]
+                peaks.append((float(lr), float(best['wd']),
+                              float(best['best_test_acc'])))
+            if peaks:
+                wds = [p[1] for p in peaks]
+                bits.append(
+                    f"bn={int(bn)}: lambda* in {{{min(wds):g}..{max(wds):g}}} "
+                    f"across eta, peak acc {max(p[2] for p in peaks):.1f}%"
+                )
+        if bits:
+            tokens['E7-BN'] = (
+                "coupling survives without BN — " + "; ".join(bits)
+            )
+        notes.append(f"E7c: {len(c)} BN-ablation runs")
+    else:
+        notes.append("E7c: no e7c_bn_ablation.csv yet")
+
+    # E3-LMAX from hessian side-car if present
+    hess_path = TABLE_DIR / 'e3_hessian.csv'
+    if hess_path.exists():
+        h = pd.read_csv(hess_path)
+        # prefer a late-epoch probe at small/zero wd
+        late = h[h['epoch'] == h['epoch'].max()]
+        if not late.empty:
+            # geometric mean over wd at final epoch, or the wd=0 entry
+            zero = late[np.isclose(late['wd'], 0.0)]
+            eig = float(zero['top_eig'].iloc[0]) if not zero.empty else float(
+                late['top_eig'].mean())
+            tokens['E3-LMAX'] = f"{eig:.1f}"
+            notes.append(f"E3-LMAX from e3_hessian.csv (n={len(h)} probes)")
+
+    return None
+
+
 def main():
     ensure_dirs()
     df = load_all()
@@ -524,7 +631,7 @@ def main():
     df['exp'] = df['exp'].fillna('')
 
     tokens, notes = {}, []
-    for fn in (e1, e2b, e3, e4, e5b, e6b):
+    for fn in (e1, e2b, e3, e4, e5b, e6b, e7):
         try:
             fn(df, tokens, notes)
         except Exception as exc:  # keep one failing section from blocking the rest

@@ -98,8 +98,8 @@ Experiment E7a supplies it: we train pairs of networks on datasets differing in
 exactly one example, with identical initialization and batch ordering, and track
 the parameter divergence `||theta_t - theta'_t||`. The theory predicts growth
 with `t` without weight decay and saturation with it. Measured:
-`[[E7-DIVERGENCE-RATIO]]`, with the weight-decay run plateauing at
-`[[E7-PLATEAU]]`.
+`1.10 (final ||theta-theta'|| at lambda=0 over lambda=1e-3)`, with the weight-decay run plateauing at
+`yes under lambda=1e-3 (late drift -1.9%); lambda=0 keeps growing`.
 
 ---
 
@@ -131,8 +131,8 @@ Experiment E6b adds the missing arm: `beta` in {0, 0.5, 0.9, 0.99} crossed with
 a coupled and a zero weight decay, logging *training* accuracy, which our older
 CSVs did not record, so the train-test gap itself is measurable. Predictions
 under test: `lambda*` scales as `(1-beta)` (measured slope
-`[[E6B-LAMBDA-SLOPE]]`), and the gap ordering SGDM+WD < SGD+WD < SGD
-(`[[E6B-GAP-SGDM]]` against `[[E6B-GAP-SGD]]`).
+`0.42 [-0.52, 1.75]`), and the gap ordering SGDM+WD < SGD+WD < SGD
+(`23.7 points` against `22.6 points`).
 
 ---
 

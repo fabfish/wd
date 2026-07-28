@@ -20,8 +20,8 @@ We accept both halves and have acted on both.
 **Missing related work.** Reviewer SijV was right that we omitted Kosson et al.
 on rotational equilibrium (arXiv:2305.17212, arXiv:2510.19093), which is the
 closest prior account of why the optimum keeps `eta*lambda` roughly constant.
-This is now cited and discussed, along with Xie et al. on scheduled weight
-decay.
+This is now cited and discussed, along with AdamW/SGDW within-run weight-decay
+schedules (cosine / drop-step / restarts).
 
 **Recovery of existing results.** Our honest accounting is that the stability
 machinery is Hardt et al.'s, that a strongly convex regularizer converting an
@@ -52,16 +52,16 @@ directly.
 `eta`, counting only NaN/explosion (not under-fitting: at large `lambda` the
 loss sticks at `log #classes` without diverging, which is not the L-smooth
 ceiling). Explosion brackets are clean at `lambda = 0` and tighten with
-momentum (`[[E3-MOM-RATIO]]` against a prediction of 0.1). At large positive
+momentum (`0.23` against a prediction of 0.1). At large positive
 `lambda` the slope-1 test `1/eta_max = lambda + L/2` is not cleanly identified;
-we report what we have (`[[E3-SLOPE]]`, `[[E3-INTERCEPT]]`, Hessian
-`[[E3-LMAX]]`) and state this limitation rather than claim a verification.
+we report what we have (`0.67`, `0.08 (implies L = 0.2)`, Hessian
+`417.4`) and state this limitation rather than claim a verification.
 
 **The stability mechanism itself.** We train pairs of networks on datasets
 differing in exactly one example, with identical initialization and batch
 ordering, and track `||theta_t - theta'_t||`. Without weight decay the convex
 theory predicts growth with `t`; with weight decay, saturation. Measured
-`[[E7-DIVERGENCE-RATIO]]`.
+`1.10 (final ||theta-theta'|| at lambda=0 over lambda=1e-3)`.
 
 These are the parts we claim survive. We explicitly do not claim the constants,
 the strong convexity used in the momentum bounds, or any statement about the
@@ -80,12 +80,21 @@ are then applied blind to six held-out settings (`T = 25`, `T = 200`, `B = 32`,
 search: no weight decay; the common default `5e-4`; a constant `eta*lambda`
 calibrated at the reference; Wang and Aitchison's `1/(eta*T)`; and ours.
 
-`[[E4-TABLE]]`
+`see _data/e4_transfer_table.md`
 
-Gap to the oracle: ours `[[E4-OURS-MEAN]]` mean, `[[E4-OURS-WORST]]` worst;
-fixed default `[[E4-DEFAULT-MEAN]]`; constant product `[[E4-KOSSON-MEAN]]`;
-`1/(eta*T)` `[[E4-WANG-MEAN]]`. The oracle column costs eight training runs per
+Gap to the oracle: ours `0.87` mean, `1.58` worst;
+fixed default `0.70`; constant product `1.63`;
+`1/(eta*T)` `1.60`. The oracle column costs eight training runs per
 setting; every rule costs zero after the one-time calibration.
+
+We also compare against *within-run* scheduled weight decay (E8): fixed learning
+rate `eta = 0.1`, and AdamW/SGDW schedule shapes applied only to `lambda`
+(cosine, linear, drop-step, cosine-with-restarts). Under SGDM, drop-step lifts
+peak accuracy from **66.67%** (fixed `lambda`) to **73.10%** (+6.4 points); under
+SGD the gain is smaller (+1.0 point for drop-step). That confirms scheduling
+`lambda` is useful engineering when the learning rate is held fixed, but it is
+orthogonal to selecting a constant `lambda` from `(eta, T, B)` — E4 tests the
+latter, E8 the former.
 
 Two supporting numbers, both from data we already had:
 
@@ -96,7 +105,7 @@ Two supporting numbers, both from data we already had:
 - Fitting the prefactor in 65 independent settings (three architectures, five
   batch sizes, two seeds) gives a geometric mean of **1.48** with a spread of
   **x/1.70**, so a single calibration transfers across architectures to within
-  about a factor of two, and being wrong by 3x costs `[[E5B-3X]]` points.
+  about a factor of two, and being wrong by 3x costs `15.11` points.
 
 ## 4. "The discussion about momentum is not complete, and the opportunity to contrast with concurrent work is missed"
 
@@ -115,12 +124,12 @@ and leaves the `1/(lambda*n)` stability term alone -- and the paper now states
 it as a result rather than a remark. A new arm (`beta` in {0, 0.5, 0.9, 0.99}
 crossed with coupled and zero weight decay, logging training accuracy so the
 train-test gap is measurable) tests `lambda* ∝ (1-beta)`: measured
-`[[E6B-LAMBDA-SLOPE]]`.
+`0.42 [-0.52, 1.75]`.
 
 **Concurrent work.** The contrast with rotational equilibrium is now explicit
 and, as described under weakness 1, is the discriminating experiment rather than
 a discussion point. We also note that the equilibrium mechanism requires scale
-invariance; our ablation on networks without normalization (`[[E7-BN]]`) probes
+invariance; our ablation on networks without normalization (`coupling survives without BN — bn=0: lambda* in {0.002..0.002} across eta, peak acc 59.3%; bn=1: lambda* in {0.0005..0.0005} across eta, peak acc 58.5%`) probes
 whether the coupling persists where that mechanism does not apply.
 
 ---

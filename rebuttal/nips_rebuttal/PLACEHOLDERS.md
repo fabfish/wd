@@ -21,14 +21,14 @@ value of every token that can already be resolved.
 | `[[E2B-ISO-RANGE]]` | E2b | eta range over which the iso-product line stays within 1 point of its peak | resolved (factor of 5) |
 | `[[E3-SLOPE]]` | E3 | fitted slope of `1/eta_max` against lambda (theory: 1) | resolved (0.67) |
 | `[[E3-INTERCEPT]]` | E3 | intercept of that fit, i.e. the implied `L/2` | resolved (0.08) |
-| `[[E3-LMAX]]` | E3 | top Hessian eigenvalue measured by power iteration | pending |
+| `[[E3-LMAX]]` | E3 Hessian | top Hessian eigenvalue measured by power iteration | resolved (417.4 at epoch 15, λ=0) |
 | `[[E3-MOM-RATIO]]` | E3 | ratio of eta_max between beta=0 and beta=0.9 (theory: 1-beta = 0.1) | resolved (0.23) |
-| `[[E4-TABLE]]` | E4 | full accuracy-gap-to-oracle table over the five strategies | pending (`ours` miss) |
-| `[[E4-OURS-MEAN]]` | E4 | mean gap to oracle, our rule | pending |
-| `[[E4-OURS-WORST]]` | E4 | worst gap to oracle, our rule | pending |
-| `[[E4-DEFAULT-MEAN]]` | E4 | mean gap to oracle, fixed lambda=5e-4 | pending |
-| `[[E4-KOSSON-MEAN]]` | E4 | mean gap to oracle, constant `eta*lambda` | pending |
-| `[[E4-WANG-MEAN]]` | E4 | mean gap to oracle, `1/(eta*T)` | pending |
+| `[[E4-TABLE]]` | E4 | full accuracy-gap-to-oracle table over the five strategies | resolved (`_data/e4_transfer_table.md`) |
+| `[[E4-OURS-MEAN]]` | E4 | mean gap to oracle, our rule | resolved (0.87) |
+| `[[E4-OURS-WORST]]` | E4 | worst gap to oracle, our rule | resolved (1.58) |
+| `[[E4-DEFAULT-MEAN]]` | E4 | mean gap to oracle, fixed lambda=5e-4 | resolved (0.70) |
+| `[[E4-KOSSON-MEAN]]` | E4 | mean gap to oracle, constant `eta*lambda` | resolved (1.63) |
+| `[[E4-WANG-MEAN]]` | E4 | mean gap to oracle, `1/(eta*T)` | resolved (1.60) |
 | `[[E5B-3X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 3 | resolved (15.11) |
 | `[[E5B-10X]]` | E5b (CIFAR, exact `sum_lr`) | accuracy lost when C is wrong by a factor of 10 | resolved (69.74) |
 | `[[E5C-C-SGD]]` | **E5c** MNIST-MLP | fitted C under SGD (mom=0) | resolved (0.44) |
@@ -37,12 +37,14 @@ value of every token that can already be resolved.
 | `[[E5C-3X]]` | E5c | cost of wrong C by ×3 (worse of under/over) | resolved (0.018 test-loss) |
 | `[[E5C-10X]]` | E5c | cost of wrong C by ×10 (worse of under/over) | resolved (0.083 test-loss) |
 | `[[E5C-FIG]]` | E5c | three-panel figure path | resolved (`outputs/plots/nips26/e5c_mnist_mlp_C.png`) |
-| `[[E6B-LAMBDA-SLOPE]]` | E6b | slope of `log lambda*` against `log(1-beta)` (prediction: 1) | pending |
-| `[[E6B-GAP-SGD]]` | E6b | train-test accuracy gap, SGD+WD at its optimum | resolved (24.3) |
-| `[[E6B-GAP-SGDM]]` | E6b | train-test accuracy gap, SGDM+WD at its optimum | resolved (23.8) |
-| `[[E7-DIVERGENCE-RATIO]]` | E7a | ratio of `\|\|theta_T - theta'_T\|\|` between lambda=0 and lambda>0 | pending |
-| `[[E7-PLATEAU]]` | E7a | whether the weight-decay run plateaus, and at what step | pending |
-| `[[E7-BN]]` | E7c | whether the coupling survives without normalization layers | pending |
+| `[[E6B-LAMBDA-SLOPE]]` | E6b | slope of `log lambda*` against `log(1-beta)` (prediction: 1) | resolved (0.42) |
+| `[[E6B-GAP-SGD]]` | E6b | train-test accuracy gap, SGD+WD at its optimum | resolved (22.6) |
+| `[[E6B-GAP-SGDM]]` | E6b | train-test accuracy gap, SGDM+WD at its optimum | resolved (23.7) |
+| `[[E7-DIVERGENCE-RATIO]]` | E7a | ratio of `\|\|theta_T - theta'_T\|\|` between lambda=0 and lambda>0 | resolved (1.10) |
+| `[[E7-PLATEAU]]` | E7a | whether the weight-decay run plateaus, and at what step | resolved (yes under λ=1e-3) |
+| `[[E7-BN]]` | E7c | whether the coupling survives without normalization layers | resolved (yes) |
+
+E8 scheduled-WD 对比见 [`common/e8_wd_schedule.md`](common/e8_wd_schedule.md)（无 `[[TOKEN]]`，数字已写死）。
 
 ## Numbers that are already measured
 

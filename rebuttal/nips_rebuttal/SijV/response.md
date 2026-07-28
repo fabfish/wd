@@ -62,7 +62,7 @@ Concretely, after the new measurements:
 Honest statement: the `η`--`λ` coupling is a real scaling at fixed `T`; across
 `T` the operative rule is the two-constraint form above, not a pure constant
 product and not an unconstrained `1/T`. Being wrong by 3× in `λ` at fixed `T`
-costs `[[E5B-3X]]` points; by 10×, `[[E5B-10X]]`.
+costs `15.11` points; by 10×, `69.74`.
 
 ---
 
@@ -95,7 +95,7 @@ timescale — rather than as a contest that one side won.
 
 A pure product rule remains incomplete even on their terms: walking an
 iso-product line costs up to `10.3` points (E2b). The ablation without
-normalization (`[[E7-BN]]`) tests whether the timescale branch survives where
+normalization (`coupling survives without BN — bn=0: lambda* in {0.002..0.002} across eta, peak acc 59.3%; bn=1: lambda* in {0.0005..0.0005} across eta, peak acc 58.5%`) tests whether the timescale branch survives where
 scale invariance fails.
 
 ## 2. The Qwen LoRA experiment

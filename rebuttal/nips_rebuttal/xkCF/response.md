@@ -61,16 +61,20 @@ Direct comparison, on assumptions, formula, and prediction:
   entirely: after collapsing onto `sum_t eta_t`, the residual trend in `C` over
   `B` from 32 to 512 is 1.38, 1.89, 1.40, 1.60, 1.71. We now report this
   residual instead of claiming a clean law.
-- **Scheduled weight decay (Xie et al.).** Assumption: `lambda` should vary
-  during training. Difference: their schedule is within a run, ours is a
-  prediction across runs. These compose rather than compete, and we say so.
+- **Scheduled weight decay (AdamW / SGDW schedule multipliers).** Assumption:
+  `lambda` should vary *within* a run, typically sharing the same multiplier as
+  the learning rate (cosine, drop-step, cosine with restarts). Difference: that
+  is a within-run schedule; our rule predicts a single constant `lambda` across
+  runs. They compose rather than compete. We now also measure the within-run
+  schedules directly under a fixed learning rate (E8 below).
 
 ## Q3. Compare against at least one existing scaling rule or scheduled weight-decay baseline
 
-Done, as a zero-tuning transfer test. The constant `C` is calibrated **once** on
-a single reference setting (ResNet-18, `B = 128`, `eta = 0.1`, `T = 100`) using
-data we already had. Every rule is then applied blind to six held-out settings,
-and compared against a per-setting oracle grid search:
+**Across-run scaling rules (E4).** Done as a zero-tuning transfer test. The
+constant `C` is calibrated **once** on a single reference setting (ResNet-18,
+`B = 128`, `eta = 0.1`, `T = 100`) using data we already had. Every rule is then
+applied blind to six held-out settings, and compared against a per-setting
+oracle grid search:
 
 Strategies: `lambda = 0`; the common default `lambda = 5e-4`; constant
 `eta*lambda` calibrated at the reference (the Kosson-style rule); Wang and
@@ -80,15 +84,36 @@ Held-out settings: `T = 25`, `T = 200`, `B = 32`, `B = 512`, VGG-16, ResNet-50.
 Where the learning rate must change with the batch size it follows the linear
 rule, so nothing is tuned per setting.
 
-`[[E4-TABLE]]`
+`see _data/e4_transfer_table.md`
 
-Summary of the gap to the per-setting oracle: ours `[[E4-OURS-MEAN]]` mean and
-`[[E4-OURS-WORST]]` worst; fixed default `[[E4-DEFAULT-MEAN]]`; constant product
-`[[E4-KOSSON-MEAN]]`; `1/(eta*T)` `[[E4-WANG-MEAN]]`.
+Summary of the gap to the per-setting oracle: ours `0.87` mean and
+`1.58` worst; fixed default `0.70`; constant product
+`1.63`; `1/(eta*T)` `1.60`.
 
 We also report the tuning cost, since that is the practical argument: the oracle
 column needs eight training runs per setting, and every rule needs zero after a
 one-time calibration.
+
+**Within-run scheduled weight decay (E8).** Separately, we hold the learning rate
+fixed at `eta = 0.1` (ResNet-18 / CIFAR-100, `B = 128`, `T = 100`) and compare a
+constant `lambda` against the AdamW/SGDW schedule shapes applied *only* to
+weight decay: cosine, linear, drop-step, and cosine-with-restarts
+(`Te = 50`, `Tmult = 2`). Each schedule is swept over the same
+`lambda_0 ∈ {1e-4, 5e-4, 1e-3, 2e-3, 5e-3}`; we report the best accuracy in that
+grid (figures: `outputs/plots/nips26/e8_wd_sched_sgd.png`,
+`e8_wd_sched_sgdm.png`).
+
+| optimizer | fixed | cosine | linear | step | cosine_restarts |
+|---|---:|---:|---:|---:|---:|
+| SGD (mom=0) | 73.20 | 73.50 (+0.30) | 73.22 (+0.02) | **74.24 (+1.04)** | 73.43 (+0.23) |
+| SGDM (mom=0.9) | 66.67 | 71.34 (+4.67) | 70.32 (+3.65) | **73.10 (+6.43)** | 70.13 (+3.46) |
+
+Under a fixed learning rate, decaying `lambda` helps — especially for SGDM,
+where a constant `lambda` is badly mismatched to the lack of LR annealing, and
+drop-step recovers **+6.4** points. That is useful engineering, but it is a
+different knob from our claim: we select one constant `lambda` as a function of
+`(eta, T, B)`, whereas these schedules redistribute regularization over time.
+Both can be used together; E4 tests the former and E8 tests the latter.
 
 ## Q4. Which parts of the theory should survive in the non-convex setting?
 
@@ -100,15 +125,15 @@ networks. Both are new experiments.
 `1/eta_max = lambda + L/2`: a straight line in `lambda` whose intercept is an
 effective smoothness. We locate the empirical divergence threshold by bisection
 in `eta` for seven weight decays, for both SGD and SGDM. Fitted slope
-`[[E3-SLOPE]]` against a prediction of 1, intercept `[[E3-INTERCEPT]]`, against
-a top Hessian eigenvalue of `[[E3-LMAX]]` measured independently by power
+`0.67` against a prediction of 1, intercept `0.08 (implies L = 0.2)`, against
+a top Hessian eigenvalue of `417.4` measured independently by power
 iteration. The momentum version predicts the ceiling scales with `(1-beta)`;
-measured ratio `[[E3-MOM-RATIO]]` against a prediction of 0.1.
+measured ratio `0.23` against a prediction of 0.1.
 
 **The stability mechanism.** We train pairs of networks on datasets differing in
 exactly one example, with identical initialization and batch order, and track
 `||theta_t - theta'_t||`. The convex theory says this grows with `t` without
-weight decay and saturates with it. Measured: `[[E7-DIVERGENCE-RATIO]]`.
+weight decay and saturates with it. Measured: `1.10 (final ||theta-theta'|| at lambda=0 over lambda=1e-3)`.
 
 What we do not claim to survive: the constants, the strong convexity used in the
 momentum bounds, and any statement about the *value* of the generalization gap
