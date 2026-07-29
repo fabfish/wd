@@ -170,7 +170,7 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
                     device, epochs=100, use_amp=True, log_interval=10,
                     divergence_loss_threshold=None, divergence_check_epoch=3,
                     probe_fn=None, keep_history=False, tag="",
-                    wd_schedule_fn=None):
+                    wd_schedule_fn=None, lr_schedule_fn=None):
     """
     Training loop for the coupling experiments.
 
@@ -183,11 +183,11 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
         constant schedule but eta*T/2 for cosine-to-zero)
       * exposes a probe hook for per-epoch diagnostics such as weight norms
 
-    wd_schedule_fn:
-        Optional callable ``wd_schedule_fn(epoch) -> float`` (0-based epoch).
-        When set, every epoch begins by writing that value into every
-        ``optimizer.param_groups[*]['weight_decay']``. Learning-rate scheduling
-        is unchanged (pass ``scheduler=None`` for a fixed learning rate).
+    wd_schedule_fn / lr_schedule_fn:
+        Optional callables ``fn(epoch) -> float`` (0-based epoch). When set,
+        every epoch begins by writing that value into every param group
+        (``weight_decay`` / ``lr``). Pass ``scheduler=None`` when driving the
+        learning rate yourself via ``lr_schedule_fn`` to avoid double annealing.
 
     Returns:
         dict of summary metrics (plus 'history' when keep_history is set).
@@ -206,6 +206,10 @@ def train_model_ext(model, train_loader, test_loader, optimizer, scheduler,
     history = []
 
     for epoch in range(epochs):
+        if lr_schedule_fn is not None:
+            lr_now = float(lr_schedule_fn(epoch))
+            for group in optimizer.param_groups:
+                group['lr'] = lr_now
         if wd_schedule_fn is not None:
             wd_now = float(wd_schedule_fn(epoch))
             for group in optimizer.param_groups:

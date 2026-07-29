@@ -110,10 +110,15 @@ grid (figures: `outputs/plots/nips26/e8_wd_sched_sgd.png`,
 
 Under a fixed learning rate, decaying `lambda` helps — especially for SGDM,
 where a constant `lambda` is badly mismatched to the lack of LR annealing, and
-drop-step recovers **+6.4** points. That is useful engineering, but it is a
-different knob from our claim: we select one constant `lambda` as a function of
-`(eta, T, B)`, whereas these schedules redistribute regularization over time.
-Both can be used together; E4 tests the former and E8 tests the latter.
+drop-step recovers **+6.4** points. As a follow-up we also apply the same
+AdamW-style multiplier jointly to `eta` and `lambda` (T=100): joint cosine
+peaks at **76.42**, vs **76.72–76.73** for cosine LR + fixed `lambda`
+(E4-ours / default `5e-4`) and **77.28** for an oracle over the same `lambda_0`
+grid. So within-run scheduling is useful when LR is held fixed, but under our
+default cosine-LR setup a constant `lambda` already matches or beats it. That
+is a different knob from our claim: we select one constant `lambda` as a
+function of `(eta, T, B)`, whereas these schedules redistribute regularization
+over time. Both can be used together; E4 tests the former and E8 the latter.
 
 ## Q4. Which parts of the theory should survive in the non-convex setting?
 

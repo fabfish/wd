@@ -91,10 +91,11 @@ We also compare against *within-run* scheduled weight decay (E8): fixed learning
 rate `eta = 0.1`, and AdamW/SGDW schedule shapes applied only to `lambda`
 (cosine, linear, drop-step, cosine-with-restarts). Under SGDM, drop-step lifts
 peak accuracy from **66.67%** (fixed `lambda`) to **73.10%** (+6.4 points); under
-SGD the gain is smaller (+1.0 point for drop-step). That confirms scheduling
-`lambda` is useful engineering when the learning rate is held fixed, but it is
-orthogonal to selecting a constant `lambda` from `(eta, T, B)` — E4 tests the
-latter, E8 the former.
+SGD the gain is smaller (+1.0 point for drop-step). A joint AdamW-style
+multiplier on both `eta` and `lambda` reaches **76.42%**, comparable to cosine
+LR + fixed `lambda` at **76.72–76.73%** (E4-ours / default). Scheduling
+`lambda` is useful when LR is held fixed, but orthogonal to selecting a
+constant `lambda` from `(eta, T, B)` — E4 tests the latter, E8 the former.
 
 Two supporting numbers, both from data we already had:
 

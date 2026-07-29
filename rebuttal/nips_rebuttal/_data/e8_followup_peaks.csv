@@ -1,0 +1,9 @@
+tag,optimizer,wd_sched,peak_acc,peak_lambda0,n,delta_vs_fixed
+joint_T100,SGDM,fixed,66.67,0.0001,5,0.0
+joint_T100,SGDM,cosine,76.42,0.001,5,9.75
+joint_T100,SGDM,linear,76.17,0.001,5,9.5
+joint_T100,SGDM,step,75.36,0.0005,5,8.689999999999998
+joint_T100,SGDM,cosine_restarts,75.11,0.001,5,8.439999999999998
+joint_T200,SGDM,fixed,62.39,0.0005,3,0.0
+joint_T200,SGDM,step,76.31,0.0005,3,13.920000000000002
+joint_T200,SGDM,cosine_restarts,76.88,0.001,3,14.489999999999995

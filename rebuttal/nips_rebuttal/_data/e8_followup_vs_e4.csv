@@ -1,0 +1,9 @@
+method,best_acc,note
+cosine LR + fixed λ (E4-ours C/∑η),76.72,0.0005982
+cosine LR + fixed λ (default 5e-4),76.73,0.0005
+cosine LR + fixed λ (oracle over λ₀ grid),77.28,λ₀=0.001
+joint m(t) = fixed (peak over λ₀),66.67,λ₀=0.0001
+joint m(t) = cosine (peak over λ₀),76.42,λ₀=0.001
+joint m(t) = linear (peak over λ₀),76.17,λ₀=0.001
+joint m(t) = step (peak over λ₀),75.36,λ₀=0.0005
+joint m(t) = cosine_restarts (peak over λ₀),75.11,λ₀=0.001
