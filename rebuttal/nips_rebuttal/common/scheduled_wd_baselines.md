@@ -115,3 +115,33 @@ $PY rebuttal/run_nips26_wd_sched.py --phase all --gpus 0,1,2,3 --workers_per_gpu
 bash rebuttal/run_nips26_e8_followup.sh
 $PY -m analysis.nips26_e8_wd_sched
 ```
+
+
+
+**Within-run scheduled weight decay.** Separately from across-run scaling rules,
+we hold the learning rate fixed at `η = 0.1` (ResNet-18 / CIFAR-100, `B = 128`,
+`T = 100`) and compare a constant `λ` against the AdamW/SGDW schedule shapes of
+Loshchilov & Hutter applied *only* to weight decay: cosine, linear, drop-step,
+and cosine-with-restarts (`Te = 50`, `Tmult = 2`). Each schedule is swept over
+`λ₀ ∈ {1e-4, 5e-4, 1e-3, 2e-3, 5e-3}`; we report the best accuracy in that grid.
+
+| optimizer | fixed | cosine | linear | step | cosine_restarts |
+|---|---:|---:|---:|---:|---:|
+| SGD (mom=0) | 73.20 | 73.50 (+0.30) | 73.22 (+0.02) | **74.24 (+1.04)** | 73.43 (+0.23) |
+| SGDM (mom=0.9) | 66.67 | 71.34 (+4.67) | 70.32 (+3.65) | **73.10 (+6.43)** | 70.13 (+3.46) |
+
+Under a fixed learning rate, decaying `λ` helps — especially for SGDM, where a
+constant `λ` is badly mismatched to the lack of LR annealing, and drop-step
+recovers **+6.4** points.
+
+We also apply the same AdamW-style multiplier *jointly* to `η` and `λ`
+(SGDM, `T = 100`): joint cosine peaks at **76.42**, versus **76.72–76.73** for
+cosine LR with a fixed `λ` (our `C/∑η` rule / the common default `5e-4`) and
+**77.28** for an oracle over the same `λ₀` grid. Extending to `T = 200` with
+restarts, joint cosine-with-restarts reaches **76.88**, still in the same range.
+So within-run scheduling is useful when the learning rate is held fixed, but
+under our default cosine-LR setup a constant `λ` already matches or beats it.
+
+That is a different knob from our claim: we select one constant `λ` as a
+function of `(η, T, B)`, whereas these schedules redistribute regularization
+over time. Both can be used together; they do not substitute for each other.
