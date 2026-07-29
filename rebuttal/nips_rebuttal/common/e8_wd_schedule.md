@@ -107,57 +107,11 @@ $PY -m analysis.nips26_e8_wd_sched
 
 ---
 
-## 5. Follow-up（已完成）
+## 5. Follow-up
 
-统一设定：SGDM，`η₀ = 0.1`，`B = 128`，R18/CIFAR-100。完整表见
-[`_data/e8_followup_table.md`](../_data/e8_followup_table.md)。
+Joint multiplier、T=200 restarts、以及与 cosine LR + 常数 λ 的对照，已整理到
+独立报告（**不按 E4 编号叙述**）：
 
-### 5.1 Joint multiplier（同一 `m(t)` 乘 η 与 λ；T=100）
+→ [`scheduled_wd_baselines.md`](scheduled_wd_baselines.md)
 
-更接近 AdamW/SGDW 原文：每个 epoch `η_t = η₀·m(t)`，`λ_t = λ₀·m(t)`（不用
-CosineAnnealingLR）。`fixed` ≡ 常数 LR + 常数 λ（与 §2 SGDM fixed 同点）。
-
-| wd_sched | peak_acc | peak λ₀ | Δ vs fixed |
-|---|---:|---:|---:|
-| fixed | 66.67 | 1e-4 | — |
-| cosine | **76.42** | 1e-3 | **+9.75** |
-| linear | 76.17 | 1e-3 | +9.50 |
-| step | 75.36 | 5e-4 | +8.69 |
-| cosine_restarts | 75.11 | 1e-3 | +8.44 |
-
-要点：joint 退火把 SGDM 从 ~67% 拉到 ~76%；**大部分增益来自 η 退火**，不是
-单独 schedule λ（对照 §2：固定 η 时 step 只到 73.10）。
-
-### 5.2 更长 T / restarts（T=200，joint；`Te=50`, `Tmult=2`）
-
-| wd_sched | peak_acc | peak λ₀ | Δ vs fixed |
-|---|---:|---:|---:|
-| fixed | 62.39 | 5e-4 | — |
-| step | 76.31 | 5e-4 | +13.92 |
-| cosine_restarts | **76.88** | 1e-3 | **+14.49** |
-
-T=200 下 cosine-with-restarts 略优于 step；相对 fixed 的增益更大（固定 η 更久
-更脆）。峰值仍在 ~77%，与 T=100 cosine LR + 常数 λ 同量级。
-
-### 5.3 vs E4：选常数 λ（cosine LR） vs joint schedule
-
-同一 `η₀=0.1`、T=100、SGDM：
-
-| method | best_acc | note |
-|---|---:|---|
-| cosine LR + fixed λ（default 5e-4） | 76.73 | 常用默认 |
-| cosine LR + fixed λ（E4-ours `C/∑η`） | 76.72 | `λ=5.982e-4` |
-| cosine LR + fixed λ（oracle over λ₀） | **77.28** | `λ₀=1e-3` |
-| joint `m(t)=cosine`（peak over λ₀） | 76.42 | AdamW-style |
-| joint `m(t)=linear` | 76.17 | |
-| joint `m(t)=step` | 75.36 | |
-| joint `m(t)=cosine_restarts` | 75.11 | |
-| joint / const LR `fixed` | 66.67 | 无退火 |
-
-**结论（对 xkCF Q3）**：
-
-1. Run 内 schedule λ（或 η+λ 同乘）在**缺 LR 退火**时帮助很大。
-2. 一旦采用主实验设定（**cosine LR + 常数 λ**），E4/默认常数已达
-   **76.7–77.3%**，与 joint cosine **76.42%** 持平或更好——within-run schedule
-   **不替代**跨设置选常数 `λ* ≈ C/∑η`。
-3. E4 测的是后者；E8 测的是前者；二者可组合，叙事上已对齐。
+原始峰表：[`_data/e8_followup_table.md`](../_data/e8_followup_table.md)。
