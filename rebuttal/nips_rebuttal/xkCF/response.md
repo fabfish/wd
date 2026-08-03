@@ -193,3 +193,183 @@ envelope evidence against a fixed default at fixed `T`, and a transfer
 comparison (Q3) that must be read under the two-constraint rule — constant
 product wins on the floor; timescale matching wins where the floor does not
 bind.
+
+---
+
+# Follow-up (2026-08-03)
+
+Three new results, one per point. All three are settled by measurement, and two
+of them change what we claim.
+
+## F1. Is the claim `λ* ∝ B`, or approximately constant `ηλ` when `η ∝ B`?
+
+**The reviewer is right, and we will fix the sentence in Exp. 3.** Our own rule
+predicts what he says it predicts. Writing `Σ_t η_t = η·⌈n/B⌉·(T+1)/2`:
+
+| regime | `Σ_t η_t` vs `B` | predicted `λ*` | predicted `ηλ*` |
+|---|---|---|---|
+| `η` fixed | `∝ 1/B` | `∝ B` | `∝ B` |
+| `η ∝ B` (Exp. 3) | invariant | **flat** | `∝ B` |
+
+So there is one law, `λ* = C/Σ_t η_t`, and two conditional readings of it. We
+measured both, by refitting the 65 optima that already sit behind E5a (no new
+training, `_data/f1_batch_claim.md`):
+
+- **At fixed `η`**, pooled within-(architecture, `η`) slope of `log λ*` on
+  `log B`: **+1.02 [+0.88, +1.15]** against a predicted **+1**, from 11 cells
+  that span more than one batch size.
+- **Along Exp. 3's line `η ∝ B`** (`B = 32…512`, `η = 0.025…0.4`, the same pairs
+  the E4 transfer test uses): `λ*` slope **−0.03 [−0.28, +0.24]** — flat, total
+  spread 1.50× over a 16× range of `B` — while `ηλ*` slope is
+  **+0.97 [+0.72, +1.24]**, spread 15.9×.
+- Pooling across all 65 settings *without* conditioning on `η` gives
+  **+0.23 [−0.05, +0.55]**: the raw scatter shows almost nothing, because the two
+  dependencies cancel. The conditioning is the entire content of the claim.
+
+Concretely, we will delete the clause in Exp. 3 stating that the optimal `λ`
+grows with batch size, and replace it with: under linear learning-rate scaling
+the *product* `ηλ*` grows like `B` while `λ*` itself stays put, because
+`Σ_t η_t` is held fixed; the `λ* ∝ B` reading applies at fixed `η`. That removes
+the apparent conflict between Eq. (17) and Table 4 without weakening either.
+The residual drift of `C` across `B` (1.38, 1.89, 1.40, 1.60, 1.71, i.e. 1.37×)
+is the error bar on both statements.
+
+## F2. A schedule that preserves `η_tλ_t`, and matching by cumulative contraction
+
+**The reviewer is right that the `joint` arm was the wrong control**: it gives
+`η_tλ_t = η₀λ₀·m(t)²`, which does not preserve the coupling. We ran both of his
+suggestions (E9, `_data/e9_table.md`, figure
+`outputs/plots/nips26/e9_iso_matched.png`). Same protocol as the main
+experiments — ResNet-18/CIFAR-100, `B = 128`, `η₀ = 0.1`, `T = 100`, SGDM,
+**cosine learning rate** — so these are comparable to our own default rather
+than to the constant-LR E8 arms.
+
+**(a) `λ_t = λ₀·η₀/η_t`.** The `1/m_cos` factor diverges in the cosine tail, so
+the multiplier is capped at `10×` (equivalently `η` is floored at `η₀/10` inside
+the `λ` formula); `η_tλ_t` is then exactly constant while `η_t ≥ η₀/10`. Stated
+as part of the protocol, not applied silently. Swept over the same
+`λ₀ ∈ {1e-4, 5e-4, 1e-3, 2e-3, 5e-3}`:
+
+| `λ₀` | realized `Σ_t η_tλ_t` | best acc |
+|---:|---:|---:|
+| 1e-4 | 0.29 C | 75.56 |
+| **5e-4** | 1.44 C | **77.98** |
+| 1e-3 | 2.88 C | 77.98 |
+| 2e-3 | 5.76 C | 70.36 |
+| 5e-3 | 14.39 C | 22.13 |
+
+**(b) Matched cumulative contraction.** `Σ_t η_tλ_t` is linear in `λ₀`, so for
+each shape we solve `λ₀ = budget / (⌈n/B⌉·Σ_e η₀ m_cos(e) m_λ(e))` and compare
+at three budgets `{C/3, C, 3C}`, where `C = λ_ref·Σ_t η_t = 1.181` is the
+contraction our own rule already prescribes at this setting. Usefully, the
+`fixed` shape at these three budgets solves to `λ₀ ∈ {1.994e-4, 5.982e-4,
+1.795e-3}`, which are exactly the E5b wrong-`C` points and the E4-ours baseline,
+so that column is the already-reported data rather than new runs:
+
+| budget `Σ_t η_tλ_t` | fixed | cosine | linear | step | **iso-product** |
+|---|---:|---:|---:|---:|---:|
+| `C/3` | 74.62 | 74.34 | 74.43 | 74.16 | **75.86** |
+| `C` | 76.72 | 75.50 | 76.44 | 75.85 | **78.22** |
+| `3C` | 76.19 | 75.03 | 75.53 | 73.97 | **77.50** |
+
+Three things follow, and the first one is not in our favour as a *simplification*
+even though it favours the underlying claim:
+
+1. **Matching the contraction budget is not sufficient.** At a fixed budget the
+   shapes still differ by 1.70 / 2.72 / 3.53 pp. So `Σ_t η_tλ_t` does not
+   summarize a schedule; how the contraction is distributed in time also matters.
+   Spreads at fixed shape across budgets (1.16–2.36 pp) are the same order, so
+   neither factor dominates.
+2. **The shape that preserves the coupling wins at every budget**, by
+   +1.24 / +1.50 / +1.31 pp over a constant `λ` at the same contraction.
+3. Placed against every other arm at the same `η₀`, `T` and optimizer:
+
+| method | best acc |
+|---|---:|
+| **iso-product, matched at `C`** | **78.22** |
+| iso-product, peak over the `λ₀` ladder | 77.98 |
+| cosine LR + constant `λ` (per-cell oracle over `λ₀`) | 77.28 |
+| cosine LR + constant `λ` (default 5e-4) | 76.73 |
+| cosine LR + constant `λ` (ours, `C/Σ_tη_t`) | 76.72 |
+| joint `m(t)` on `η` and `λ` (best shape, cosine) | 76.42 |
+| constant LR + scheduled `λ` (best shape, step) | 73.10 |
+| constant LR + constant `λ` | 66.67 |
+
+The schedule the reviewer proposed as a fairer control turns out to be the best
+arm we have measured: **+0.94** over tuning a constant `λ` per cell and
+**+1.80** over the joint multiplier. We will report the comparison this way and
+retract the `joint`-based framing.
+
+## F3. Held-out `C`: calibrate on small MLPs, predict `λ*` on larger ones
+
+We use MLP **width** as the held-out architecture axis: it moves the parameter
+count by more than an order of magnitude with the data, optimizer and schedule
+untouched. Protocol as in E5c (3-layer ReLU MLP, no normalization, cosine LR,
+`B = 128`). Details and the blindness argument: `common/e10_c_width.md`.
+
+The runner is split into `ladder → predict → heldout`, and the `predict` stage
+writes `λ_pred` with a timestamp to `_data/e10_predictions_<ds>.json` before any
+held-out grid is trained; both files record `blind: true`. Sanity check on the
+pipeline: refitting `C` at `h = 512` on MNIST reproduces the E5c values we
+already reported, 0.440 (SGD) and 0.320 (SGDM), to three digits.
+
+**How `C` moves with width** (calibration rungs only):
+
+| dataset | momentum | `C(128)` | `C(256)` | `C(512)` | slope of `log C` on `log h` |
+|---|---:|---:|---:|---:|---|
+| MNIST | 0 | 0.442 | 0.374 | 0.440 | **−0.00 [−0.24, +0.24]** |
+| MNIST | 0.9 | 0.466 | 0.353 | 0.320 | **−0.27 [−0.40, −0.14]** |
+| CIFAR-10 | 0.9 | — | 2.800 | 2.672 | −0.068 (two rungs, no interval) |
+
+**Blind extrapolation vs `C` measured directly at the held-out width:**
+
+| dataset | momentum | width | `C` predicted | `C` measured | ratio |
+|---|---:|---:|---:|---:|---:|
+| MNIST | 0 | 1024 | 0.416 | 0.325 | 1.28× |
+| MNIST | 0 | 2048 | 0.415 | 0.327 | 1.27× |
+| MNIST | 0.9 | 1024 | 0.257 | 0.244 | 1.05× |
+| MNIST | 0.9 | 2048 | 0.213 | 0.255 | 0.84× |
+| CIFAR-10 | 0.9 | 1024 | 2.549 | 2.479 | **1.03×** |
+
+So `C` transfers across a 4–16× change in width to within **1.3×**, and the
+resulting `λ` is within **1.60×** (MNIST) / **1.14×** (CIFAR-10) of the oracle.
+
+**Does that reduce tuning?** The oracle for each cell is the best weight decay
+anyone measured there — the 5-point ladder *plus* every rule's own `λ` — so no
+rule can look good merely because the ladder is coarse. Cost: 5+ runs per
+(width, momentum, `η`) cell for the oracle, one run for any rule, zero after a
+one-time calibration.
+
+| dataset | rule | mean acc gap (pp) | worst | mean test-loss gap | `λ/λ_oracle` |
+|---|---|---:|---:|---:|---:|
+| MNIST (12 cells) | default 5e-4 | 0.03 | 0.11 | 0.0005 | 1.27× |
+| | `1/(ηT)` | 0.11 | 0.25 | 0.0032 | 2.70× |
+| | constant `ηλ` | 0.06 | 0.20 | 0.0018 | 1.56× |
+| | **ours** | 0.08 | 0.19 | 0.0020 | 1.60× |
+| CIFAR-10 (3 cells) | default 5e-4 | 0.84 | 1.19 | 0.1576 | 0.13× |
+| | `1/(ηT)` | 0.52 | 1.11 | 0.0792 | 0.23× |
+| | constant `ηλ` | 1.49 | 3.73 | **0.0171** | 1.08× |
+| | **ours** | 2.01 | 3.79 | 0.0233 | 1.14× |
+
+Reading this honestly:
+
+- **The prediction of `λ*` is good; the accuracy advantage is not there.** On
+  CIFAR-10 ours and constant-`ηλ` land nearest the loss-oracle `λ` (1.1×) while
+  the default and `1/(ηT)` are off by 4–8×, yet the fixed default gives the
+  smaller *accuracy* gap, because in this setting the accuracy optimum sits at a
+  smaller `λ` than the loss optimum. This is the same pattern as E4
+  (ours 0.87 vs default 0.70) and we do not dress it up.
+- **MNIST cannot discriminate**: all four rules are within 0.11 pp. That is
+  useful negative information — we will not claim an advantage on MNIST-MLP.
+- **The width axis is not where `C` is fragile.** `C` is 0.32–0.44 for
+  MNIST-MLP, 2.5–2.8 for CIFAR-10-MLP, and 1.48 (geometric mean) for
+  CIFAR-100 CNNs: about **8.8×** across families, against ≤1.5× across a 16×
+  width range. So the practical statement is that `C` must be calibrated once
+  per dataset/architecture family, after which it transfers over width, learning
+  rate and training length. One calibration replaces a two-dimensional grid; it
+  does not replace knowing the family.
+- Limits of this test: single seed; the CIFAR-10 ladder has only two rungs, so
+  its slope has no usable interval; and at `η = 0.3` our predicted
+  `λ = 1.402e-3` diverged while `λ = 1.322e-3` converged, i.e. that cell sits on
+  the stability boundary. It is counted as a divergence rather than imputed.
+

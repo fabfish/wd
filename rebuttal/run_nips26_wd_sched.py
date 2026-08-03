@@ -1,20 +1,35 @@
 """
-E8: fixed weight decay vs scheduled weight decay (AdamW/SGDW schedule shapes).
+E8/E9: fixed weight decay vs scheduled weight decay (AdamW/SGDW schedule shapes).
 
 Modes:
   --lr_mode const   LR fixed; only lambda is scheduled (original E8)
   --lr_mode joint   same multiplier m(t) applied to both lr and weight_decay
                     (AdamW/SGDW SetScheduleMultiplier); no CosineAnnealingLR
   --lr_mode cosine  CosineAnnealingLR on eta; lambda constant (E4-style baseline)
+  --lr_mode cos_shape  cosine eta driven manually, lambda follows an arbitrary
+                    shape m_lambda(t). Used by E9 so that the cumulative
+                    contraction sum_t eta_t lambda_t is known analytically
+                    before the run starts. Writes scheduler='cosine' to the CSV
+                    because the learning-rate trajectory is bit-identical to
+                    CosineAnnealingLR (both step once per epoch).
+
+E9 answers reviewer xkCF's follow-up that the `joint` arm gives
+eta_t*lambda_t = eta_0*lambda_0*m(t)^2 and therefore does *not* preserve the
+coupling our rule is about. Two sweeps:
+
+  --sweep iso      lambda_t = lambda_0 * eta_0/eta_t, i.e. eta_t*lambda_t held
+                   constant (clipped in the cosine tail, see ISO_M_FLOOR)
+  --sweep matched  every lambda shape is rescaled so that all methods share the
+                   same cumulative contraction sum_t eta_t lambda_t
 
 Phases:
   --phase sgd|sgdm|all
-  --sweep joint|long|e4_baselines|const  (what grid to build)
+  --sweep joint|long|e4_baselines|const|iso|matched  (what grid to build)
 
 Usage:
-  python rebuttal/run_nips26_wd_sched.py --sweep joint --phase sgdm --gpus 0,1,2,3
-  python rebuttal/run_nips26_wd_sched.py --sweep long  --phase sgdm --gpus 0,1,2,3
-  python rebuttal/run_nips26_wd_sched.py --sweep e4_baselines --phase sgdm --gpus 0,1,2,3
+  python rebuttal/run_nips26_wd_sched.py --sweep joint --phase sgdm --gpus 1,2,3
+  python rebuttal/run_nips26_wd_sched.py --sweep iso     --phase sgdm --gpus 1,2,3
+  python rebuttal/run_nips26_wd_sched.py --sweep matched --phase sgdm --gpus 1,2,3
 """
 import argparse
 import csv
@@ -63,6 +78,20 @@ RESTART_TMULT = 2
 # E4-ours reference lambda (C / sum_lr at R18 B=128 eta=0.1 T=100 cosine).
 E4_OURS_LAMBDA = 5.982e-4
 
+CIFAR100_TRAIN_N = 50000
+
+# --- E9 (xkCF follow-up) -------------------------------------------------
+# iso-product arm: lambda_t = lambda_0 / m_cos(t) diverges as the cosine tail
+# goes to zero, so the multiplier is capped at 1/ISO_M_FLOOR. The product
+# eta_t*lambda_t is then exactly constant while eta_t >= ISO_M_FLOOR*eta_0 and
+# decays like the learning rate afterwards. The cap is part of the reported
+# protocol, not a silent fix.
+ISO_M_FLOOR = 0.1
+
+# matched-contraction arm: shapes compared at a common budget sum_t eta_t lambda_t.
+E9_SHAPES = ['fixed', 'cosine', 'linear', 'step', 'iso_product']
+E9_BUDGET_FACTORS = [1.0 / 3.0, 1.0, 3.0]
+
 
 def wd_multiplier(wd_sched, epoch, epochs, te=RESTART_TE, tmult=RESTART_TMULT):
     """Return m(t) in [0, 1] for a 0-based epoch index."""
@@ -100,6 +129,77 @@ def make_multiplier_fns(wd_sched, lr0, lambda0, epochs):
         return float(lr0) * wd_multiplier(wd_sched, epoch, epochs)
 
     return lr_fn, wd_fn
+
+
+# --- E9 helpers ----------------------------------------------------------
+
+def cosine_lr_multiplier(epoch, epochs):
+    """CosineAnnealingLR's per-epoch multiplier, stepped once per epoch."""
+    return 0.5 * (1.0 + math.cos(math.pi * float(epoch) / float(epochs)))
+
+
+def wd_shape_multiplier(wd_sched, epoch, epochs, m_floor=ISO_M_FLOOR):
+    """
+    m_lambda(t) for the E9 shapes, on top of a cosine learning rate.
+
+    'iso_product' is reviewer xkCF's suggestion lambda_t = lambda_0*eta_0/eta_t,
+    which makes eta_t*lambda_t constant. The 1/m_cos blow-up in the tail is
+    capped at 1/m_floor.
+    """
+    if wd_sched == 'iso_product':
+        m = cosine_lr_multiplier(epoch, epochs)
+        return 1.0 / max(m, float(m_floor))
+    return wd_multiplier(wd_sched, epoch, epochs)
+
+
+def make_cos_shape_fns(wd_sched, lr0, lambda0, epochs):
+    """Cosine eta driven by hand, lambda following m_lambda(t)."""
+    def lr_fn(epoch):
+        return float(lr0) * cosine_lr_multiplier(epoch, epochs)
+
+    def wd_fn(epoch):
+        return float(lambda0) * wd_shape_multiplier(wd_sched, epoch, epochs)
+
+    return lr_fn, wd_fn
+
+
+def contraction_sum(lr0, lambda0, epochs, batch_size, wd_sched,
+                    n=CIFAR100_TRAIN_N):
+    """
+    sum_t eta_t*lambda_t accumulated over optimizer steps, for a cosine eta.
+
+    Computed the same way the training loop applies the two schedules (one value
+    per epoch, steps_per_epoch steps each), so the budget used to pick lambda_0
+    is the budget the run actually spends.
+    """
+    steps = math.ceil(float(n) / float(batch_size))
+    total = 0.0
+    for epoch in range(int(epochs)):
+        eta = float(lr0) * cosine_lr_multiplier(epoch, epochs)
+        lam = float(lambda0) * wd_shape_multiplier(wd_sched, epoch, epochs)
+        total += eta * lam
+    return total * steps
+
+
+def solve_lambda0_for_budget(budget, lr0, epochs, batch_size, wd_sched,
+                             n=CIFAR100_TRAIN_N, sig=4):
+    """lambda_0 such that contraction_sum(...) == budget (linear in lambda_0)."""
+    unit = contraction_sum(lr0, 1.0, epochs, batch_size, wd_sched, n=n)
+    if unit <= 0:
+        raise ValueError(f'degenerate shape {wd_sched}')
+    return float(f'%.{sig}g' % (float(budget) / unit))
+
+
+def e9_budget_anchor(lr0=0.1, epochs=100, batch_size=128, n=CIFAR100_TRAIN_N):
+    """
+    The reference contraction budget C = lambda_ref * sum_t eta_t.
+
+    Anchored on E4_OURS_LAMBDA rather than refitted, so that the `fixed` shape
+    at budget 1.0*C is *literally* the E4/E8 baseline run already in the CSV
+    (same RUN_KEY) and is reused instead of retrained. `analysis.nips26_lib.
+    reference_point()['C']` agrees with this to 0.3%.
+    """
+    return contraction_sum(lr0, E4_OURS_LAMBDA, epochs, batch_size, 'fixed', n=n)
 
 
 def cfg_key(cfg):
@@ -172,9 +272,10 @@ def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
              lr_mode='const', exp=None):
     """
     lr_mode:
-      const  -> scheduler='const'   (fixed LR; schedule only WD)
-      joint  -> scheduler='joint'   (same m(t) on LR and WD)
-      cosine -> scheduler='cosine'  (CosineAnnealingLR; WD constant)
+      const     -> scheduler='const'   (fixed LR; schedule only WD)
+      joint     -> scheduler='joint'   (same m(t) on LR and WD)
+      cosine    -> scheduler='cosine'  (CosineAnnealingLR; WD constant)
+      cos_shape -> scheduler='cosine'  (cosine LR by hand; WD follows a shape)
     """
     if momentum > 0:
         method = 'SGDM+WD' if lambda0 > 0 else 'SGDM'
@@ -185,13 +286,23 @@ def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
             exp = 'e8_joint'
         elif lr_mode == 'cosine':
             exp = 'e8_e4_baseline'
+        elif lr_mode == 'cos_shape':
+            exp = 'e9_cos_shape'
         else:
             exp = 'e8_wd_sched'
+    # cos_shape is numerically the same learning-rate trajectory as
+    # CosineAnnealingLR, so it shares the 'cosine' scheduler label. That is what
+    # lets the matched-contraction `fixed` arm dedup against the existing
+    # E4/E8 baseline row instead of retraining it.
+    scheduler_col = {
+        'const': 'const', 'joint': 'joint',
+        'cosine': 'cosine', 'cos_shape': 'cosine',
+    }.get(lr_mode, 'const')
     return {
         'model': model, 'dataset': dataset, 'method': method,
         'batch_size': int(batch_size), 'lr': float(lr), 'wd': float(lambda0),
         'momentum': float(momentum), 'epochs': int(epochs),
-        'scheduler': lr_mode if lr_mode in ('const', 'joint', 'cosine') else 'const',
+        'scheduler': scheduler_col,
         'seed': int(seed), 'wd_sched': wd_sched, 'exp': exp,
         'lr_mode': lr_mode,
         'num_workers': DEFAULT_NUM_WORKERS,
@@ -205,6 +316,9 @@ def build_cfgs(sweep, phase):
       joint         joint multiplier, T=100, SGDM schedules × λ0 grid
       long          joint, T=200, fixed/step/restarts × thin λ0
       e4_baselines  cosine LR + fixed λ in {E4-ours, 5e-4} (+ λ0 grid optional)
+      iso           E9a: cosine LR, λ_t = λ0·η0/η_t (constant η_t·λ_t) × λ0 grid
+      matched       E9b: cosine LR, every shape rescaled to a common budget
+                    sum_t η_t·λ_t ∈ {C/3, C, 3C}
     """
     momenta = []
     if phase in ('sgd', 'all'):
@@ -241,6 +355,23 @@ def build_cfgs(sweep, phase):
                 cfgs.append(make_cfg(
                     'fixed', lam0, momentum, epochs=100, lr_mode='cosine',
                     exp='e8_e4_baseline'))
+    elif sweep == 'iso':
+        for momentum in momenta:
+            for lam0 in LAMBDA0_GRID:
+                cfgs.append(make_cfg(
+                    'iso_product', lam0, momentum, epochs=100,
+                    lr_mode='cos_shape', exp='e9_iso'))
+    elif sweep == 'matched':
+        anchor = e9_budget_anchor()
+        for momentum in momenta:
+            for factor in E9_BUDGET_FACTORS:
+                budget = factor * anchor
+                for wd_sched in E9_SHAPES:
+                    lam0 = solve_lambda0_for_budget(
+                        budget, 0.1, 100, 128, wd_sched)
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e9_matched'))
     else:
         raise ValueError(f'unknown sweep={sweep}')
     return cfgs
@@ -272,6 +403,11 @@ def run_one(cfg):
             cfg['wd_sched'], cfg['lr'], cfg['wd'], cfg['epochs'])
     elif lr_mode == 'const':
         _, wd_fn = make_multiplier_fns(
+            cfg['wd_sched'], cfg['lr'], cfg['wd'], cfg['epochs'])
+    elif lr_mode == 'cos_shape':
+        # Cosine eta by hand (scheduler=None, or it would anneal twice) so that
+        # the contraction budget is known analytically before the run.
+        lr_fn, wd_fn = make_cos_shape_fns(
             cfg['wd_sched'], cfg['lr'], cfg['wd'], cfg['epochs'])
     elif lr_mode == 'cosine':
         lr_sched = CosineAnnealingLR(optimizer, T_max=cfg['epochs'])
@@ -351,11 +487,13 @@ def run_grid(cfgs, gpu_ids, workers_per_gpu, csv_path, logger, label=''):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='E8 scheduled weight-decay sweep')
-    parser.add_argument('--sweep', choices=['const', 'joint', 'long', 'e4_baselines'],
+    parser = argparse.ArgumentParser(description='E8/E9 scheduled weight-decay sweep')
+    parser.add_argument('--sweep',
+                        choices=['const', 'joint', 'long', 'e4_baselines',
+                                 'iso', 'matched'],
                         default='const')
     parser.add_argument('--phase', choices=['sgd', 'sgdm', 'all'], default='sgdm')
-    parser.add_argument('--gpus', type=str, default='0,1,2,3')
+    parser.add_argument('--gpus', type=str, default='1,2,3')
     parser.add_argument('--workers_per_gpu', type=int, default=2)
     parser.add_argument('--csv', type=str, default=str(DEFAULT_CSV))
     parser.add_argument('--dry_run', action='store_true')
@@ -366,6 +504,16 @@ def main():
     cfgs = build_cfgs(args.sweep, args.phase)
     logger.info(f'sweep={args.sweep} phase={args.phase} gpus={gpu_ids} '
                 f'workers_per_gpu={args.workers_per_gpu} n_cfgs={len(cfgs)}')
+    if args.sweep in ('iso', 'matched'):
+        anchor = e9_budget_anchor()
+        logger.info(f'E9 contraction anchor C = {anchor:.6g} '
+                    f'(= {E4_OURS_LAMBDA:g} x sum_lr)')
+        for c in cfgs:
+            spent = contraction_sum(c['lr'], c['wd'], c['epochs'],
+                                    c['batch_size'], c['wd_sched'])
+            logger.info(f"  plan mom={c['momentum']} shape={c['wd_sched']:>14s} "
+                        f"lam0={c['wd']:.4g} sum_eta_lambda={spent:.4g} "
+                        f"({spent / anchor:.3f} C)")
 
     run_grid._dry_run = args.dry_run
     ensure_csv_schema(args.csv)
