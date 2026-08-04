@@ -198,41 +198,8 @@ bind.
 
 # Follow-up (2026-08-03)
 
-Three new results, one per point. All three are settled by measurement, and two
-of them change what we claim.
-
-## F1. Is the claim `λ* ∝ B`, or approximately constant `ηλ` when `η ∝ B`?
-
-**The reviewer is right, and we will fix the sentence in Exp. 3.** Our own rule
-predicts what he says it predicts. Writing `Σ_t η_t = η·⌈n/B⌉·(T+1)/2`:
-
-| regime | `Σ_t η_t` vs `B` | predicted `λ*` | predicted `ηλ*` |
-|---|---|---|---|
-| `η` fixed | `∝ 1/B` | `∝ B` | `∝ B` |
-| `η ∝ B` (Exp. 3) | invariant | **flat** | `∝ B` |
-
-So there is one law, `λ* = C/Σ_t η_t`, and two conditional readings of it. We
-measured both, by refitting the 65 optima that already sit behind E5a (no new
-training, `_data/f1_batch_claim.md`):
-
-- **At fixed `η`**, pooled within-(architecture, `η`) slope of `log λ*` on
-  `log B`: **+1.02 [+0.88, +1.15]** against a predicted **+1**, from 11 cells
-  that span more than one batch size.
-- **Along Exp. 3's line `η ∝ B`** (`B = 32…512`, `η = 0.025…0.4`, the same pairs
-  the E4 transfer test uses): `λ*` slope **−0.03 [−0.28, +0.24]** — flat, total
-  spread 1.50× over a 16× range of `B` — while `ηλ*` slope is
-  **+0.97 [+0.72, +1.24]**, spread 15.9×.
-- Pooling across all 65 settings *without* conditioning on `η` gives
-  **+0.23 [−0.05, +0.55]**: the raw scatter shows almost nothing, because the two
-  dependencies cancel. The conditioning is the entire content of the claim.
-
-Concretely, we will delete the clause in Exp. 3 stating that the optimal `λ`
-grows with batch size, and replace it with: under linear learning-rate scaling
-the *product* `ηλ*` grows like `B` while `λ*` itself stays put, because
-`Σ_t η_t` is held fixed; the `λ* ∝ B` reading applies at fixed `η`. That removes
-the apparent conflict between Eq. (17) and Table 4 without weakening either.
-The residual drift of `C` across `B` (1.38, 1.89, 1.40, 1.60, 1.71, i.e. 1.37×)
-is the error bar on both statements.
+Two new results, both settled by measurement. F2 replaces the scheduled-weight-decay
+control we had used; F3 is a held-out test of the rule's transfer.
 
 ## F2. A schedule that preserves `η_tλ_t`, and matching by cumulative contraction
 

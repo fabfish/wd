@@ -46,14 +46,13 @@ value of every token that can already be resolved.
 
 E8 scheduled-WD 对比见 [`common/e8_wd_schedule.md`](common/e8_wd_schedule.md)（无 `[[TOKEN]]`，数字已写死）。
 
-## Follow-up 2026-08-03（reviewer xkCF 的三点）
+## Follow-up 2026-08-03（reviewer xkCF：E9 / E10 两点）
 
-F1/E9/E10 的数字**全部由脚本产出**，已直接写进 `xkCF/response.md` 的
+E9/E10 的数字**全部由脚本产出**，已直接写进 `xkCF/response.md` 的
 "Follow-up (2026-08-03)" 一节（无未解析占位符）。来源与复现口径：
 
 | 组 | 生成脚本 | 产物 | 关键数字 |
 |---|---|---|---|
-| **F1** `λ*∝B` 的成立条件 | `analysis/nips26_f1_batch_claim.py` | `_data/f1_batch_claim.{md,csv}` | 固定 η：slope **+1.02[+0.88, +1.15]**（预测 +1）；`η∝B` 线上：λ* **−0.03 [−0.28, +0.24]**（预测 flat）、`ηλ*` **+0.97 [+0.72, +1.24]**；不分条件的裸回归 +0.23 |
 | **E9** iso-product / matched-contraction | `rebuttal/run_nips26_wd_sched.py --sweep iso\|matched` → `analysis/nips26_e9_iso_sched.py` | `_data/e9_iso_matched.csv`、`_data/e9_table.md`、`_data/e9_tokens.md`、`outputs/plots/nips26/e9_iso_matched.png` | `C = 1.181`；matched 最佳 **78.22**（iso @ `C`）；同预算跨形状 spread **1.70 / 2.72 / 3.53 pp**；iso 梯峰值 **77.98** |
 | **E10** held-out `C`（宽度） | `mlp_wd/scripts/run_e10_c_width.py` → `mlp_wd/analysis/report_e10_c_width.py` | `_data/e10_predictions_{mnist,cifar10}.json`、`_data/e10_heldout_table_*.md`、`_data/e10_heldout_*.csv`、`_data/e10_C_by_width_*.csv`、`_data/e10_tokens_*.md`、`outputs/plots/nips26/e10_c_width_*.png` | C-vs-width slope **−0.00 [−0.24,+0.24]**(SGD) / **−0.27 [−0.40,−0.14]**(SGDM)；C 外推误差 **1.03–1.28×**；gap(ours) MNIST **0.08/0.19 pp**、CIFAR-10 **2.01/3.79 pp** |
 
@@ -64,9 +63,11 @@ F1/E9/E10 的数字**全部由脚本产出**，已直接写进 `xkCF/response.md
 连时间戳写入 `_data/e10_predictions_<ds>.json`，两份文件均为 `blind: true`；
 `predict` 默认拒绝覆盖已有预测文件。
 
-**F1 引起的正文修改（必须落到 paper）**：删掉 Exp. 3 中「optimal `λ` grows with
-batch size」这句，改为「在线性 LR scaling 下 `ηλ*` 随 B 增长而 `λ*` 基本不动，
-因为 `Σ_tη_t` 被固定住了；`λ*∝B` 是**固定 η** 下的读法」。
+**需要改正文（paper edit，自行修正，非审稿意见）**：删掉 Exp. 3 中
+「optimal `λ` grows with batch size」这句，改为「在线性 LR scaling 下 `ηλ*`
+随 B 增长而 `λ*` 基本不动，因为 `Σ_tη_t` 被固定住了；`λ*∝B` 是**固定 η** 下的
+读法」。C 在 B 上的残余漂移 1.38/1.89/1.40/1.60/1.71 与已发布数字逐字一致，
+不存在 Eq.(17) 与 Table 4 的矛盾，故 reviewer 的 F1 不采纳。
 
 ## Numbers that are already measured
 
