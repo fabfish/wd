@@ -1,0 +1,13 @@
+tag,phase,wd_sched,peak_acc,peak_lambda0,n,delta_vs_fixed42,note
+fixed_seed42,SGDM,fixed,77.45,0.0006,27,0.0,"oracle over available lambdas, seed 42 (control)"
+fixed_allseeds,SGDM,fixed,77.84,0.0006,34,0.39000000000000057,"oracle over available lambdas, all seeds"
+e11_raise,SGDM,linear_up,78.28,0.005,8,0.8299999999999983,
+e11_raise,SGDM,cosine_up,78.09,0.005,8,0.6400000000000006,
+e11_raise,SGDM,step_up,77.39,0.01,8,-0.060000000000002274,
+e9_iso,SGDM,iso_product,78.22,0.0003475,14,0.769999999999996,analytic raise-up lambda0*eta0/eta_t (reference)
+fixed_seed42,SGD,fixed,77.75,0.005,8,0.0,"oracle over available lambdas, seed 42 (control)"
+fixed_allseeds,SGD,fixed,77.75,0.005,8,0.0,"oracle over available lambdas, all seeds"
+e11_raise,SGD,linear_up,77.94,0.02,8,0.18999999999999773,
+e11_raise,SGD,cosine_up,77.91,0.02,8,0.1599999999999966,
+e11_raise,SGD,step_up,76.73,0.05,8,-1.019999999999996,
+e9_iso,SGD,iso_product,78.01,0.005212,13,0.2600000000000051,analytic raise-up lambda0*eta0/eta_t (reference)

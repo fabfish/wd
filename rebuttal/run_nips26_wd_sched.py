@@ -22,14 +22,27 @@ coupling our rule is about. Two sweeps:
   --sweep matched  every lambda shape is rescaled so that all methods share the
                    same cumulative contraction sum_t eta_t lambda_t
 
+E11 raise-up arm (does weight decay matter more early or late?):
+  --sweep raise    cosine LR, lambda ramps UP 0 -> lambda_0 over the run
+                   (linear_up / cosine_up / step_up). Compared against the
+                   fixed-lambda cosine-LR rows already in the CSV (best fixed
+                   lambda is the oracle control; the 5e-4 default is not).
+  --sweep raise_big       same shapes, larger lambda0 grid {1e-2, 2e-2, 5e-2}
+  --sweep raise_matched   raise-up shapes rescaled to budgets {C/3, C, 3C}
+  --sweep raise_ms        peak configs + fixed control, rerun across --seeds
+
 Phases:
   --phase sgd|sgdm|all
-  --sweep joint|long|e4_baselines|const|iso|matched  (what grid to build)
+  --sweep joint|long|e4_baselines|const|iso|matched|raise|raise_big|raise_matched|raise_ms
+  --seeds 42,123,...     build every cfg once per seed (default 42 only)
 
 Usage:
   python rebuttal/run_nips26_wd_sched.py --sweep joint --phase sgdm --gpus 1,2,3
   python rebuttal/run_nips26_wd_sched.py --sweep iso     --phase sgdm --gpus 1,2,3
   python rebuttal/run_nips26_wd_sched.py --sweep matched --phase sgdm --gpus 1,2,3
+  python rebuttal/run_nips26_wd_sched.py --sweep raise   --phase sgdm --gpus 6
+  python rebuttal/run_nips26_wd_sched.py --sweep raise_ms --phase sgdm \
+      --seeds 42,123,2024 --csv rebuttal/results/nips26_e11_runs.csv
 """
 import argparse
 import csv
@@ -92,6 +105,25 @@ ISO_M_FLOOR = 0.1
 E9_SHAPES = ['fixed', 'cosine', 'linear', 'step', 'iso_product']
 E9_BUDGET_FACTORS = [1.0 / 3.0, 1.0, 3.0]
 
+# E11: raise-up lambda shapes (m: 0 -> 1) under a cosine learning rate.
+RAISE_SCHEDULES = ['linear_up', 'cosine_up', 'step_up']
+# Extension arm: raise-up peaks sat at the 5e-3 grid edge, so probe larger lambda0.
+RAISE_LAMBDA0_BIG = [1e-2, 2e-2, 5e-2]
+# E11 multi-seed arm: per-shape peak configs from the seed-42 grid plus the
+# fixed-lambda control, rerun across seeds to size the seed noise.
+RAISE_PEAK_CONFIGS = [
+    ('linear_up', 5e-3),
+    ('cosine_up', 5e-3),
+    ('step_up', 1e-2),
+    ('fixed', 6e-4),
+]
+# E11 matched arm: denser budget ladder than E9's {C/3, C, 3C} -- the SGDM
+# raise-up optimum sits between C and 3C, and the SGD optimum at/above 3C.
+E11_BUDGET_FACTORS = [1.0 / 3.0, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0]
+# E11 XL arm: SGD raise-up shapes had NOT collapsed at 9C; probe the upper
+# bound of the contraction budget.
+E11_BUDGET_FACTORS_XL = [15.0, 25.0, 40.0, 60.0]
+
 
 def wd_multiplier(wd_sched, epoch, epochs, te=RESTART_TE, tmult=RESTART_TMULT):
     """Return m(t) in [0, 1] for a 0-based epoch index."""
@@ -110,6 +142,18 @@ def wd_multiplier(wd_sched, epoch, epochs, te=RESTART_TE, tmult=RESTART_TMULT):
         if frac < 0.75:
             return 0.1
         return 0.01
+    # E11 raise-up shapes: m(t) climbs 0 -> 1, lambda0 is the end-of-run peak.
+    if wd_sched == 'linear_up':
+        return min(1.0, t / T)
+    if wd_sched == 'cosine_up':
+        return 0.5 * (1.0 - math.cos(math.pi * t / T))
+    if wd_sched == 'step_up':
+        frac = t / T
+        if frac < 0.5:
+            return 0.01
+        if frac < 0.75:
+            return 0.1
+        return 1.0
     if wd_sched == 'cosine_restarts':
         remaining = t
         Ti = float(te)
@@ -309,7 +353,7 @@ def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
     }
 
 
-def build_cfgs(sweep, phase):
+def build_cfgs(sweep, phase, seeds=(42,)):
     """
     sweep:
       const         original E8 (fixed LR, all 5 WD schedules)
@@ -319,6 +363,15 @@ def build_cfgs(sweep, phase):
       iso           E9a: cosine LR, λ_t = λ0·η0/η_t (constant η_t·λ_t) × λ0 grid
       matched       E9b: cosine LR, every shape rescaled to a common budget
                     sum_t η_t·λ_t ∈ {C/3, C, 3C}
+      raise         E11: cosine LR, λ ramps up (linear_up/cosine_up/step_up)
+                    × λ0 grid; fixed-λ control already exists in the CSV
+      raise_big     E11 extension: same shapes × λ0 ∈ {1e-2, 2e-2, 5e-2}
+      raise_matched E11: raise-up shapes rescaled to the dense budget ladder
+                    E11_BUDGET_FACTORS {C/3, C, 1.5C, ..., 9C}
+      raise_matched_iso  same dense ladder for iso_product only (the
+                    theory-predicted hyperbolic raise-up shape)
+      raise_matched_xl   E11 upper-bound probe: 4 raise shapes × {15..60}C
+      raise_ms      E11 multi-seed: RAISE_PEAK_CONFIGS × --seeds
     """
     momenta = []
     if phase in ('sgd', 'all'):
@@ -372,9 +425,82 @@ def build_cfgs(sweep, phase):
                     cfgs.append(make_cfg(
                         wd_sched, lam0, momentum, epochs=100,
                         lr_mode='cos_shape', exp='e9_matched'))
+    elif sweep == 'raise':
+        # E11: cosine LR, lambda ramps UP (m: 0 -> 1, lambda0 = end peak).
+        # The fixed-lambda cosine-LR control is already in the CSV (legacy
+        # e1/e5b rows + e8_e4_baseline), so no 'fixed' arm is rebuilt here.
+        for momentum in momenta:
+            for wd_sched in RAISE_SCHEDULES:
+                for lam0 in LAMBDA0_GRID:
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e11_raise'))
+    elif sweep == 'raise_big':
+        # E11 extension: larger lambda0 for the raise-up shapes (same exp tag
+        # so analysis picks both arms up together).
+        for momentum in momenta:
+            for wd_sched in RAISE_SCHEDULES:
+                for lam0 in RAISE_LAMBDA0_BIG:
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e11_raise'))
+    elif sweep == 'raise_matched':
+        # E11 matched-budget arm: raise-up shapes rescaled to a common
+        # contraction budget sum_t eta_t*lambda_t over E11_BUDGET_FACTORS
+        # (a denser ladder than E9 'matched'; existing factors dedup away).
+        anchor = e9_budget_anchor()
+        for momentum in momenta:
+            for factor in E11_BUDGET_FACTORS:
+                budget = factor * anchor
+                for wd_sched in RAISE_SCHEDULES:
+                    lam0 = solve_lambda0_for_budget(
+                        budget, 0.1, 100, 128, wd_sched)
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e11_matched'))
+    elif sweep == 'raise_matched_iso':
+        # E11 dense-budget arm for the theory-predicted hyperbolic raise-up
+        # shape iso_product (lambda_t = lambda0*eta0/eta_t, capped), run
+        # separately so it never duplicates an in-flight raise_matched queue.
+        anchor = e9_budget_anchor()
+        for momentum in momenta:
+            for factor in E11_BUDGET_FACTORS:
+                budget = factor * anchor
+                lam0 = solve_lambda0_for_budget(
+                    budget, 0.1, 100, 128, 'iso_product')
+                cfgs.append(make_cfg(
+                    'iso_product', lam0, momentum, epochs=100,
+                    lr_mode='cos_shape', exp='e11_matched'))
+    elif sweep == 'raise_matched_xl':
+        # E11 upper-bound probe: all raise-up shapes (incl. iso_product) at
+        # extreme budgets, to find where SGD finally collapses.
+        anchor = e9_budget_anchor()
+        for momentum in momenta:
+            for factor in E11_BUDGET_FACTORS_XL:
+                budget = factor * anchor
+                for wd_sched in RAISE_SCHEDULES + ['iso_product']:
+                    lam0 = solve_lambda0_for_budget(
+                        budget, 0.1, 100, 128, wd_sched)
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e11_matched'))
+    elif sweep == 'raise_ms':
+        # E11 multi-seed arm: peak configs plus the fixed-lambda control,
+        # across --seeds. seed=42 rows dedup against the existing grid runs.
+        for momentum in momenta:
+            for wd_sched, lam0 in RAISE_PEAK_CONFIGS:
+                cfgs.append(make_cfg(
+                    wd_sched, lam0, momentum, epochs=100,
+                    lr_mode='cos_shape', exp='e11_raise_ms'))
     else:
         raise ValueError(f'unknown sweep={sweep}')
-    return cfgs
+    out = []
+    for seed in seeds:
+        for cfg in cfgs:
+            c = dict(cfg)
+            c['seed'] = int(seed)
+            out.append(c)
+    return out
 
 
 def run_one(cfg):
@@ -487,28 +613,39 @@ def run_grid(cfgs, gpu_ids, workers_per_gpu, csv_path, logger, label=''):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='E8/E9 scheduled weight-decay sweep')
+    parser = argparse.ArgumentParser(description='E8/E9/E11 scheduled weight-decay sweep')
     parser.add_argument('--sweep',
                         choices=['const', 'joint', 'long', 'e4_baselines',
-                                 'iso', 'matched'],
+                                 'iso', 'matched', 'raise', 'raise_big',
+                                 'raise_matched', 'raise_matched_iso',
+                                 'raise_matched_xl', 'raise_ms'],
                         default='const')
     parser.add_argument('--phase', choices=['sgd', 'sgdm', 'all'], default='sgdm')
     parser.add_argument('--gpus', type=str, default='1,2,3')
     parser.add_argument('--workers_per_gpu', type=int, default=2)
+    parser.add_argument('--seeds', type=str, default='42',
+                        help='comma-separated seed list; each cfg is built per seed')
     parser.add_argument('--csv', type=str, default=str(DEFAULT_CSV))
     parser.add_argument('--dry_run', action='store_true')
     args = parser.parse_args()
 
     logger = get_logger(f'nips26_e8_{args.sweep}_{args.phase}')
     gpu_ids = parse_gpu_ids(args.gpus)
-    cfgs = build_cfgs(args.sweep, args.phase)
+    seeds = [int(s) for s in args.seeds.split(',') if s.strip()]
+    cfgs = build_cfgs(args.sweep, args.phase, seeds=seeds)
     logger.info(f'sweep={args.sweep} phase={args.phase} gpus={gpu_ids} '
-                f'workers_per_gpu={args.workers_per_gpu} n_cfgs={len(cfgs)}')
-    if args.sweep in ('iso', 'matched'):
+                f'seeds={seeds} workers_per_gpu={args.workers_per_gpu} '
+                f'n_cfgs={len(cfgs)}')
+    if args.sweep in ('iso', 'matched', 'raise_matched'):
         anchor = e9_budget_anchor()
         logger.info(f'E9 contraction anchor C = {anchor:.6g} '
                     f'(= {E4_OURS_LAMBDA:g} x sum_lr)')
+        seen_plans = set()
         for c in cfgs:
+            plan_key = (c['momentum'], c['wd_sched'], c['wd'])
+            if plan_key in seen_plans:
+                continue
+            seen_plans.add(plan_key)
             spent = contraction_sum(c['lr'], c['wd'], c['epochs'],
                                     c['batch_size'], c['wd_sched'])
             logger.info(f"  plan mom={c['momentum']} shape={c['wd_sched']:>14s} "
