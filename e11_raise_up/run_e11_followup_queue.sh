@@ -6,7 +6,7 @@ cd /home/yzy/Documents/GitHub/wd
 PY=/home/yzy/anaconda3/envs/nm/bin/python
 GPUS=${GPUS:-1,2}
 WPG=${WPG:-3}
-CSV=rebuttal/results/nips26_e11_runs.csv
+CSV=e11_raise_up/results/nips26_e11_runs.csv
 LOGDIR=outputs/logs
 mkdir -p "$LOGDIR"
 

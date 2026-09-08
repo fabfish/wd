@@ -14,12 +14,12 @@ E8/E9 回答的是"衰减形 λ 调度 vs 固定 λ"。E11 问一个反向的问
 
 | 项 | 路径 |
 |---|---|
-| Runner | [`rebuttal/run_nips26_wd_sched.py`](../../run_nips26_wd_sched.py)(`--sweep raise` / `raise_big` / `raise_matched` / `raise_matched_iso` / `raise_matched_xl` / `raise_ms`,新增 `--seeds`) |
-| 队列脚本 | [`rebuttal/run_e11_queue.sh`](../../run_e11_queue.sh)、[`run_e11_followup_queue.sh`](../../run_e11_followup_queue.sh)、[`run_e11_matched_dense_queue.sh`](../../run_e11_matched_dense_queue.sh)、[`run_e11_iso_dense_queue.sh`](../../run_e11_iso_dense_queue.sh) |
-| 分析 | [`analysis/nips26_e11_wd_raise.py`](../../../analysis/nips26_e11_wd_raise.py) |
-| 训练 CSV | `rebuttal/results/nips26_e11_runs.csv`(**E11 专用**,为 nips26_runs.csv 的超集拷贝;原 CSV 冻结未动) |
-| 结果表 | [`_data/e11_wd_raise_table.md`](../_data/e11_wd_raise_table.md)、[`_data/e11_matched_table.md`](../_data/e11_matched_table.md)、[`_data/e11_multiseed_table.md`](../_data/e11_multiseed_table.md) |
-| 图 | `outputs/plots/nips26/e11_wd_raise_{sgdm,sgd}.png`、`e11_matched_budget_{sgdm,sgd}.png`、`e11_contraction_trajectories.png` |
+| Runner | [`rebuttal/run_nips26_wd_sched.py`](../rebuttal/run_nips26_wd_sched.py)(`--sweep raise` / `raise_big` / `raise_matched` / `raise_matched_iso` / `raise_matched_xl` / `raise_ms`,新增 `--seeds`) |
+| 队列脚本 | [`run_e11_queue.sh`](run_e11_queue.sh)、[`run_e11_followup_queue.sh`](run_e11_followup_queue.sh)、[`run_e11_matched_dense_queue.sh`](run_e11_matched_dense_queue.sh)、[`run_e11_iso_dense_queue.sh`](run_e11_iso_dense_queue.sh)(本目录) |
+| 分析 | [`analysis/nips26_e11_wd_raise.py`](../analysis/nips26_e11_wd_raise.py) |
+| 训练 CSV | [`results/nips26_e11_runs.csv`](results/nips26_e11_runs.csv)(**E11 专用**,为 nips26_runs.csv 的超集拷贝;原 CSV 冻结未动) |
+| 结果表 | [`tables/e11_wd_raise_table.md`](tables/e11_wd_raise_table.md)、[`tables/e11_matched_table.md`](tables/e11_matched_table.md)、[`tables/e11_multiseed_table.md`](tables/e11_multiseed_table.md) |
+| 图 | [`figures/`](figures/):`e11_wd_raise_{sgdm,sgd}.png`、`e11_matched_budget_{sgdm,sgd}.png`、`e11_contraction_trajectories.png` |
 
 ---
 
@@ -99,7 +99,7 @@ E8/E9 回答的是"衰减形 λ 调度 vs 固定 λ"。E11 问一个反向的问
 | 9C | 77.83 | 77.82 | 70.91 | 77.83 |
 
 (图 `e11_matched_budget_{sgdm,sgd}.png`;E9 的衰减形状在同预算下只有
-75.5~76.4,表中略,见 `_data/e11_matched_table.md`)
+75.5~76.4,表中略,见 `tables/e11_matched_table.md`)
 
 要点:
 
@@ -180,7 +180,7 @@ WD 的收缩方向 −λw 完全恒定,动量对恒定方向的增益为 1/(1−
 
 ```bash
 # 环境:Python 3.11, torch 2.4.1+cu121;数据在 data/ 下自动下载
-CSV=rebuttal/results/nips26_e11_runs.csv
+CSV=e11_raise_up/results/nips26_e11_runs.csv
 PY=python
 
 # SGD 固定 λ 对照网格(原 CSV 只有 3 行)

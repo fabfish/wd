@@ -11,16 +11,17 @@ Sections:
      for the per-shape peak configs and the fixed control.
 
 Reads the E11-dedicated CSV (a superset copy of nips26_runs.csv; the original
-file is frozen).
+file is frozen). All E11 artifacts live in the top-level e11_raise_up/ folder.
 
 Writes:
-  outputs/plots/nips26/e11_wd_raise_{sgdm,sgd}.png
-  rebuttal/nips_rebuttal/_data/e11_wd_raise_peaks.csv
-  rebuttal/nips_rebuttal/_data/e11_wd_raise_table.md
-  rebuttal/nips_rebuttal/_data/e11_matched_peaks.csv
-  rebuttal/nips_rebuttal/_data/e11_matched_table.md
-  rebuttal/nips_rebuttal/_data/e11_multiseed.csv
-  rebuttal/nips_rebuttal/_data/e11_multiseed_table.md
+  e11_raise_up/figures/e11_wd_raise_{sgdm,sgd}.png
+  e11_raise_up/figures/e11_matched_budget_{sgdm,sgd}.png
+  e11_raise_up/tables/e11_wd_raise_peaks.csv
+  e11_raise_up/tables/e11_wd_raise_table.md
+  e11_raise_up/tables/e11_matched_peaks.csv
+  e11_raise_up/tables/e11_matched_table.md
+  e11_raise_up/tables/e11_multiseed.csv
+  e11_raise_up/tables/e11_multiseed_table.md
 """
 from pathlib import Path
 import math
@@ -30,9 +31,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-CSV = ROOT / 'rebuttal' / 'results' / 'nips26_e11_runs.csv'
-PLOT_DIR = ROOT / 'outputs' / 'plots' / 'nips26'
-DATA_DIR = ROOT / 'rebuttal' / 'nips_rebuttal' / '_data'
+E11 = ROOT / 'e11_raise_up'
+CSV = E11 / 'results' / 'nips26_e11_runs.csv'
+PLOT_DIR = E11 / 'figures'
+DATA_DIR = E11 / 'tables'
 
 RAISE_SCHEDULES = ['linear_up', 'cosine_up', 'step_up']
 LAMBDA0 = [1e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2]

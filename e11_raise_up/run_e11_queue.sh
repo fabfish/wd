@@ -5,12 +5,14 @@ cd /home/yzy/Documents/GitHub/wd
 PY=/home/yzy/anaconda3/envs/nm/bin/python
 GPUS=${GPUS:-6}
 WPG=${WPG:-3}
+CSV=e11_raise_up/results/nips26_e11_runs.csv
 LOGDIR=outputs/logs
 mkdir -p "$LOGDIR"
 
 echo "=== $(date '+%F %T') starting E11 sweep=raise phase=sgdm gpus=$GPUS wpg=$WPG ==="
 PYTHONUNBUFFERED=1 "$PY" rebuttal/run_nips26_wd_sched.py \
   --sweep raise --phase sgdm --gpus "$GPUS" --workers_per_gpu "$WPG" \
+  --csv "$CSV" \
   2>&1 | tee "$LOGDIR/nips26_e11_raise_sgdm.out"
 echo "=== $(date '+%F %T') finished E11 sweep ==="
 
