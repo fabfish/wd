@@ -1,0 +1,10 @@
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] Epoch 25/100 | Train Loss: 1.7570 | Train Acc: 51.35% | Test Acc: 37.79% | Best: 42.63%
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] Epoch 50/100 | Train Loss: 1.1890 | Train Acc: 66.18% | Test Acc: 53.14% | Best: 54.55%
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] Epoch 75/100 | Train Loss: 0.4668 | Train Acc: 85.48% | Test Acc: 65.91% | Best: 66.26%
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] Epoch 100/100 | Train Loss: 0.0225 | Train Acc: 99.52% | Test Acc: 72.91% | Best: 72.95%
+PROBE_DONE wall_time=911s best=72.95

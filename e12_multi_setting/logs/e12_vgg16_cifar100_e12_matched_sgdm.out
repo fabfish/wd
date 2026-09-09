@@ -1,0 +1,266 @@
+[2026-09-10 02:11:29] [INFO] sweep=e12_matched phase=sgdm gpus=[3, 6] seeds=[42] workers_per_gpu=3 model=vgg16 dataset=cifar100 n_cfgs=21
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.001132 sum_eta_lambda=0.658 (0.333 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.0004724 sum_eta_lambda=0.6582 (0.333 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.0001936 sum_eta_lambda=0.6581 (0.333 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.003397 sum_eta_lambda=1.975 (1.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.001417 sum_eta_lambda=1.974 (1.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.0005809 sum_eta_lambda=1.975 (1.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.005095 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.002126 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.0008713 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.006794 sum_eta_lambda=3.949 (2.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.002834 sum_eta_lambda=3.948 (2.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.001162 sum_eta_lambda=3.95 (2.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.008492 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.003543 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.001452 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.01019 sum_eta_lambda=5.923 (3.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.004252 sum_eta_lambda=5.924 (3.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.001743 sum_eta_lambda=5.925 (3.001 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=   linear_up lam0=0.01359 sum_eta_lambda=7.9 (4.001 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape=      linear lam0=0.005669 sum_eta_lambda=7.898 (4.000 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO]   plan vgg16/cifar100 mom=0.9 shape= iso_product lam0=0.002324 sum_eta_lambda=7.9 (4.001 C; anchor lam_ref=0.001)
+[2026-09-10 02:11:29] [INFO] E8-e12_matched-sgdm: 21 configs, 0 already done, 21 to run
+[2026-09-10 02:11:29] [INFO] E8-e12_matched-sgdm: budget ~21.0 units
+GPU Scheduler initialized with GPUs: [3, 6]
+  Workers per GPU: 3 (Total workers: 6)
+
+Started 6 workers (3 per GPU) for 21 tasks
+================================================================================
+Worker 0 started on GPU 6 (PID: 3898017)
+GPU 6 (Worker 0): Processing task 0
+Worker 2 started on GPU 3 (PID: 3898016)
+GPU 3 (Worker 2): Processing task 1
+Worker 1 started on GPU 3 (PID: 3898015)
+GPU 3 (Worker 1): Processing task 2
+Worker 1 started on GPU 6 (PID: 3898018)
+GPU 6 (Worker 1): Processing task 3
+Worker 2 started on GPU 6 (PID: 3898019)
+GPU 6 (Worker 2): Processing task 4
+Worker 0 started on GPU 3 (PID: 3898014)
+GPU 3 (Worker 0): Processing task 5
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verifiedFiles already downloaded and verified
+
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verifiedFiles already downloaded and verified
+
+Files already downloaded and verifiedFiles already downloaded and verified
+
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] Epoch 25/100 | Train Loss: 1.5909 | Train Acc: 55.47% | Test Acc: 46.05% | Best: 48.66%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] Epoch 25/100 | Train Loss: 1.4827 | Train Acc: 57.87% | Test Acc: 48.19% | Best: 50.36%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 25/100 | Train Loss: 1.8137 | Train Acc: 50.09% | Test Acc: 41.00% | Best: 42.91%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] Epoch 25/100 | Train Loss: 1.9561 | Train Acc: 46.79% | Test Acc: 37.97% | Best: 41.47%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] Epoch 25/100 | Train Loss: 1.6455 | Train Acc: 54.00% | Test Acc: 47.28% | Best: 47.28%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 25/100 | Train Loss: 2.1048 | Train Acc: 43.01% | Test Acc: 35.57% | Best: 36.72%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] Epoch 50/100 | Train Loss: 0.8226 | Train Acc: 75.36% | Test Acc: 60.17% | Best: 60.22%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 50/100 | Train Loss: 1.4907 | Train Acc: 58.55% | Test Acc: 48.02% | Best: 52.66%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] Epoch 50/100 | Train Loss: 0.9107 | Train Acc: 73.19% | Test Acc: 59.15% | Best: 60.33%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] Epoch 50/100 | Train Loss: 1.7781 | Train Acc: 51.94% | Test Acc: 43.38% | Best: 45.19%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] Epoch 50/100 | Train Loss: 1.1732 | Train Acc: 66.89% | Test Acc: 51.07% | Best: 56.55%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 50/100 | Train Loss: 1.3673 | Train Acc: 61.32% | Test Acc: 52.46% | Best: 52.46%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] Epoch 75/100 | Train Loss: 0.1371 | Train Acc: 95.57% | Test Acc: 69.06% | Best: 69.06%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] Epoch 75/100 | Train Loss: 0.5994 | Train Acc: 82.00% | Test Acc: 64.44% | Best: 64.44%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 75/100 | Train Loss: 1.3298 | Train Acc: 63.62% | Test Acc: 47.55% | Best: 52.88%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] Epoch 75/100 | Train Loss: 1.2269 | Train Acc: 65.69% | Test Acc: 51.40% | Best: 54.78%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] Epoch 100/100 | Train Loss: 0.0123 | Train Acc: 99.72% | Test Acc: 72.12% | Best: 72.24%
+GPU 3: Completed task 1
+GPU 3 (Worker 2): Processing task 6
+[2026-09-10 02:33:53] [INFO]   [1/21] cosine mom=0.9 wd_sched=linear lam0=0.0004724 T=100 -> best=72.24 diverged=0 (1336s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] Epoch 75/100 | Train Loss: 0.5753 | Train Acc: 82.92% | Test Acc: 64.84% | Best: 64.84%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 75/100 | Train Loss: 0.4513 | Train Acc: 85.88% | Test Acc: 66.56% | Best: 66.64%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] Epoch 100/100 | Train Loss: 0.0313 | Train Acc: 99.46% | Test Acc: 72.77% | Best: 72.86%
+GPU 3: Completed task 2
+GPU 3 (Worker 1): Processing task 7
+[2026-09-10 02:34:53] [INFO]   [2/21] cosine mom=0.9 wd_sched=iso_product lam0=0.0001936 T=100 -> best=72.86 diverged=0 (1396s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 100/100 | Train Loss: 0.1681 | Train Acc: 96.47% | Test Acc: 74.23% | Best: 74.24%
+GPU 3: Completed task 5
+GPU 3 (Worker 0): Processing task 8
+[2026-09-10 02:35:00] [INFO]   [3/21] cosine mom=0.9 wd_sched=iso_product lam0=0.0005809 T=100 -> best=74.24 diverged=0 (1404s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] Epoch 25/100 | Train Loss: 2.1123 | Train Acc: 43.03% | Test Acc: 31.34% | Best: 37.63%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] Epoch 100/100 | Train Loss: 0.0900 | Train Acc: 98.10% | Test Acc: 73.84% | Best: 73.84%
+GPU 6: Completed task 3
+GPU 6 (Worker 1): Processing task 9
+[2026-09-10 02:40:22] [INFO]   [4/21] cosine mom=0.9 wd_sched=linear_up lam0=0.003397 T=100 -> best=73.84 diverged=0 (1725s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] Epoch 25/100 | Train Loss: 2.3114 | Train Acc: 38.47% | Test Acc: 24.76% | Best: 30.97%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] Epoch 25/100 | Train Loss: 1.9783 | Train Acc: 46.15% | Test Acc: 33.86% | Best: 36.59%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] Epoch 100/100 | Train Loss: 0.0263 | Train Acc: 99.51% | Test Acc: 72.99% | Best: 73.07%
+GPU 6: Completed task 0
+GPU 6 (Worker 0): Processing task 10
+[2026-09-10 02:41:49] [INFO]   [5/21] cosine mom=0.9 wd_sched=linear_up lam0=0.001132 T=100 -> best=73.07 diverged=0 (1812s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002834] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 100/100 | Train Loss: 0.0276 | Train Acc: 99.31% | Test Acc: 72.46% | Best: 72.46%
+GPU 6: Completed task 4
+GPU 6 (Worker 2): Processing task 11
+[2026-09-10 02:41:53] [INFO]   [6/21] cosine mom=0.9 wd_sched=linear lam0=0.001417 T=100 -> best=72.46 diverged=0 (1816s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001162] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] Epoch 50/100 | Train Loss: 2.0613 | Train Acc: 44.86% | Test Acc: 35.57% | Best: 37.63%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] Epoch 50/100 | Train Loss: 1.5982 | Train Acc: 55.66% | Test Acc: 48.92% | Best: 48.92%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] Epoch 50/100 | Train Loss: 1.7530 | Train Acc: 52.13% | Test Acc: 40.58% | Best: 44.83%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] Epoch 25/100 | Train Loss: 2.2869 | Train Acc: 39.25% | Test Acc: 24.84% | Best: 34.06%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002834] Epoch 25/100 | Train Loss: 2.5672 | Train Acc: 32.61% | Test Acc: 22.67% | Best: 26.40%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001162] Epoch 25/100 | Train Loss: 2.1848 | Train Acc: 41.30% | Test Acc: 29.74% | Best: 36.30%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] Epoch 75/100 | Train Loss: 1.5065 | Train Acc: 58.52% | Test Acc: 49.16% | Best: 49.16%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] Epoch 75/100 | Train Loss: 0.6012 | Train Acc: 81.48% | Test Acc: 65.96% | Best: 65.96%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] Epoch 75/100 | Train Loss: 1.6275 | Train Acc: 56.06% | Test Acc: 42.85% | Best: 46.67%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] Epoch 50/100 | Train Loss: 2.3054 | Train Acc: 39.22% | Test Acc: 29.33% | Best: 34.06%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] Epoch 100/100 | Train Loss: 0.1663 | Train Acc: 96.35% | Test Acc: 73.11% | Best: 73.11%
+GPU 3: Completed task 6
+GPU 3 (Worker 2): Processing task 12
+[2026-09-10 02:55:52] [INFO]   [7/21] cosine mom=0.9 wd_sched=linear_up lam0=0.005095 T=100 -> best=73.11 diverged=0 (1315s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.008492] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002834] Epoch 50/100 | Train Loss: 1.8290 | Train Acc: 49.97% | Test Acc: 43.02% | Best: 43.67%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] Epoch 100/100 | Train Loss: 0.0300 | Train Acc: 99.26% | Test Acc: 72.16% | Best: 72.16%
+GPU 3: Completed task 7
+GPU 3 (Worker 1): Processing task 13
+[2026-09-10 02:58:27] [INFO]   [8/21] cosine mom=0.9 wd_sched=linear lam0=0.002126 T=100 -> best=72.16 diverged=0 (1410s)
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001162] Epoch 50/100 | Train Loss: 1.9794 | Train Acc: 46.78% | Test Acc: 35.00% | Best: 38.67%
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003543] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] Epoch 100/100 | Train Loss: 0.2849 | Train Acc: 93.77% | Test Acc: 73.68% | Best: 73.68%
+GPU 3: Completed task 8
+GPU 3 (Worker 0): Processing task 14
+[2026-09-10 02:58:37] [INFO]   [9/21] cosine mom=0.9 wd_sched=iso_product lam0=0.0008713 T=100 -> best=73.68 diverged=0 (1413s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001452] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.008492] Epoch 25/100 | Train Loss: 2.4283 | Train Acc: 35.77% | Test Acc: 20.75% | Best: 31.24%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] Epoch 75/100 | Train Loss: 1.7387 | Train Acc: 53.00% | Test Acc: 44.53% | Best: 44.53%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003543] Epoch 25/100 | Train Loss: 2.7732 | Train Acc: 28.44% | Test Acc: 13.37% | Best: 21.26%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001452] Epoch 25/100 | Train Loss: 2.3005 | Train Acc: 38.64% | Test Acc: 28.79% | Best: 31.16%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002834] Epoch 75/100 | Train Loss: 0.7854 | Train Acc: 76.61% | Test Acc: 63.35% | Best: 63.35%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001162] Epoch 75/100 | Train Loss: 1.8913 | Train Acc: 50.03% | Test Acc: 36.58% | Best: 43.81%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.008492] Epoch 50/100 | Train Loss: 2.4914 | Train Acc: 34.81% | Test Acc: 27.87% | Best: 31.24%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] Epoch 100/100 | Train Loss: 0.2557 | Train Acc: 94.13% | Test Acc: 72.31% | Best: 72.47%
+GPU 6: Completed task 9
+GPU 6 (Worker 1): Processing task 15
+[2026-09-10 03:10:07] [INFO]   [10/21] cosine mom=0.9 wd_sched=linear_up lam0=0.006794 T=100 -> best=72.47 diverged=0 (1780s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01019] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003543] Epoch 50/100 | Train Loss: 2.0117 | Train Acc: 45.43% | Test Acc: 35.68% | Best: 35.68%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001452] Epoch 50/100 | Train Loss: 2.1509 | Train Acc: 42.61% | Test Acc: 35.51% | Best: 35.96%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.008492] Epoch 75/100 | Train Loss: 1.9259 | Train Acc: 48.33% | Test Acc: 37.93% | Best: 40.89%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002834] Epoch 100/100 | Train Loss: 0.0437 | Train Acc: 98.85% | Test Acc: 71.50% | Best: 71.57%
+[2026-09-10 03:12:57] [INFO]   [11/21] cosine mom=0.9 wd_sched=linear lam0=0.002834 T=100 -> best=71.57 diverged=0 (1861s)
+GPU 6: Completed task 10
+GPU 6 (Worker 0): Processing task 16
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004252] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001162] Epoch 100/100 | Train Loss: 0.4326 | Train Acc: 90.27% | Test Acc: 72.35% | Best: 72.35%
+GPU 6: Completed task 11
+GPU 6 (Worker 2): Processing task 17
+[2026-09-10 03:13:06] [INFO]   [12/21] cosine mom=0.9 wd_sched=iso_product lam0=0.001162 T=100 -> best=72.35 diverged=0 (1868s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001743] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003543] Epoch 75/100 | Train Loss: 0.9444 | Train Acc: 72.18% | Test Acc: 59.33% | Best: 59.33%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001452] Epoch 75/100 | Train Loss: 2.0581 | Train Acc: 45.61% | Test Acc: 36.83% | Best: 37.45%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01019] Epoch 25/100 | Train Loss: 2.5511 | Train Acc: 32.94% | Test Acc: 24.00% | Best: 28.66%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.008492] Epoch 100/100 | Train Loss: 0.3643 | Train Acc: 91.32% | Test Acc: 71.79% | Best: 71.79%
+GPU 3: Completed task 12
+GPU 3 (Worker 2): Processing task 18
+[2026-09-10 03:18:16] [INFO]   [13/21] cosine mom=0.9 wd_sched=linear_up lam0=0.008492 T=100 -> best=71.79 diverged=0 (1340s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01359] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001743] Epoch 25/100 | Train Loss: 2.4493 | Train Acc: 35.18% | Test Acc: 20.33% | Best: 26.72%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004252] Epoch 25/100 | Train Loss: 2.9839 | Train Acc: 24.12% | Test Acc: 20.10% | Best: 20.10%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003543] Epoch 100/100 | Train Loss: 0.0679 | Train Acc: 98.24% | Test Acc: 71.26% | Best: 71.40%
+GPU 3: Completed task 13
+GPU 3 (Worker 1): Processing task 19
+[2026-09-10 03:22:22] [INFO]   [14/21] cosine mom=0.9 wd_sched=linear lam0=0.003543 T=100 -> best=71.40 diverged=0 (1431s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.005669] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001452] Epoch 100/100 | Train Loss: 0.5542 | Train Acc: 87.52% | Test Acc: 71.86% | Best: 71.86%
+GPU 3: Completed task 14
+GPU 3 (Worker 0): Processing task 20
+[2026-09-10 03:22:31] [INFO]   [15/21] cosine mom=0.9 wd_sched=iso_product lam0=0.001452 T=100 -> best=71.86 diverged=0 (1430s)
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002324] start
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01019] Epoch 50/100 | Train Loss: 2.6446 | Train Acc: 31.27% | Test Acc: 22.59% | Best: 28.66%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01359] Epoch 25/100 | Train Loss: 2.7778 | Train Acc: 28.29% | Test Acc: 18.37% | Best: 26.75%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001743] Epoch 50/100 | Train Loss: 2.3093 | Train Acc: 38.78% | Test Acc: 27.96% | Best: 36.12%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004252] Epoch 50/100 | Train Loss: 2.1907 | Train Acc: 41.25% | Test Acc: 25.04% | Best: 33.30%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.005669] Epoch 25/100 | Train Loss: 3.4302 | Train Acc: 15.85% | Test Acc: 8.62% | Best: 10.58%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002324] Epoch 25/100 | Train Loss: 2.6574 | Train Acc: 30.93% | Test Acc: 24.97% | Best: 25.41%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01019] Epoch 75/100 | Train Loss: 2.1054 | Train Acc: 44.17% | Test Acc: 34.59% | Best: 35.07%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01359] Epoch 50/100 | Train Loss: 2.9538 | Train Acc: 25.25% | Test Acc: 20.40% | Best: 26.75%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.005669] Epoch 50/100 | Train Loss: 2.5261 | Train Acc: 34.19% | Test Acc: 18.03% | Best: 27.98%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001743] Epoch 75/100 | Train Loss: 2.2390 | Train Acc: 41.99% | Test Acc: 27.33% | Best: 36.12%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002324] Epoch 50/100 | Train Loss: 2.5771 | Train Acc: 32.83% | Test Acc: 23.32% | Best: 30.36%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004252] Epoch 75/100 | Train Loss: 1.1092 | Train Acc: 68.22% | Test Acc: 57.74% | Best: 57.74%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01359] Epoch 75/100 | Train Loss: 2.4094 | Train Acc: 37.12% | Test Acc: 29.18% | Best: 30.59%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01019] Epoch 100/100 | Train Loss: 0.4871 | Train Acc: 88.00% | Test Acc: 70.72% | Best: 70.72%
+GPU 6: Completed task 15
+Worker on GPU 6 finished
+[2026-09-10 03:37:28] [INFO]   [16/21] cosine mom=0.9 wd_sched=linear_up lam0=0.01019 T=100 -> best=70.72 diverged=0 (1637s)
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.005669] Epoch 75/100 | Train Loss: 1.3925 | Train Acc: 60.69% | Test Acc: 51.67% | Best: 51.67%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002324] Epoch 75/100 | Train Loss: 2.5397 | Train Acc: 35.25% | Test Acc: 19.50% | Best: 30.36%
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001743] Epoch 100/100 | Train Loss: 0.6966 | Train Acc: 84.34% | Test Acc: 69.77% | Best: 69.77%
+GPU 6: Completed task 17
+Worker on GPU 6 finished
+[2026-09-10 03:40:53] [INFO]   [17/21] cosine mom=0.9 wd_sched=iso_product lam0=0.001743 T=100 -> best=69.77 diverged=0 (1662s)
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01359] Epoch 100/100 | Train Loss: 0.7631 | Train Acc: 80.98% | Test Acc: 67.79% | Best: 67.79%
+GPU 3: Completed task 18[2026-09-10 03:40:59] [INFO]   [18/21] cosine mom=0.9 wd_sched=linear_up lam0=0.01359 T=100 -> best=67.79 diverged=0 (1357s)
+
+Worker on GPU 3 finished
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004252] Epoch 100/100 | Train Loss: 0.1101 | Train Acc: 96.87% | Test Acc: 70.00% | Best: 70.06%
+GPU 6: Completed task 16
+Worker on GPU 6 finished
+[2026-09-10 03:41:17] [INFO]   [19/21] cosine mom=0.9 wd_sched=linear lam0=0.004252 T=100 -> best=70.06 diverged=0 (1693s)
+[e12_matched|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.005669] Epoch 100/100 | Train Loss: 0.1935 | Train Acc: 94.45% | Test Acc: 68.02% | Best: 68.02%
+GPU 3: Completed task 19
+Worker on GPU 3 finished
+[2026-09-10 03:43:50] [INFO]   [20/21] cosine mom=0.9 wd_sched=linear lam0=0.005669 T=100 -> best=68.02 diverged=0 (1283s)
+[e12_matched|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002324] Epoch 100/100 | Train Loss: 1.0198 | Train Acc: 76.59% | Test Acc: 66.57% | Best: 66.57%
+GPU 3: Completed task 20
+Worker on GPU 3 finished
+[2026-09-10 03:44:21] [INFO]   [21/21] cosine mom=0.9 wd_sched=iso_product lam0=0.002324 T=100 -> best=66.57 diverged=0 (1305s)
+================================================================================
+All workers finished. Completed 21 tasks.
+[2026-09-10 03:44:22] [INFO] E8-e12_matched-sgdm: finished 21/21 in 92.9 min

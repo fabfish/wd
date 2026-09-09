@@ -1,0 +1,5 @@
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():

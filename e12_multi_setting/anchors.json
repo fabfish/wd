@@ -1,4 +1,8 @@
 {
   "mlp|cifar10|sgd": 0.01,
-  "mlp|cifar10|sgdm": 0.001
+  "mlp|cifar10|sgdm": 0.001,
+  "mlp|mnist|sgd": 0.002,
+  "mlp|mnist|sgdm": 0.0003,
+  "vgg16|cifar100|sgd": 0.01,
+  "vgg16|cifar100|sgdm": 0.001
 }
