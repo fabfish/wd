@@ -1,0 +1,68 @@
+[2026-09-09 23:24:02] [INFO] sweep=e12_fixed phase=all gpus=[0, 1, 3] seeds=[42] workers_per_gpu=4 model=mlp dataset=mnist n_cfgs=14
+[2026-09-09 23:24:02] [INFO] E8-e12_fixed-all: 14 configs, 0 already done, 14 to run
+[2026-09-09 23:24:02] [INFO] E8-e12_fixed-all: budget ~14.0 units
+GPU Scheduler initialized with GPUs: [0, 1, 3]
+  Workers per GPU: 4 (Total workers: 12)
+
+Started 12 workers (4 per GPU) for 14 tasks
+================================================================================
+Worker 0 started on GPU 3 (PID: 2166936)
+GPU 3 (Worker 0): Processing task 0
+Worker 1 started on GPU 0 (PID: 2166929)
+GPU 0 (Worker 1): Processing task 1
+Worker 2 started on GPU 3 (PID: 2166938)
+GPU 3 (Worker 2): Processing task 2
+Worker 2 started on GPU 0 (PID: 2166930)
+GPU 0 (Worker 2): Processing task 3
+Worker 3 started on GPU 1 (PID: 2166935)
+GPU 1 (Worker 3): Processing task 4
+Worker 1 started on GPU 3 (PID: 2166937)
+GPU 3 (Worker 1): Processing task 5
+Worker 0 started on GPU 1 (PID: 2166932)
+GPU 1 (Worker 0): Processing task 6
+Worker 1 started on GPU 1 (PID: 2166933)
+GPU 1 (Worker 1): Processing task 7
+Worker 3 started on GPU 0 (PID: 2166931)
+GPU 0 (Worker 3): Processing task 8
+Worker 2 started on GPU 1 (PID: 2166934)
+GPU 1 (Worker 2): Processing task 9
+Worker 0 started on GPU 0 (PID: 2166928)
+GPU 0 (Worker 0): Processing task 10
+Worker 3 started on GPU 3 (PID: 2166939)
+GPU 3 (Worker 3): Processing task 11
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.002] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.005] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003] start
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0003] start
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0006] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.01] start
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001] start
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0001] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0075] start
+[e12_fixed|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.02] start
+[e12_fixed|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.002] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():

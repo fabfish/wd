@@ -1,0 +1,5 @@
+setting,wd_sched,lambda0,mean_acc,std_acc,n_seeds,seeds
+resnet18/cifar100/SGDM,cosine_up,0.005,77.845,0.13500000000000512,2,"123,2024"
+resnet18/cifar100/SGDM,fixed,0.0006,77.455,0.3850000000000051,2,"123,2024"
+resnet18/cifar100/SGDM,linear_up,0.005,77.935,0.02499999999999858,2,"123,2024"
+resnet18/cifar100/SGDM,step_up,0.01,77.845,0.125,2,"123,2024"

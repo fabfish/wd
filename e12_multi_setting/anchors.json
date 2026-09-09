@@ -1,0 +1,4 @@
+{
+  "mlp|cifar10|sgd": 0.01,
+  "mlp|cifar10|sgdm": 0.001
+}
