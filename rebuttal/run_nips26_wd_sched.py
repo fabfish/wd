@@ -31,9 +31,21 @@ E11 raise-up arm (does weight decay matter more early or late?):
   --sweep raise_matched   raise-up shapes rescaled to budgets {C/3, C, 3C}
   --sweep raise_ms        peak configs + fixed control, rerun across --seeds
 
+E12 cross-setting arm (does the E11 raise-up story generalize?):
+  --sweep e12_fixed    cosine LR + fixed lambda grid, phase-dependent, for
+                       (model, dataset) given by --model/--dataset. Doubles as
+                       the fixed-WD oracle sweep and the const-shape budget
+                       curve; the per-setting peak lambda becomes the local
+                       anchor written by e12_multi_setting/make_anchors.py.
+  --sweep e12_matched  shapes {linear_up, linear (down), iso_product} rescaled
+                       to a phase-dependent budget ladder in units of the
+                       setting-local C (lambda_ref * sum_lr). lambda_ref is
+                       read from --anchors (default e12_multi_setting/anchors.json)
+                       keyed by "model|dataset|phase"; missing key -> abort.
+
 Phases:
   --phase sgd|sgdm|all
-  --sweep joint|long|e4_baselines|const|iso|matched|raise|raise_big|raise_matched|raise_ms
+  --sweep joint|long|e4_baselines|const|iso|matched|raise|raise_big|raise_matched|raise_ms|e12_fixed|e12_matched
   --seeds 42,123,...     build every cfg once per seed (default 42 only)
 
 Usage:
@@ -43,9 +55,16 @@ Usage:
   python rebuttal/run_nips26_wd_sched.py --sweep raise   --phase sgdm --gpus 6
   python rebuttal/run_nips26_wd_sched.py --sweep raise_ms --phase sgdm \
       --seeds 42,123,2024 --csv rebuttal/results/nips26_e11_runs.csv
+  python rebuttal/run_nips26_wd_sched.py --sweep e12_fixed --phase all \
+      --model mlp --dataset cifar10 --gpus 0 \
+      --csv e12_multi_setting/results/e12_runs.csv
+  python rebuttal/run_nips26_wd_sched.py --sweep e12_matched --phase all \
+      --model mlp --dataset cifar10 --gpus 0 \
+      --csv e12_multi_setting/results/e12_runs.csv
 """
 import argparse
 import csv
+import json
 import math
 import sys
 import time
@@ -57,7 +76,9 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from wd_core.data import get_cifar100_loaders  # noqa: E402
+from wd_core.data import (  # noqa: E402
+    DATASET_NUM_CLASSES, DATASET_TRAIN_N, get_loaders,
+)
 from wd_core.models import get_model  # noqa: E402
 from wd_core.utils import set_seed, train_model_ext  # noqa: E402
 from wd_core.gpu_scheduler import GPUScheduler, parse_gpu_ids  # noqa: E402
@@ -123,6 +144,26 @@ E11_BUDGET_FACTORS = [1.0 / 3.0, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0]
 # E11 XL arm: SGD raise-up shapes had NOT collapsed at 9C; probe the upper
 # bound of the contraction budget.
 E11_BUDGET_FACTORS_XL = [15.0, 25.0, 40.0, 60.0]
+
+# --- E12 (cross-setting grid) ---------------------------------------------
+# Dynamic WD shapes compared per setting: linear_up, linear (down), and the
+# theory-predicted hyperbolic raise-up iso_product. `fixed` is covered by the
+# e12_fixed oracle sweep itself.
+E12_SHAPES = ['linear_up', 'linear', 'iso_product']
+# Phase-dependent fixed-lambda grids. E11 on R18/C100 found the SGDM oracle at
+# 6e-4 and the SGD oracle at 5e-3, so the grids bracket those scales.
+E12_FIXED_GRIDS = {
+    'sgdm': [1e-4, 3e-4, 6e-4, 1e-3, 2e-3, 3e-3, 5e-3],
+    'sgd': [1e-3, 2e-3, 3e-3, 5e-3, 7.5e-3, 1e-2, 2e-2],
+}
+# Phase-dependent budget ladders (units of the setting-local C). E11 showed
+# the SGDM optimum at ~1.5-2C and collapse by ~4C, while SGD peaks at ~6-9C
+# and only collapses around 15C (R18/C100).
+E12_BUDGET_FACTORS = {
+    'sgdm': [1.0 / 3.0, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0],
+    'sgd': [1.0, 2.0, 3.0, 4.0, 6.0, 9.0, 15.0],
+}
+DEFAULT_ANCHORS = 'e12_multi_setting/anchors.json'
 
 
 def wd_multiplier(wd_sched, epoch, epochs, te=RESTART_TE, tmult=RESTART_TMULT):
@@ -246,6 +287,41 @@ def e9_budget_anchor(lr0=0.1, epochs=100, batch_size=128, n=CIFAR100_TRAIN_N):
     return contraction_sum(lr0, E4_OURS_LAMBDA, epochs, batch_size, 'fixed', n=n)
 
 
+# --- E12 helpers ----------------------------------------------------------
+
+def phase_name(momentum):
+    """'sgd' for momentum 0, 'sgdm' otherwise (mirrors --phase vocabulary)."""
+    return 'sgd' if float(momentum) == 0.0 else 'sgdm'
+
+
+def load_anchors(anchors_path):
+    """Read {f'{model}|{dataset}|{phase}': lambda_ref} from anchors.json."""
+    path = Path(anchors_path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f'anchors file not found: {path}. Run e12_fixed first, then '
+            'e12_multi_setting/make_anchors.py.')
+    with open(path) as f:
+        return json.load(f)
+
+
+def e12_budget_anchor(model, dataset, momentum, anchors,
+                      lr0=0.1, epochs=100, batch_size=128):
+    """
+    Setting-local contraction budget C = lambda_ref * sum_t eta_t, where
+    lambda_ref is the fixed-WD oracle of THIS (model, dataset, phase) found by
+    the e12_fixed sweep. Every E12 budget is expressed in these local units.
+    """
+    key = f'{model}|{dataset}|{phase_name(momentum)}'
+    if key not in anchors:
+        raise KeyError(f'anchor missing for {key!r}; available: '
+                       f'{sorted(anchors)}. Run e12_fixed + make_anchors.py.')
+    lam_ref = float(anchors[key])
+    n = DATASET_TRAIN_N[dataset]
+    return lam_ref, contraction_sum(lr0, lam_ref, epochs, batch_size,
+                                    'fixed', n=n)
+
+
 def cfg_key(cfg):
     out = []
     for field in RUN_KEY:
@@ -353,7 +429,8 @@ def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
     }
 
 
-def build_cfgs(sweep, phase, seeds=(42,)):
+def build_cfgs(sweep, phase, seeds=(42,), model='resnet18',
+               dataset='cifar100', anchors=None):
     """
     sweep:
       const         original E8 (fixed LR, all 5 WD schedules)
@@ -372,6 +449,11 @@ def build_cfgs(sweep, phase, seeds=(42,)):
                     theory-predicted hyperbolic raise-up shape)
       raise_matched_xl   E11 upper-bound probe: 4 raise shapes × {15..60}C
       raise_ms      E11 multi-seed: RAISE_PEAK_CONFIGS × --seeds
+      e12_fixed     E12: cosine LR + fixed lambda, phase-dependent grid, on
+                    (--model, --dataset). Oracle sweep; anchors come from its
+                    peak via make_anchors.py.
+      e12_matched   E12: {linear_up, linear, iso_product} × phase-dependent
+                    budget ladder in setting-local C units (needs anchors.json)
     """
     momenta = []
     if phase in ('sgd', 'all'):
@@ -492,6 +574,35 @@ def build_cfgs(sweep, phase, seeds=(42,)):
                 cfgs.append(make_cfg(
                     wd_sched, lam0, momentum, epochs=100,
                     lr_mode='cos_shape', exp='e11_raise_ms'))
+    elif sweep == 'e12_fixed':
+        # E12 oracle sweep: cosine LR + fixed lambda on the phase-dependent
+        # grid, for the (--model, --dataset) setting. Peak acc row becomes
+        # the setting-local anchor via make_anchors.py.
+        for momentum in momenta:
+            phase = phase_name(momentum)
+            for lam0 in E12_FIXED_GRIDS[phase]:
+                cfgs.append(make_cfg(
+                    'fixed', lam0, momentum, epochs=100, lr_mode='cosine',
+                    exp='e12_fixed', model=model, dataset=dataset))
+    elif sweep == 'e12_matched':
+        # E12 matched-budget arm: dynamic shapes at a phase-dependent ladder
+        # of the setting-local C. The anchor must exist (e12_fixed + anchors).
+        if anchors is None:
+            raise ValueError('e12_matched needs --anchors (anchors.json)')
+        for momentum in momenta:
+            phase = phase_name(momentum)
+            lam_ref, anchor = e12_budget_anchor(model, dataset, momentum,
+                                                anchors)
+            for factor in E12_BUDGET_FACTORS[phase]:
+                budget = factor * anchor
+                for wd_sched in E12_SHAPES:
+                    lam0 = solve_lambda0_for_budget(
+                        budget, 0.1, 100, 128, wd_sched,
+                        n=DATASET_TRAIN_N[dataset])
+                    cfgs.append(make_cfg(
+                        wd_sched, lam0, momentum, epochs=100,
+                        lr_mode='cos_shape', exp='e12_matched',
+                        model=model, dataset=dataset))
     else:
         raise ValueError(f'unknown sweep={sweep}')
     out = []
@@ -508,12 +619,16 @@ def run_one(cfg):
     set_seed(cfg['seed'])
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    train_loader, test_loader = get_cifar100_loaders(
+    dataset = cfg.get('dataset', 'cifar100')
+    train_loader, test_loader = get_loaders(
+        dataset,
         batch_size=cfg['batch_size'],
         num_workers=cfg.get('num_workers', DEFAULT_NUM_WORKERS),
         data_dir=DATA_DIR,
     )
-    model = get_model(cfg['model'], num_classes=100).to(device)
+    num_classes = DATASET_NUM_CLASSES[dataset]
+    model = get_model(cfg['model'], num_classes=num_classes,
+                      dataset=dataset).to(device)
 
     optimizer = optim.SGD(
         model.parameters(), lr=cfg['lr'],
@@ -618,7 +733,8 @@ def main():
                         choices=['const', 'joint', 'long', 'e4_baselines',
                                  'iso', 'matched', 'raise', 'raise_big',
                                  'raise_matched', 'raise_matched_iso',
-                                 'raise_matched_xl', 'raise_ms'],
+                                 'raise_matched_xl', 'raise_ms',
+                                 'e12_fixed', 'e12_matched'],
                         default='const')
     parser.add_argument('--phase', choices=['sgd', 'sgdm', 'all'], default='sgdm')
     parser.add_argument('--gpus', type=str, default='1,2,3')
@@ -626,16 +742,28 @@ def main():
     parser.add_argument('--seeds', type=str, default='42',
                         help='comma-separated seed list; each cfg is built per seed')
     parser.add_argument('--csv', type=str, default=str(DEFAULT_CSV))
+    parser.add_argument('--model', type=str, default='resnet18',
+                        choices=['resnet18', 'vgg16', 'resnet50', 'mlp'],
+                        help='model for e12 sweeps (default resnet18)')
+    parser.add_argument('--dataset', type=str, default='cifar100',
+                        choices=['cifar100', 'cifar10', 'mnist'],
+                        help='dataset for e12 sweeps (default cifar100)')
+    parser.add_argument('--anchors', type=str, default=DEFAULT_ANCHORS,
+                        help='anchors.json for e12_matched (model|dataset|phase -> lambda_ref)')
     parser.add_argument('--dry_run', action='store_true')
     args = parser.parse_args()
 
     logger = get_logger(f'nips26_e8_{args.sweep}_{args.phase}')
     gpu_ids = parse_gpu_ids(args.gpus)
     seeds = [int(s) for s in args.seeds.split(',') if s.strip()]
-    cfgs = build_cfgs(args.sweep, args.phase, seeds=seeds)
+    anchors = None
+    if args.sweep == 'e12_matched':
+        anchors = load_anchors(args.anchors)
+    cfgs = build_cfgs(args.sweep, args.phase, seeds=seeds,
+                      model=args.model, dataset=args.dataset, anchors=anchors)
     logger.info(f'sweep={args.sweep} phase={args.phase} gpus={gpu_ids} '
                 f'seeds={seeds} workers_per_gpu={args.workers_per_gpu} '
-                f'n_cfgs={len(cfgs)}')
+                f'model={args.model} dataset={args.dataset} n_cfgs={len(cfgs)}')
     if args.sweep in ('iso', 'matched', 'raise_matched'):
         anchor = e9_budget_anchor()
         logger.info(f'E9 contraction anchor C = {anchor:.6g} '
@@ -651,6 +779,23 @@ def main():
             logger.info(f"  plan mom={c['momentum']} shape={c['wd_sched']:>14s} "
                         f"lam0={c['wd']:.4g} sum_eta_lambda={spent:.4g} "
                         f"({spent / anchor:.3f} C)")
+    elif args.sweep == 'e12_matched':
+        seen_plans = set()
+        for c in cfgs:
+            plan_key = (c['model'], c['dataset'], c['momentum'],
+                        c['wd_sched'], c['wd'])
+            if plan_key in seen_plans:
+                continue
+            seen_plans.add(plan_key)
+            lam_ref, anchor = e12_budget_anchor(c['model'], c['dataset'],
+                                                c['momentum'], anchors)
+            spent = contraction_sum(c['lr'], c['wd'], c['epochs'],
+                                    c['batch_size'], c['wd_sched'],
+                                    n=DATASET_TRAIN_N[c['dataset']])
+            logger.info(f"  plan {c['model']}/{c['dataset']} "
+                        f"mom={c['momentum']} shape={c['wd_sched']:>12s} "
+                        f"lam0={c['wd']:.4g} sum_eta_lambda={spent:.4g} "
+                        f"({spent / anchor:.3f} C; anchor lam_ref={lam_ref:g})")
 
     run_grid._dry_run = args.dry_run
     ensure_csv_schema(args.csv)

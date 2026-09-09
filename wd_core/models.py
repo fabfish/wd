@@ -1,5 +1,6 @@
 """
 Models for CIFAR-100 classification: ResNet-18, ResNet-50, and VGG-16.
+Plus a plain MLP for the small-dataset (CIFAR-10/MNIST) arm.
 """
 import torch
 import torch.nn as nn
@@ -166,8 +167,48 @@ def vgg16(num_classes=100):
     return VGG('VGG16', num_classes=num_classes)
 
 
-def get_model(model_name, num_classes=100):
-    """Factory function to get model by name"""
+class MLP(nn.Module):
+    """
+    Plain ReLU MLP for CIFAR-10 / MNIST, mirroring mlp_wd.mlp_core.models.MLP
+    (no BatchNorm, no Dropout) so the E12 small-dataset arm stays comparable
+    with the established MLP experiments.
+
+    num_layers=3 means input -> hidden -> hidden -> output.
+    """
+
+    def __init__(self, in_features=3072, hidden_dim=512, num_layers=3,
+                 num_classes=10):
+        super(MLP, self).__init__()
+        if num_layers < 2:
+            raise ValueError('num_layers must be >= 2')
+        dims = [in_features] + [hidden_dim] * (num_layers - 1) + [num_classes]
+        layers = [nn.Flatten()]
+        for i in range(num_layers):
+            layers.append(nn.Linear(dims[i], dims[i + 1]))
+            if i < num_layers - 1:
+                layers.append(nn.ReLU(inplace=True))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.net(x)
+
+
+MLP_IN_FEATURES = {'cifar10': 3 * 32 * 32, 'mnist': 28 * 28}
+
+
+def mlp(dataset='cifar10', num_classes=10, hidden_dim=512, num_layers=3):
+    """MLP factory keyed by dataset (CIFAR-10: 3072, MNIST: 784 inputs)."""
+    if dataset not in MLP_IN_FEATURES:
+        raise ValueError(f'Unknown dataset for mlp: {dataset}. '
+                         f'Available: {list(MLP_IN_FEATURES)}')
+    return MLP(in_features=MLP_IN_FEATURES[dataset], hidden_dim=hidden_dim,
+               num_layers=num_layers, num_classes=num_classes)
+
+
+def get_model(model_name, num_classes=100, dataset='cifar100'):
+    """Factory function to get model by name."""
+    if model_name == 'mlp':
+        return mlp(dataset=dataset, num_classes=num_classes)
     models = {
         'resnet18': resnet18,
         'resnet50': resnet50,
