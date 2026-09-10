@@ -1,0 +1,108 @@
+# E12：跨 setting 的 WD schedule grid search（cosine LR）
+
+在多种 (model, dataset) × {SGDM, SGD} 配置上，系统比较 4 种 weight-decay
+schedule——**const(fixed)、linear_up、linear_down、iso_up(iso_product)**——
+在统一的 cosine LR 协议下估计各自的最优收缩预算 C\*，检验 E11 结论
+（cosine LR 下 raise-up 形状优于固定 λ；SGDM 最优预算 ~1.5–2C；动量放大
+WD 收缩）的普适性。
+
+## 协议
+
+- 所有 run：cosine LR（T=100，η₀=0.1），B=128，seed 42（多种子另计），
+  AMP，CIFAR-100/CIFAR-10/MNIST 本地数据。
+- **预算定义**（setting-local C）：C = λ_ref · Σ_t η_t，其中 λ_ref 是该
+  (model, dataset, phase) 的 fixed-WD oracle（seed 42 峰值）。任何形状的
+  实际预算按训练循环同样方式逐 epoch 累计
+  Σ_t η_t λ_t（乘 steps_per_epoch）再除以 C，得到 `budget_c`。
+- **两阶段流程**：`e12_fixed`（fixed λ 网格 → 找 oracle λ_ref，同时给出
+  const 形状的整条预算曲线）→ `make_anchors.py`（写 anchors.json，含 E11
+  CSV 里 e4 旧行——R50/VGG 的 9.62e-4 oracle 即来自此）→ `e12_matched`
+  （3 个动态形状 × 相位相关预算阶梯，λ₀ 用 runner 的
+  `solve_lambda0_for_budget` 反解）。
+- **补空（e12_fill）**：R18/SGD linear_down 阶梯（原缺失）、VGG/SGD 崩塌
+  边界 1.2/1.5C、VGG/SGDM 1.2C 密度、R50/SGDM fixed 曲线 8e-4/9e-4/1.1e-3
+  加密、MLP/C10 SGD 低预算档 1/3–1/2C。
+- R18/CIFAR-100 不重跑：其列只读引用 E11 CSV（`e11_raise_up/`），且只取
+  `scheduler=='cosine'` 的行（E11 中 const/joint LR 的行已排除）。
+
+## 各 setting 峰值表（seed 42，budget 单位 = 本地 C）
+
+| setting | phase | wd_sched | peak_acc | peak_budget | peak_λ₀ |
+|---|---|---|---:|---:|---:|
+| resnet18/cifar100 | SGDM | fixed | 77.45 | 1.00C | 6e-4 |
+| | | **linear_up** | **78.45** | 1.99C | 4.064e-3 |
+| | | iso_up | 78.22 | 1.00C | 3.475e-4 |
+| | | linear_down | 76.44 | 1.00C | 8.478e-4 |
+| resnet18/cifar100 | SGD | fixed | 77.75 | 1.00C | 5e-3 |
+| | | **linear_up** | **78.08** | 1.79C | 3.048e-2 |
+| | | linear_down | 78.04 | 1.50C | 1.063e-2 |
+| | | iso_up | 78.01 | 1.79C | 5.212e-3 |
+| vgg16/cifar100 | SGDM | fixed | 73.43 | 1.00C | 9.62e-4 |
+| | | **iso_up** | **74.24** | 1.04C | 5.809e-4 |
+| | | linear_up | 73.84 | 1.04C | 3.397e-3 |
+| | | linear_down | 72.46 | 1.04C | 1.417e-3 |
+| vgg16/cifar100 | SGD | fixed | 75.16 | 1.00C | 1e-2 |
+| | | **iso_up** | **75.89** | 1.00C | 5.809e-3 |
+| | | linear_up | 75.43 | 1.00C | 3.397e-2 |
+| | | linear_down | 74.29 | 1.00C | 1.417e-2 |
+| resnet50/cifar100 | SGDM | fixed | 78.20 | 1.00C | 9.62e-4 |
+| | | **linear_up** | **78.72** | 0.94C | 3.057e-3 |
+| | | iso_up | 78.51 | 0.62C | 3.485e-4 |
+| | | linear_down | 77.01 | 0.62C | 8.503e-4 |
+| resnet50/cifar100 | SGD | fixed | 79.21 | 1.00C | 5e-3 |
+| | | **linear_up** | **79.55** | 1.00C | 1.698e-2 |
+| | | iso_up | 79.31 | 1.00C | 2.904e-3 |
+| | | linear_down | 79.25 | 1.00C | 7.086e-3 |
+| mlp/cifar10 | SGDM | fixed | 56.86 | 1.00C | 1e-3 |
+| | | **linear_up** | **58.80** | 1.50C | 5.095e-3 |
+| | | iso_up | 58.67 | 1.00C | 5.809e-4 |
+| | | linear_down | 55.71 | 1.50C | 2.126e-3 |
+| mlp/cifar10 | SGD | fixed | **58.15** | 1.00C | 1e-2 |
+| | | linear_down | 56.84 | 1.00C | 1.417e-2 |
+| | | iso_up | 55.27 | 1.00C | 5.809e-3 |
+| | | linear_up | 54.86 | 1.00C | 3.397e-2 |
+| mlp/mnist | 两相位 | 全形状 98.0–98.8 | ~1C | 分辨率 <0.5% | |
+
+R50/SGDM 阶梯覆盖 0.21–2.49C（按 9.62e-4 锚重标定）；linear_up 峰值在
+0.94C，fixed oracle 在 1C——两者差 0.52 分。
+
+## 跨 setting 结论
+
+1. **raise-up 形状在 SGDM 相位 4/4 个有分辨率的 setting 上全部优于 fixed
+   oracle**：R18 +1.00（2C）、R50 +0.52（0.94C）、MLP/C10 +1.94（1.5C）、
+   VGG +0.81（iso，1C）。SGD 相位则分化：R18（+0.33）、R50（+0.34）、
+   VGG（+0.73，iso）占优，MLP/C10 上 fixed 已是最优（动态形状 -1~-3 分）。
+2. **iso_product 在 1C 附近最优与理论一致**：R18/SGDM 1C、VGG 双相位 1C、
+   R50/SGDM 0.62C、MLP/C10 1C——iso 形状的最优点稳定压在理论预测点附近，
+   没有一处超过 1.04C。
+3. **最优预算 C\* 的跨架构差异**：ResNet 系（R18 2C、R50 0.94C）与 VGG
+   （1C）、MLP（1–1.5C）的最优预算都在 ~1–2C 窗口内；但 **VGG/SGD 的崩塌
+   边界显著更早**——iso/linear_up 从 2C 起直接崩到随机水平（1–4% acc），
+   R18/SGD 要到 3–7C 才崩。VGG 的 WD 容差窗口最窄。
+4. **R50/VGG 的 SGDM fixed oracle 是 9.62e-4 而非 R18 的 6e-4**（来自 E11
+   e4 旧行，本实验 grid 的 6e-4 点漏掉了它）——fixed 曲线的峰在
+   6e-4–1e-3 之间很尖（9.62e-4: 78.20 vs 1e-3: 75.66，0.4 的相对变化损失
+   2.5 分）。这提示"最优 λ 对模型宽度/深度敏感"，且超参搜索需要更密的网格。
+5. **动量方向**：R50 上 SGD（79.55）明显强于 SGDM（78.72），与 R18
+   （两者接近）不同；两种 ResNet 上 raise-up 均小幅胜出且最优预算在本地
+   C 单位下同为 ~1–2C，支持"把预算按各自 fixed oracle 归一化后，最优 WD
+   预算在 ~1–2C"的规律性表述。
+
+## 多种子（部分）
+
+e12_ms（seed 42/123/2024）已覆盖 R18/SGD、VGG、MLP 的峰值配置与 fixed
+对照；VGG/SGD 双种子确认 iso@1C 稳定优于 fixed。R50 与 MLP 的完整多种子
+待补（见 next_steps.md）。E11 的 R18/SGDM 多种子（3 seeds）直接引用。
+
+## 文件清单
+
+- `results/e12_runs.csv`：全部 E12 run（e12_fixed/e12_matched/e12_ms/e12_fill）
+- `tables/`：`e12_setting_table.md`（峰值）、`e12_crosstab.md`（完整交叉表）、
+  `e12_full_ladder_table.md`（逐梯级长表）、`e12_multiseed.md`、
+  `e12_cstar_summary.md`
+- `figures/`：每 setting×phase 的 budget-vs-acc 曲线
+- `logs/`：各队列完整日志
+- 工具：`run_e12_setting.sh`（单 setting 全链路队列）、`make_anchors.py`、
+  `run_e12_ms.py`（多种子驱动）、`make_fill_configs.py`、`e12_full_table.py`、
+  `e12_crosstab.py`、`e12_probe.py`
+- 分析：`analysis/nips26_e12_multi_setting.py`

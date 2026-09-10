@@ -27,7 +27,7 @@ run_sweep () {
 }
 
 run_sweep e12_fixed all
-"$PY" e12_multi_setting/make_anchors.py "$CSV" "$ANCHORS"
+"$PY" e12_multi_setting/make_anchors.py "$CSV" "$ANCHORS" --extra-csv e11_raise_up/results/nips26_e11_runs.csv
 run_sweep e12_matched sgdm
 run_sweep e12_matched sgd
 echo "=== $(date '+%F %T') E12 setting $MODEL/$DATASET done ==="
