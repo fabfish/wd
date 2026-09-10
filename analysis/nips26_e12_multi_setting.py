@@ -122,7 +122,9 @@ def build_budget_rows(df, model, dataset, momentum, lam_ref):
     g = slice_setting(df, model, dataset, momentum)
     rows = []
     for _, r in g.iterrows():
-        sched = str(r['wd_sched']).strip() or 'fixed'
+        sched = str(r['wd_sched']).strip()
+        if sched in ('', 'nan'):
+            sched = 'fixed'
         if sched not in E12_SHAPES:
             continue
         rows.append({
@@ -147,9 +149,10 @@ def peak_by_shape(bdf, sched, exp_prefixes=None):
     return g.loc[g['best_test_acc'].idxmax()]
 
 
-def setting_section(df, model, dataset, momentum):
+def setting_section(df, model, dataset, momentum, lam_ref_override=None):
     """Full per-(setting, phase) analysis: peak table + budget figure."""
-    lam_ref = setting_anchor(df, model, dataset, momentum)
+    lam_ref = lam_ref_override if lam_ref_override is not None \
+        else setting_anchor(df, model, dataset, momentum)
     if lam_ref is None:
         print(f'[skip] {model}/{dataset}/{PHASE_LABELS[momentum]}: no fixed rows')
         return None, None
@@ -254,6 +257,15 @@ def main():
     PLOT_DIR.mkdir(parents=True, exist_ok=True)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Setting-local anchors: prefer anchors.json (built by make_anchors.py,
+    # which also mines the E11 CSV for legacy oracle rows like 9.62e-4).
+    anchors_file = E12 / 'anchors.json'
+    anchors = {}
+    if anchors_file.exists():
+        import json as _json
+        with open(anchors_file) as _f:
+            anchors = _json.load(_f)
+
     # Settings present in the E12 CSV (skip resnet18/cifar100, which is E11).
     e12_pairs = sorted(
         set(zip(df['model'], df['dataset'])))
@@ -262,10 +274,31 @@ def main():
     # R18/C100 column comes from the E11 CSV, read-only.
     r18 = ('resnet18', 'cifar100')
 
+    def anchor_key(model, dataset, momentum):
+        phase = 'sgd' if float(momentum) == 0.0 else 'sgdm'
+        key = f'{model}|{dataset}|{phase}'
+        return float(anchors[key]) if key in anchors else None
+
+    # Merge legacy E11 fixed rows (e4: resnet50/vgg16 oracle points like
+    # 9.62e-4) into the E12 frame so the fixed curve/peak is complete.
+    df_merged = df
+    if not e11.empty:
+        extra = e11[
+            (e11['exp'] == 'e4')
+            & (e11['scheduler'] == 'cosine')
+            & (e11['seed'] == 42)
+            & (e11['epochs'] == 100)
+            & (e11['batch_size'] == 128)
+        ]
+        if not extra.empty and not df.empty:
+            df_merged = pd.concat([df, extra], ignore_index=True)
+
     all_rows = []
     for (model, dataset) in e12_pairs:
         for mom in (0.9, 0.0):
-            rows, _ = setting_section(df, model, dataset, mom)
+            rows, _ = setting_section(
+                df_merged, model, dataset, mom,
+                lam_ref_override=anchor_key(model, dataset, mom))
             if rows:
                 all_rows.extend(rows)
     for mom in (0.9, 0.0):

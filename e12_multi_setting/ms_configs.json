@@ -1,0 +1,16 @@
+[
+  {"model": "resnet18", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "fixed", "wd": 0.005},
+  {"model": "resnet18", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "linear_up", "wd": 0.03048},
+  {"model": "mlp", "dataset": "cifar10", "momentum": 0.9, "wd_sched": "fixed", "wd": 0.001},
+  {"model": "mlp", "dataset": "cifar10", "momentum": 0.9, "wd_sched": "linear_up", "wd": 0.005095},
+  {"model": "mlp", "dataset": "cifar10", "momentum": 0.0, "wd_sched": "fixed", "wd": 0.01},
+  {"model": "mlp", "dataset": "cifar10", "momentum": 0.0, "wd_sched": "linear_up", "wd": 0.03397},
+  {"model": "mlp", "dataset": "mnist", "momentum": 0.9, "wd_sched": "fixed", "wd": 0.0003},
+  {"model": "mlp", "dataset": "mnist", "momentum": 0.9, "wd_sched": "linear", "wd": 0.0004252},
+  {"model": "mlp", "dataset": "mnist", "momentum": 0.0, "wd_sched": "fixed", "wd": 0.002},
+  {"model": "mlp", "dataset": "mnist", "momentum": 0.0, "wd_sched": "linear", "wd": 0.002834},
+  {"model": "vgg16", "dataset": "cifar100", "momentum": 0.9, "wd_sched": "fixed", "wd": 0.001},
+  {"model": "vgg16", "dataset": "cifar100", "momentum": 0.9, "wd_sched": "iso_product", "wd": 0.0005809},
+  {"model": "vgg16", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "fixed", "wd": 0.01},
+  {"model": "vgg16", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "iso_product", "wd": 0.005809}
+]
