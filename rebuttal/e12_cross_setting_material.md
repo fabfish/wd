@@ -76,3 +76,14 @@ with its lack of residual connections.
 ~1-2C where C = lambda_fixed* sum eta_t of the best constant-lambda run.
 Constant WD is a special case that is strictly worse on scale-invariant
 architectures (ResNet/VGG)."
+
+## BN-MLP ablation (mlp_bn/cifar10)
+
+We tested the hypothesis that the MLP SGD counter-example is explained by
+missing BatchNorm (scale non-invariance). Adding BN does NOT rescue the SGD
+phase: fixed (56.74) and linear_up (56.75) tie, iso_product is worse (52.50).
+On SGDM, BN flips the shape ordering: linear_down@3C (58.91) becomes best,
+fixed oracle moves to the smallest grid point (1e-4, 58.31). Scale
+invariance alone therefore does not explain the raise-up advantage on
+ResNet/VGG; residual connections (or other architectural factors) likely
+matter. State this as a negative result if space allows.

@@ -1,9 +1,12 @@
 {
+  "mlp_bn|cifar10|sgd": 0.02,
+  "mlp_bn|cifar10|sgdm": 0.0001,
   "mlp|cifar10|sgd": 0.01,
-  "mlp|cifar10|sgdm": 0.001,
+  "mlp|cifar10|sgdm": 0.0008,
   "mlp|mnist|sgd": 0.002,
   "mlp|mnist|sgdm": 0.0003,
   "resnet18|cifar100|sgd": 0.005,
+  "resnet18|cifar100|sgdm": 0.000962,
   "resnet50|cifar100|sgd": 0.005,
   "resnet50|cifar100|sgdm": 0.000962,
   "vgg16|cifar100|sgd": 0.01,

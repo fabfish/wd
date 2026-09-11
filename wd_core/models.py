@@ -170,14 +170,15 @@ def vgg16(num_classes=100):
 class MLP(nn.Module):
     """
     Plain ReLU MLP for CIFAR-10 / MNIST, mirroring mlp_wd.mlp_core.models.MLP
-    (no BatchNorm, no Dropout) so the E12 small-dataset arm stays comparable
-    with the established MLP experiments.
+    so the E12 small-dataset arm stays comparable with the established MLP
+    experiments. `use_bn` inserts BatchNorm1d after every hidden Linear,
+    bringing the network into the (approximately) scale-invariant regime.
 
     num_layers=3 means input -> hidden -> hidden -> output.
     """
 
     def __init__(self, in_features=3072, hidden_dim=512, num_layers=3,
-                 num_classes=10):
+                 num_classes=10, use_bn=False):
         super(MLP, self).__init__()
         if num_layers < 2:
             raise ValueError('num_layers must be >= 2')
@@ -186,6 +187,8 @@ class MLP(nn.Module):
         for i in range(num_layers):
             layers.append(nn.Linear(dims[i], dims[i + 1]))
             if i < num_layers - 1:
+                if use_bn:
+                    layers.append(nn.BatchNorm1d(dims[i + 1]))
                 layers.append(nn.ReLU(inplace=True))
         self.net = nn.Sequential(*layers)
 
@@ -196,19 +199,24 @@ class MLP(nn.Module):
 MLP_IN_FEATURES = {'cifar10': 3 * 32 * 32, 'mnist': 28 * 28}
 
 
-def mlp(dataset='cifar10', num_classes=10, hidden_dim=512, num_layers=3):
+def mlp(dataset='cifar10', num_classes=10, hidden_dim=512, num_layers=3,
+        use_bn=False):
     """MLP factory keyed by dataset (CIFAR-10: 3072, MNIST: 784 inputs)."""
     if dataset not in MLP_IN_FEATURES:
         raise ValueError(f'Unknown dataset for mlp: {dataset}. '
                          f'Available: {list(MLP_IN_FEATURES)}')
     return MLP(in_features=MLP_IN_FEATURES[dataset], hidden_dim=hidden_dim,
-               num_layers=num_layers, num_classes=num_classes)
+               num_layers=num_layers, num_classes=num_classes, use_bn=use_bn)
 
 
 def get_model(model_name, num_classes=100, dataset='cifar100'):
     """Factory function to get model by name."""
     if model_name == 'mlp':
         return mlp(dataset=dataset, num_classes=num_classes)
+    if model_name == 'mlp_bn':
+        # E12 extension: scale-invariant MLP (BN after hidden Linears) to test
+        # whether the SGD-phase counter-example disappears with BN.
+        return mlp(dataset=dataset, num_classes=num_classes, use_bn=True)
     models = {
         'resnet18': resnet18,
         'resnet50': resnet50,

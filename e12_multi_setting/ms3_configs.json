@@ -1,0 +1,4 @@
+[
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.9, "wd_sched": "iso_product", "wd": 0.0003485},
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "iso_product", "wd": 0.002904}
+]

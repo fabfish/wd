@@ -4,10 +4,10 @@ that setting/phase, seed 42). n_runs counts seed-42 rows.
 
 | setting | phase | wd_sched | peak_acc | peak_budget_C | peak_lambda0 | n_runs |
 |---|---|---|---:|---:|---:|---:|
-| mlp/cifar10/SGDM | SGDM | fixed | 57.07 | 0.80C | 0.0008 | 11 |
-| mlp/cifar10/SGDM | SGDM | linear_up | 58.80 | 1.50C | 0.005095 | 9 |
-| mlp/cifar10/SGDM | SGDM | linear | 55.71 | 1.50C | 0.002126 | 7 |
-| mlp/cifar10/SGDM | SGDM | iso_product | 58.67 | 1.00C | 0.0005809 | 7 |
+| mlp/cifar10/SGDM | SGDM | fixed | 57.07 | 1.00C | 0.0008 | 11 |
+| mlp/cifar10/SGDM | SGDM | linear_up | 58.80 | 1.87C | 0.005095 | 9 |
+| mlp/cifar10/SGDM | SGDM | linear | 55.71 | 1.88C | 0.002126 | 7 |
+| mlp/cifar10/SGDM | SGDM | iso_product | 58.67 | 1.25C | 0.0005809 | 7 |
 | mlp/cifar10/SGD | SGD | fixed | 58.15 | 1.00C | 0.01 | 9 |
 | mlp/cifar10/SGD | SGD | linear_up | 54.86 | 1.00C | 0.03397 | 11 |
 | mlp/cifar10/SGD | SGD | linear | 56.84 | 1.00C | 0.01417 | 9 |
@@ -20,14 +20,22 @@ that setting/phase, seed 42). n_runs counts seed-42 rows.
 | mlp/mnist/SGD | SGD | linear_up | 98.34 | 1.00C | 0.006794 | 7 |
 | mlp/mnist/SGD | SGD | linear | 98.47 | 1.00C | 0.002834 | 9 |
 | mlp/mnist/SGD | SGD | iso_product | 98.32 | 1.00C | 0.001162 | 7 |
+| mlp_bn/cifar10/SGDM | SGDM | fixed | 58.31 | 1.00C | 0.0001 | 7 |
+| mlp_bn/cifar10/SGDM | SGDM | linear_up | 57.90 | 2.00C | 0.0006794 | 7 |
+| mlp_bn/cifar10/SGDM | SGDM | linear | 58.91 | 3.00C | 0.0004252 | 7 |
+| mlp_bn/cifar10/SGDM | SGDM | iso_product | 57.99 | 1.00C | 5.809e-05 | 7 |
+| mlp_bn/cifar10/SGD | SGD | fixed | 56.74 | 1.00C | 0.02 | 7 |
+| mlp_bn/cifar10/SGD | SGD | linear_up | 56.75 | 1.00C | 0.06794 | 7 |
+| mlp_bn/cifar10/SGD | SGD | linear | 55.68 | 1.00C | 0.02834 | 7 |
+| mlp_bn/cifar10/SGD | SGD | iso_product | 52.50 | 1.00C | 0.01162 | 7 |
 | resnet50/cifar100/SGDM | SGDM | fixed | 78.20 | 1.00C | 0.000962 | 16 |
 | resnet50/cifar100/SGDM | SGDM | linear_up | 78.72 | 0.94C | 0.003057 | 9 |
 | resnet50/cifar100/SGDM | SGDM | linear | 77.01 | 0.62C | 0.0008503 | 7 |
-| resnet50/cifar100/SGDM | SGDM | iso_product | 78.51 | 0.62C | 0.0003485 | 7 |
+| resnet50/cifar100/SGDM | SGDM | iso_product | 78.51 | 0.62C | 0.0003485 | 9 |
 | resnet50/cifar100/SGD | SGD | fixed | 79.21 | 1.00C | 0.005 | 9 |
 | resnet50/cifar100/SGD | SGD | linear_up | 79.55 | 1.00C | 0.01698 | 9 |
 | resnet50/cifar100/SGD | SGD | linear | 79.25 | 1.00C | 0.007086 | 7 |
-| resnet50/cifar100/SGD | SGD | iso_product | 79.31 | 1.00C | 0.002904 | 7 |
+| resnet50/cifar100/SGD | SGD | iso_product | 79.31 | 1.00C | 0.002904 | 9 |
 | vgg16/cifar100/SGDM | SGDM | fixed | 73.43 | 1.00C | 0.000962 | 12 |
 | vgg16/cifar100/SGDM | SGDM | linear_up | 73.84 | 1.04C | 0.003397 | 8 |
 | vgg16/cifar100/SGDM | SGDM | linear | 72.46 | 1.04C | 0.001417 | 7 |

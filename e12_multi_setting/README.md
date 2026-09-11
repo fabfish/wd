@@ -61,6 +61,14 @@ WD 收缩）的普适性。
 | | | linear_down | 56.84 | 1.00C | 1.417e-2 |
 | | | iso_up | 55.27 | 1.00C | 5.809e-3 |
 | | | linear_up | 54.86 | 1.00C | 3.397e-2 |
+| mlp_bn/cifar10 | SGDM | fixed | 58.31 | 1.00C | 1e-4 |
+| | | **linear_down** | **58.91** | 3.00C | 4.252e-4 |
+| | | iso_up | 57.99 | 1.00C | 5.809e-5 |
+| | | linear_up | 57.90 | 2.00C | 6.794e-4 |
+| mlp_bn/cifar10 | SGD | fixed | **56.74** | 1.00C | 2e-2 |
+| | | linear_up | 56.75 | 1.00C | 6.794e-2 |
+| | | linear_down | 55.68 | 1.00C | 2.834e-2 |
+| | | iso_up | 52.50 | 1.00C | 1.162e-2 |
 | mlp/mnist | 两相位 | 全形状 98.0–98.8 | ~1C | 分辨率 <0.5% | |
 
 R50/SGDM 阶梯覆盖 0.21–2.49C（按 9.62e-4 锚重标定）；linear_up 峰值在
@@ -130,3 +138,22 @@ e12_ms（seed 42/123/2024）已覆盖 R18/SGD、VGG、MLP 的峰值配置与 fix
   `run_e12_ms.py`（多种子驱动）、`make_fill_configs.py`、`e12_full_table.py`、
   `e12_crosstab.py`、`e12_probe.py`
 - 分析：`analysis/nips26_e12_multi_setting.py`
+
+## BN-MLP 消融（mlp_bn/cifar10）
+
+验证"无 BN 导致 SGD 相位 raise-up 失效"的猜想——**猜想被证伪**：
+
+- SGD 相位：fixed（56.74）与 linear_up（56.75）打平，iso 反而更差
+  （52.50）——加 BN 并没有让 SGD 上的 raise-up 反例消失。
+- SGDM 相位：形状排序被 BN 翻转——linear_down@3C（58.91）成为最高，
+  fixed oracle 移到最小档 1e-4（58.31），linear_up/iso 均不占优。
+- 对照无 BN：SGDM linear_up@1.5C 58.80 最优。BN 改变的不只是 scale
+  不变性，也改变了最优 WD 形状——scale-invariance 假设不足以解释
+  ResNet/VGG 上的 raise-up 优势，架构（残差连接等）可能才是关键。
+
+## 收敛声明（2026-09-11）
+
+E12 实验线收敛：5 个主 setting × 2 相位 × 4 形状的 budget ladder、多种子
+（每个 setting×相位 3 种子覆盖 fixed 与峰值形状）、崩塌边界、fixed 加密、
+BN 消融全部完成。全部结果、表格、图与结论见本目录与
+rebuttal/e12_cross_setting_material.md；后续可能的方向见 next_steps.md。
