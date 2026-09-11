@@ -1,0 +1,55 @@
+[2026-09-11 14:56:38] [INFO] e12_ms: 7 configs x 1 seeds = 7 runs, gpus=[1, 3], workers_per_gpu=2
+[2026-09-11 14:56:38] [INFO] e12_ms: 7 configs, 4 already done, 3 to run
+[2026-09-11 14:56:38] [INFO] e12_ms: budget ~3.0 units
+GPU Scheduler initialized with GPUs: [1, 3]
+  Workers per GPU: 2 (Total workers: 4)
+Worker 1 started on GPU 3 (PID: 2551619)
+Worker on GPU 3 finished
+Worker 0 started on GPU 1 (PID: 2551616)
+GPU 1 (Worker 0): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] start
+Worker 1 started on GPU 1 (PID: 2551617)
+GPU 1 (Worker 1): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0008] start
+Worker 0 started on GPU 3 (PID: 2551618)
+GPU 3 (Worker 0): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0008] Epoch 25/100 | Train Loss: 1.7794 | Train Acc: 36.25% | Test Acc: 34.92% | Best: 36.00%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0008] Epoch 50/100 | Train Loss: 1.4023 | Train Acc: 50.74% | Test Acc: 46.94% | Best: 46.94%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0008] Epoch 75/100 | Train Loss: 0.5664 | Train Acc: 80.14% | Test Acc: 54.18% | Best: 54.18%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0008] Epoch 100/100 | Train Loss: 0.0655 | Train Acc: 99.34% | Test Acc: 57.00% | Best: 57.07%
+GPU 1: Completed task 0
+Worker on GPU 1 finished
+
+Started 4 workers (2 per GPU) for 3 tasks
+================================================================================
+[2026-09-11 15:04:12] [INFO]   [1/3] cosine mom=0.9 wd_sched=fixed lam0=0.0008 T=100 -> best=57.07 diverged=0 (447s)
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 25/100 | Train Loss: 1.7910 | Train Acc: 35.67% | Test Acc: 33.47% | Best: 35.41%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 50/100 | Train Loss: 1.4373 | Train Acc: 49.64% | Test Acc: 45.34% | Best: 45.65%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 75/100 | Train Loss: 0.6735 | Train Acc: 76.35% | Test Acc: 54.59% | Best: 54.65%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 100/100 | Train Loss: 0.0878 | Train Acc: 98.82% | Test Acc: 56.13% | Best: 56.24%
+GPU 1: Completed task 1
+Worker on GPU 1 finished
+[2026-09-11 15:04:15] [INFO]   [2/3] cosine mom=0.9 wd_sched=fixed lam0=0.000962 T=100 -> best=56.24 diverged=0 (450s)
+[2026-09-11 15:14:54] [INFO]   [3/3] cosine mom=0.9 wd_sched=fixed lam0=0.000962 T=100 -> best=76.22 diverged=0 (1088s)
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 25/100 | Train Loss: 1.4556 | Train Acc: 59.02% | Test Acc: 52.66% | Best: 52.87%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 50/100 | Train Loss: 1.0545 | Train Acc: 69.45% | Test Acc: 55.11% | Best: 58.53%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 75/100 | Train Loss: 0.3263 | Train Acc: 90.39% | Test Acc: 69.58% | Best: 69.58%
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000962] Epoch 100/100 | Train Loss: 0.0207 | Train Acc: 99.92% | Test Acc: 76.21% | Best: 76.22%
+GPU 3: Completed task 2
+Worker on GPU 3 finished
+================================================================================
+All workers finished. Completed 3 tasks.
+[2026-09-11 15:14:55] [INFO] e12_ms: finished 3/3 in 18.3 min

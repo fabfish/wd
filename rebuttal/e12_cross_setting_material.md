@@ -22,9 +22,19 @@ constant lambda (the fixed oracle, not the paper default):
 | MLP/C10 | SGDM | linear_up @ 1.50C | 58.80 | 1e-3 | 56.86 | +1.94 |
 | MLP/C10 | SGD | fixed wins (counter-example) | 58.15 | — | — | − |
 
-Multi-seed checks (3 seeds): VGG/SGD iso@1C 76.43/75.78/75.89 vs fixed
-74.67/75.10/75.16 — the ordering holds in every seed. E11 already had
-R18/SGDM 3-seed confirmation (78.05+-0.16 vs 77.45+-0.31).
+Multi-seed checks (3 seeds where available): every setting shows the dynamic
+shape beating the fixed oracle in EVERY seed (pairwise): R18/SGD linear_up
+78.17±0.07 vs fixed 77.65±0.16; R50/SGD 79.68±0.07 vs 79.26±0.15; VGG/SGD
+iso 76.11±0.33 vs 74.89±0.22; VGG/SGDM iso 73.61±0.23 vs 73.13±0.03;
+MLP/C10 SGDM linear_up 58.10±0.08 vs 56.36±0.12; R50/SGDM linear_up
+78.31±0.44 vs fixed 76.92±0.85. E11 already had R18/SGDM 3-seed
+confirmation (78.05±0.16 vs 77.45±0.31).
+
+Caveats stated honestly: R18/SGD linear_down looked tied with linear_up at
+seed 42 (78.04) but falls back to the fixed level across seeds
+(77.55±0.23) — not a stable winner. R50/SGDM's fixed oracle at 9.62e-4 is
+itself seed-sensitive (75.77–78.20 across 4 estimates), while linear_up is
+stable and uniformly better — a robustness argument FOR scheduling.
 
 ## Claim 2: the iso-product schedule peaks at ~1C everywhere
 
@@ -43,15 +53,21 @@ by each phase's own oracle the two optimizers agree.
 
 ## Claim 4: collapse boundary is architecture-dependent
 
-VGG/SGD collapses to chance (1-4% acc) already at 2C; R18/SGD survives to
-~3-7C; R50/SGD at 3-6C TBD (fill2 in flight). The WD tolerance window is
-narrowest for VGG — consistent with its lack of residual connections.
+VGG/SGD collapses to chance (1-4% acc) already at 2C; R50/SGD collapses at
+2-3C (linear_up 79.55@1C -> 71.92@3C; iso 79.31@1C -> 45.41@3C); R18/SGD
+survives to ~3-7C. The WD tolerance window is narrowest for VGG — consistent
+with its lack of residual connections.
 
 ## Counter-examples (state honestly)
 
 - MLP (no BN) on CIFAR-10 / SGD: fixed WD is best; all dynamic shapes lose
-  1-3 points. Scale-non-invariant networks may not benefit from raising WD.
+  1-3 points (stable across seeds). Scale-non-invariant networks may not
+  benefit from raising WD.
 - MNIST: all shapes within 0.5% (task too easy to resolve).
+- The fixed-WD oracle lambda itself is architecture-specific and
+  seed-sensitive near its sharp peak (9.62e-4 wins for R50/VGG but loses on
+  R18: 76.22 vs 6e-4's 77.45; MLP oracle is 8e-4). Schedules at ~1-2C avoid
+  this brittleness.
 
 ## Practical recommendation for the paper
 

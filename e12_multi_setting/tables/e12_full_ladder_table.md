@@ -12,6 +12,8 @@ R50/C100 rows appear as they land.
 | mlp/cifar10 | SGD | fixed | 0.0075 | 0.75 | 57.91 | 0 | e12 |
 | mlp/cifar10 | SGD | fixed | 0.01 | 1.00 | 58.15 | 0 | e12 |
 | mlp/cifar10 | SGD | fixed | 0.02 | 2.00 | 55.59 | 0 | e12 |
+| mlp/cifar10 | SGD | iso up | 0.001936 | 0.33 | 57.77 | 0 | e12 |
+| mlp/cifar10 | SGD | iso up | 0.002904 | 0.50 | 56.83 | 0 | e12 |
 | mlp/cifar10 | SGD | iso up | 0.005809 | 1.00 | 55.27 | 0 | e12 |
 | mlp/cifar10 | SGD | iso up | 0.01162 | 2.00 | 52.06 | 0 | e12 |
 | mlp/cifar10 | SGD | iso up | 0.01743 | 3.00 | 50.02 | 0 | e12 |
@@ -19,6 +21,8 @@ R50/C100 rows appear as they land.
 | mlp/cifar10 | SGD | iso up | 0.03485 | 6.00 | 46.16 | 0 | e12 |
 | mlp/cifar10 | SGD | iso up | 0.05228 | 9.00 | 42.97 | 0 | e12 |
 | mlp/cifar10 | SGD | iso up | 0.08713 | 15.00 | 36.98 | 0 | e12 |
+| mlp/cifar10 | SGD | linear down | 0.004724 | 0.33 | 57.33 | 0 | e12 |
+| mlp/cifar10 | SGD | linear down | 0.007086 | 0.50 | 57.12 | 0 | e12 |
 | mlp/cifar10 | SGD | linear down | 0.01417 | 1.00 | 56.84 | 0 | e12 |
 | mlp/cifar10 | SGD | linear down | 0.02834 | 2.00 | 56.78 | 0 | e12 |
 | mlp/cifar10 | SGD | linear down | 0.04252 | 3.00 | 56.29 | 0 | e12 |
@@ -26,6 +30,8 @@ R50/C100 rows appear as they land.
 | mlp/cifar10 | SGD | linear down | 0.08503 | 6.00 | 53.81 | 0 | e12 |
 | mlp/cifar10 | SGD | linear down | 0.1276 | 9.00 | 50.89 | 0 | e12 |
 | mlp/cifar10 | SGD | linear down | 0.2126 | 15.00 | 44.98 | 0 | e12 |
+| mlp/cifar10 | SGD | linear up | 0.01132 | 0.33 | 57.79 | 0 | e12 |
+| mlp/cifar10 | SGD | linear up | 0.01698 | 0.50 | 58.01 | 0 | e12 |
 | mlp/cifar10 | SGD | linear up | 0.03397 | 1.00 | 54.86 | 0 | e12 |
 | mlp/cifar10 | SGD | linear up | 0.06794 | 2.00 | 53.49 | 0 | e12 |
 | mlp/cifar10 | SGD | linear up | 0.1019 | 3.00 | 52.66 | 0 | e12 |
@@ -33,34 +39,36 @@ R50/C100 rows appear as they land.
 | mlp/cifar10 | SGD | linear up | 0.2038 | 6.00 | 51.80 | 0 | e12 |
 | mlp/cifar10 | SGD | linear up | 0.3057 | 9.00 | 51.14 | 0 | e12 |
 | mlp/cifar10 | SGD | linear up | 0.5095 | 15.00 | 50.25 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.0001 | 0.10 | 51.90 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.0003 | 0.30 | 55.33 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.0006 | 0.60 | 56.02 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.001 | 1.00 | 56.86 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.002 | 2.00 | 56.42 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.003 | 3.00 | 56.15 | 0 | e12 |
-| mlp/cifar10 | SGDM | fixed | 0.005 | 5.00 | 52.20 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.0001936 | 0.33 | 57.01 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.0005809 | 1.00 | 58.67 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.0008713 | 1.50 | 58.46 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.001162 | 2.00 | 57.57 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.001452 | 2.50 | 56.42 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.001743 | 3.00 | 55.75 | 0 | e12 |
-| mlp/cifar10 | SGDM | iso up | 0.002324 | 4.00 | 53.71 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.0004724 | 0.33 | 54.71 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.001417 | 1.00 | 55.07 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.002126 | 1.50 | 55.71 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.002834 | 2.00 | 54.55 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.003543 | 2.50 | 55.18 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.004252 | 3.00 | 53.96 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear down | 0.005669 | 4.00 | 50.42 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.001132 | 0.33 | 57.31 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.003397 | 1.00 | 58.66 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.005095 | 1.50 | 58.80 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.006794 | 2.00 | 57.99 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.008492 | 2.50 | 58.01 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.01019 | 3.00 | 57.01 | 0 | e12 |
-| mlp/cifar10 | SGDM | linear up | 0.01359 | 4.00 | 56.54 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.0001 | 0.12 | 51.90 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.0003 | 0.38 | 55.33 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.0006 | 0.75 | 56.02 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.0008 | 1.00 | 57.07 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.000962 | 1.20 | 56.24 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.001 | 1.25 | 56.86 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.002 | 2.50 | 56.42 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.003 | 3.75 | 56.15 | 0 | e12 |
+| mlp/cifar10 | SGDM | fixed | 0.005 | 6.25 | 52.20 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.0001936 | 0.42 | 57.01 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.0005809 | 1.25 | 58.67 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.0008713 | 1.87 | 58.46 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.001162 | 2.50 | 57.57 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.001452 | 3.12 | 56.42 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.001743 | 3.75 | 55.75 | 0 | e12 |
+| mlp/cifar10 | SGDM | iso up | 0.002324 | 5.00 | 53.71 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.0004724 | 0.42 | 54.71 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.001417 | 1.25 | 55.07 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.002126 | 1.88 | 55.71 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.002834 | 2.50 | 54.55 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.003543 | 3.12 | 55.18 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.004252 | 3.75 | 53.96 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear down | 0.005669 | 5.00 | 50.42 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.001132 | 0.42 | 57.31 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.003397 | 1.25 | 58.66 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.005095 | 1.87 | 58.80 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.006794 | 2.50 | 57.99 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.008492 | 3.13 | 58.01 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.01019 | 3.75 | 57.01 | 0 | e12 |
+| mlp/cifar10 | SGDM | linear up | 0.01359 | 5.00 | 56.54 | 0 | e12 |
 | mlp/mnist | SGD | fixed | 0.001 | 0.50 | 98.38 | 0 | e12 |
 | mlp/mnist | SGD | fixed | 0.002 | 1.00 | 98.38 | 0 | e12 |
 | mlp/mnist | SGD | fixed | 0.003 | 1.50 | 98.25 | 0 | e12 |
@@ -139,6 +147,13 @@ R50/C100 rows appear as they land.
 | resnet18/cifar100 | SGD | iso up | 0.008687 | 2.99 | 57.74 | 0 | e11 |
 | resnet18/cifar100 | SGD | iso up | 0.0139 | 4.79 | 39.63 | 0 | e11 |
 | resnet18/cifar100 | SGD | iso up | 0.02085 | 7.18 | 31.43 | 0 | e11 |
+| resnet18/cifar100 | SGD | linear down | 0.002362 | 0.33 | 77.08 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.007086 | 1.00 | 77.22 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.01063 | 1.50 | 78.04 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.01417 | 2.00 | 76.92 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.02126 | 3.00 | 77.18 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.02834 | 4.00 | 76.37 | 0 | e12 |
+| resnet18/cifar100 | SGD | linear down | 0.04252 | 6.00 | 72.91 | 0 | e12 |
 | resnet18/cifar100 | SGD | linear up | 0.0001 | 0.01 | 73.46 | 0 | e11 |
 | resnet18/cifar100 | SGD | linear up | 0.0005 | 0.03 | 74.00 | 0 | e11 |
 | resnet18/cifar100 | SGD | linear up | 0.0006773 | 0.04 | 74.09 | 0 | e11 |
@@ -174,6 +189,7 @@ R50/C100 rows appear as they land.
 | resnet18/cifar100 | SGDM | fixed | 0.0006 | 1.00 | 77.45 | 0 | e11 |
 | resnet18/cifar100 | SGDM | fixed | 0.00075 | 1.25 | 76.68 | 0 | e11 |
 | resnet18/cifar100 | SGDM | fixed | 0.0008 | 1.33 | 77.41 | 0 | e11 |
+| resnet18/cifar100 | SGDM | fixed | 0.000962 | 1.60 | 76.22 | 0 | e12 |
 | resnet18/cifar100 | SGDM | fixed | 0.001 | 1.67 | 77.28 | 0 | e11 |
 | resnet18/cifar100 | SGDM | fixed | 0.0012 | 2.00 | 77.13 | 0 | e11 |
 | resnet18/cifar100 | SGDM | fixed | 0.0015 | 2.50 | 77.37 | 0 | e11 |
@@ -229,16 +245,62 @@ R50/C100 rows appear as they land.
 | resnet50/cifar100 | SGD | fixed | 0.0075 | 1.50 | 78.98 | 0 | e12 |
 | resnet50/cifar100 | SGD | fixed | 0.01 | 2.00 | 78.65 | 0 | e12 |
 | resnet50/cifar100 | SGD | fixed | 0.02 | 4.00 | 73.40 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.002904 | 1.00 | 79.31 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.005809 | 2.00 | 75.07 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.008713 | 3.00 | 45.41 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.01162 | 4.00 | 38.86 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.01743 | 6.00 | 29.38 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.02614 | 9.00 | 16.50 | 0 | e12 |
+| resnet50/cifar100 | SGD | iso up | 0.04357 | 15.00 | 7.15 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.007086 | 1.00 | 79.25 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.01417 | 2.00 | 78.36 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.02126 | 3.00 | 75.03 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.02834 | 4.00 | 69.53 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.04252 | 6.00 | 27.76 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.06378 | 9.00 | 3.31 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear down | 0.1063 | 15.00 | 3.30 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.01698 | 1.00 | 79.55 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.03397 | 2.00 | 78.98 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.05095 | 3.00 | 71.92 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.06794 | 4.00 | 62.48 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.1019 | 6.00 | 39.15 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.1529 | 9.00 | 35.73 | 0 | e12 |
+| resnet50/cifar100 | SGD | linear up | 0.2548 | 15.00 | 24.71 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.0001 | 0.10 | 72.66 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.000256 | 0.27 | 76.19 | 0 | e11 |
 | resnet50/cifar100 | SGDM | fixed | 0.0003 | 0.31 | 74.94 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.000598 | 0.62 | 76.86 | 0 | e11 |
 | resnet50/cifar100 | SGDM | fixed | 0.0006 | 0.62 | 76.07 | 0 | e12 |
+| resnet50/cifar100 | SGDM | fixed | 0.0008 | 0.83 | 76.73 | 0 | e12 |
+| resnet50/cifar100 | SGDM | fixed | 0.0009 | 0.94 | 76.90 | 0 | e12 |
+| resnet50/cifar100 | SGDM | fixed | 0.000962 | 1.00 | 77.21 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.000962 | 1.00 | 78.20 | 0 | e11 |
 | resnet50/cifar100 | SGDM | fixed | 0.001 | 1.04 | 75.66 | 0 | e12 |
+| resnet50/cifar100 | SGDM | fixed | 0.0011 | 1.14 | 77.72 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.002 | 2.08 | 72.34 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.003 | 3.12 | 64.52 | 0 | e12 |
 | resnet50/cifar100 | SGDM | fixed | 0.005 | 5.20 | 55.48 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.0001162 | 0.21 | 75.08 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.0003485 | 0.62 | 78.51 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.0005228 | 0.94 | 77.42 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.0006971 | 1.25 | 77.33 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.0008713 | 1.56 | 77.08 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.001046 | 1.87 | 76.42 | 0 | e12 |
+| resnet50/cifar100 | SGDM | iso up | 0.001394 | 2.49 | 73.09 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.0002834 | 0.21 | 74.38 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.0008503 | 0.62 | 77.01 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.001276 | 0.94 | 76.47 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.001701 | 1.25 | 76.42 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.002126 | 1.56 | 75.83 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.002551 | 1.87 | 74.44 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear down | 0.003401 | 2.49 | 64.44 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.0006794 | 0.21 | 75.23 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.002038 | 0.62 | 78.68 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.003057 | 0.94 | 78.72 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.004076 | 1.25 | 78.27 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.005095 | 1.56 | 77.43 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.006114 | 1.87 | 77.23 | 0 | e12 |
+| resnet50/cifar100 | SGDM | linear up | 0.008152 | 2.49 | 75.10 | 0 | e12 |
 | vgg16/cifar100 | SGD | fixed | 0.001 | 0.10 | 72.35 | 0 | e12 |
 | vgg16/cifar100 | SGD | fixed | 0.002 | 0.20 | 73.67 | 0 | e12 |
 | vgg16/cifar100 | SGD | fixed | 0.003 | 0.30 | 74.20 | 0 | e12 |
@@ -247,6 +309,8 @@ R50/C100 rows appear as they land.
 | vgg16/cifar100 | SGD | fixed | 0.01 | 1.00 | 75.16 | 0 | e12 |
 | vgg16/cifar100 | SGD | fixed | 0.02 | 2.00 | 74.10 | 0 | e12 |
 | vgg16/cifar100 | SGD | iso up | 0.005809 | 1.00 | 75.89 | 0 | e12 |
+| vgg16/cifar100 | SGD | iso up | 0.006971 | 1.20 | 75.01 | 0 | e12 |
+| vgg16/cifar100 | SGD | iso up | 0.008713 | 1.50 | 69.60 | 0 | e12 |
 | vgg16/cifar100 | SGD | iso up | 0.01162 | 2.00 | 47.34 | 0 | e12 |
 | vgg16/cifar100 | SGD | iso up | 0.01743 | 3.00 | 31.69 | 0 | e12 |
 | vgg16/cifar100 | SGD | iso up | 0.02324 | 4.00 | 22.46 | 0 | e12 |
@@ -261,6 +325,8 @@ R50/C100 rows appear as they land.
 | vgg16/cifar100 | SGD | linear down | 0.1276 | 9.00 | 2.52 | 0 | e12 |
 | vgg16/cifar100 | SGD | linear down | 0.2126 | 15.00 | 1.00 | 0 | e12 |
 | vgg16/cifar100 | SGD | linear up | 0.03397 | 1.00 | 75.43 | 0 | e12 |
+| vgg16/cifar100 | SGD | linear up | 0.04076 | 1.20 | 75.69 | 0 | e12 |
+| vgg16/cifar100 | SGD | linear up | 0.05095 | 1.50 | 74.40 | 0 | e12 |
 | vgg16/cifar100 | SGD | linear up | 0.06794 | 2.00 | 70.48 | 0 | e12 |
 | vgg16/cifar100 | SGD | linear up | 0.1019 | 3.00 | 45.21 | 0 | e12 |
 | vgg16/cifar100 | SGD | linear up | 0.1359 | 4.00 | 35.91 | 0 | e12 |
@@ -279,6 +345,7 @@ R50/C100 rows appear as they land.
 | vgg16/cifar100 | SGDM | fixed | 0.005 | 5.20 | 67.50 | 0 | e12 |
 | vgg16/cifar100 | SGDM | iso up | 0.0001936 | 0.35 | 72.86 | 0 | e12 |
 | vgg16/cifar100 | SGDM | iso up | 0.0005809 | 1.04 | 74.24 | 0 | e12 |
+| vgg16/cifar100 | SGDM | iso up | 0.0006706 | 1.20 | 73.75 | 0 | e12 |
 | vgg16/cifar100 | SGDM | iso up | 0.0008713 | 1.56 | 73.68 | 0 | e12 |
 | vgg16/cifar100 | SGDM | iso up | 0.001162 | 2.08 | 72.35 | 0 | e12 |
 | vgg16/cifar100 | SGDM | iso up | 0.001452 | 2.60 | 71.86 | 0 | e12 |
@@ -293,6 +360,7 @@ R50/C100 rows appear as they land.
 | vgg16/cifar100 | SGDM | linear down | 0.005669 | 4.16 | 68.02 | 0 | e12 |
 | vgg16/cifar100 | SGDM | linear up | 0.001132 | 0.35 | 73.07 | 0 | e12 |
 | vgg16/cifar100 | SGDM | linear up | 0.003397 | 1.04 | 73.84 | 0 | e12 |
+| vgg16/cifar100 | SGDM | linear up | 0.003921 | 1.20 | 73.95 | 0 | e12 |
 | vgg16/cifar100 | SGDM | linear up | 0.005095 | 1.56 | 73.11 | 0 | e12 |
 | vgg16/cifar100 | SGDM | linear up | 0.006794 | 2.08 | 72.47 | 0 | e12 |
 | vgg16/cifar100 | SGDM | linear up | 0.008492 | 2.60 | 71.79 | 0 | e12 |
