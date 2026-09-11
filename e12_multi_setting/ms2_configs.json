@@ -1,0 +1,7 @@
+[
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.9, "wd_sched": "fixed", "wd": 0.000962},
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.9, "wd_sched": "linear_up", "wd": 0.003057},
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "fixed", "wd": 0.005},
+  {"model": "resnet50", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "linear_up", "wd": 0.01698},
+  {"model": "resnet18", "dataset": "cifar100", "momentum": 0.0, "wd_sched": "linear", "wd": 0.01063}
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "linear_up",
+    "wd": 0.05095,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "linear_up",
+    "wd": 0.1019,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "iso_product",
+    "wd": 0.008713,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "iso_product",
+    "wd": 0.01743,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0008,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.000962,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.000962,
+    "exp": "e12_fill"
+  }
+]
