@@ -5,7 +5,7 @@
 # Usage: run_e12_setting.sh <model> <dataset>   (env GPUS, WPG override)
 set -euo pipefail
 cd /home/yzy/Documents/GitHub/wd
-PY=/home/yzy/anaconda3/envs/nm/bin/python
+PY=${PY:-/home/yzy/anaconda3/envs/nm/bin/python}
 MODEL=${1:?usage: run_e12_setting.sh <model> <dataset>}
 DATASET=${2:?usage: run_e12_setting.sh <model> <dataset>}
 GPUS=${GPUS:-1,2}
@@ -27,7 +27,7 @@ run_sweep () {
 }
 
 run_sweep e12_fixed all
-"$PY" e12_multi_setting/make_anchors.py "$CSV" "$ANCHORS" --extra-csv e11_raise_up/results/nips26_e11_runs.csv
+"$PY" e12_multi_setting/make_anchors.py "$CSV" "$ANCHORS"
 run_sweep e12_matched sgdm
 run_sweep e12_matched sgd
 echo "=== $(date '+%F %T') E12 setting $MODEL/$DATASET done ==="
