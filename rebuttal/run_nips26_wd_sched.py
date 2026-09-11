@@ -743,7 +743,7 @@ def main():
                         help='comma-separated seed list; each cfg is built per seed')
     parser.add_argument('--csv', type=str, default=str(DEFAULT_CSV))
     parser.add_argument('--model', type=str, default='resnet18',
-                        choices=['resnet18', 'vgg16', 'resnet50', 'mlp', 'mlp_bn'],
+                        choices=['resnet18', 'resnet34', 'resnet50', 'vgg13', 'vgg16', 'mlp', 'mlp_bn'],
                         help='model for e12 sweeps (default resnet18)')
     parser.add_argument('--dataset', type=str, default='cifar100',
                         choices=['cifar100', 'cifar10', 'mnist'],

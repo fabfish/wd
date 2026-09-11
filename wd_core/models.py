@@ -122,6 +122,11 @@ def resnet18(num_classes=100):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
 
 
+def resnet34(num_classes=100):
+    """Returns a ResNet-34 model for CIFAR-100"""
+    return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
+
+
 def resnet50(num_classes=100):
     """Returns a ResNet-50 model for CIFAR-100"""
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
@@ -129,6 +134,7 @@ def resnet50(num_classes=100):
 
 cfg_vgg = {
     'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+    'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
 }
 
@@ -165,6 +171,11 @@ class VGG(nn.Module):
 def vgg16(num_classes=100):
     """Returns a VGG-16 model for CIFAR-100"""
     return VGG('VGG16', num_classes=num_classes)
+
+
+def vgg13(num_classes=100):
+    """Returns a VGG-13 model for CIFAR-100"""
+    return VGG('VGG13', num_classes=num_classes)
 
 
 class MLP(nn.Module):
@@ -219,7 +230,9 @@ def get_model(model_name, num_classes=100, dataset='cifar100'):
         return mlp(dataset=dataset, num_classes=num_classes, use_bn=True)
     models = {
         'resnet18': resnet18,
+        'resnet34': resnet34,
         'resnet50': resnet50,
+        'vgg13': vgg13,
         'vgg16': vgg16,
     }
     if model_name not in models:
