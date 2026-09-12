@@ -30,8 +30,11 @@ SHAPE_LABELS = {'fixed': 'fixed (const λ)',
                 'iso_product': 'iso up'}
 
 
-def render_table(piv):
-    """Markdown table: header + one row per shape, bold per-row max, no NaN."""
+def render_table(piv, lam_piv):
+    """Markdown table: header + one row per shape, bold per-row max, no NaN.
+
+    Each cell shows acc and the lambda0 of that run, e.g. "58.15 (λ=0.01)".
+    """
     cols = list(piv.columns)
     header = '| wd_sched | ' + ' | '.join(f'{c:g}' for c in cols) + ' |'
     sep = '|---|' + '---|' * len(cols)
@@ -44,7 +47,8 @@ def render_table(piv):
             if pd.isna(v):
                 cells.append('')
             else:
-                s = f'{v:.2f}'
+                lam = lam_piv.loc[idx, c]
+                s = f'{v:.2f} (λ={lam:.4g})'
                 if pd.notna(row_max) and v == row_max:
                     s = f'**{s}**'
                 cells.append(s)
@@ -68,12 +72,20 @@ def build_md_body():
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
         g = g[g['seed'] == 42] if 'seed' in g else g
-        piv = g.pivot_table(index='wd_sched', columns='budget_r',
-                            values='best_acc', aggfunc='max')
+        # One run per (shape, budget rung): the highest-acc one, so lambda0
+        # shown is the lambda0 of the run whose acc is displayed.
+        best = g.sort_values('best_acc', ascending=False).drop_duplicates(
+            ['wd_sched', 'budget_r'])
+        piv = best.pivot_table(index='wd_sched', columns='budget_r',
+                               values='best_acc', aggfunc='max')
+        lam_piv = best.pivot_table(index='wd_sched', columns='budget_r',
+                                   values='lambda0', aggfunc='first')
         piv = piv.reindex(['fixed', 'linear_up', 'linear', 'iso_product'])
+        lam_piv = lam_piv.reindex(['fixed', 'linear_up', 'linear',
+                                   'iso_product'])
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
-        out_lines.append(render_table(piv))
+        out_lines.append(render_table(piv, lam_piv))
         out_lines.append('')
     return '\n'.join(out_lines)
 

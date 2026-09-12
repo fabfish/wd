@@ -308,3 +308,116 @@ Worker on GPU 3 finished
 GPU 2: Completed task 20
 Worker on GPU 2 finished
 [2026-09-12 15:43:20] [INFO]   [19/21] cosine mom=0.0 wd_sched=iso_product lam0=0.04357 T=100 -> best=9.13 diverged=0 (2204s)
+=== 2026-09-12 16:52:40 E12 sweep=e12_fixed phase=all model=resnet34 dataset=cifar100 gpus=0,3 wpg=2 ===
+[2026-09-12 16:52:42] [INFO] sweep=e12_fixed phase=all gpus=[0, 3] seeds=[42] workers_per_gpu=2 model=resnet34 dataset=cifar100 n_cfgs=14
+[2026-09-12 16:52:42] [INFO] E8-e12_fixed-all: 14 configs, 14 already done, 0 to run
+=== 2026-09-12 16:52:43 finished sweep=e12_fixed phase=all ===
+Wrote 16 anchors to e12_multi_setting/anchors.json:
+  mlp_bn|cifar10|sgd -> 0.02
+  mlp_bn|cifar10|sgdm -> 0.0001
+  mlp|cifar10|sgd -> 0.01
+  mlp|cifar10|sgdm -> 0.0008
+  mlp|mnist|sgd -> 0.002
+  mlp|mnist|sgdm -> 0.0003
+  resnet18|cifar100|sgd -> 0.005
+  resnet18|cifar100|sgdm -> 0.000962
+  resnet34|cifar100|sgd -> 0.005
+  resnet34|cifar100|sgdm -> 0.001
+  resnet50|cifar100|sgd -> 0.005
+  resnet50|cifar100|sgdm -> 0.0011
+  vgg13|cifar100|sgd -> 0.0075
+  vgg13|cifar100|sgdm -> 0.0006
+  vgg16|cifar100|sgd -> 0.01
+  vgg16|cifar100|sgdm -> 0.001
+=== 2026-09-12 16:52:43 E12 sweep=e12_matched phase=sgdm model=resnet34 dataset=cifar100 gpus=0,3 wpg=2 ===
+[2026-09-12 16:52:46] [INFO] sweep=e12_matched phase=sgdm gpus=[0, 3] seeds=[42] workers_per_gpu=2 model=resnet34 dataset=cifar100 n_cfgs=21
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.001132 sum_eta_lambda=0.658 (0.333 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.0004724 sum_eta_lambda=0.6582 (0.333 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.0001936 sum_eta_lambda=0.6581 (0.333 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.003397 sum_eta_lambda=1.975 (1.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.001417 sum_eta_lambda=1.974 (1.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.0005809 sum_eta_lambda=1.975 (1.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.005095 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.002126 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.0008713 sum_eta_lambda=2.962 (1.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.006794 sum_eta_lambda=3.949 (2.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.002834 sum_eta_lambda=3.948 (2.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.001162 sum_eta_lambda=3.95 (2.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.008492 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.003543 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.001452 sum_eta_lambda=4.936 (2.500 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.01019 sum_eta_lambda=5.923 (3.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.004252 sum_eta_lambda=5.924 (3.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.001743 sum_eta_lambda=5.925 (3.001 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=   linear_up lam0=0.01359 sum_eta_lambda=7.9 (4.001 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape=      linear lam0=0.005669 sum_eta_lambda=7.898 (4.000 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO]   plan resnet34/cifar100 mom=0.9 shape= iso_product lam0=0.002324 sum_eta_lambda=7.9 (4.001 C; anchor lam_ref=0.001)
+[2026-09-12 16:52:46] [INFO] E8-e12_matched-sgdm: 21 configs, 21 already done, 0 to run
+=== 2026-09-12 16:52:46 finished sweep=e12_matched phase=sgdm ===
+=== 2026-09-12 16:52:46 E12 sweep=e12_matched phase=sgd model=resnet34 dataset=cifar100 gpus=0,3 wpg=2 ===
+[2026-09-12 16:52:49] [INFO] sweep=e12_matched phase=sgd gpus=[0, 3] seeds=[42] workers_per_gpu=2 model=resnet34 dataset=cifar100 n_cfgs=21
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.01698 sum_eta_lambda=9.871 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.007086 sum_eta_lambda=9.873 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.002904 sum_eta_lambda=9.871 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.03397 sum_eta_lambda=19.75 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.01417 sum_eta_lambda=19.74 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.005809 sum_eta_lambda=19.75 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.05095 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.02126 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.008713 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.06794 sum_eta_lambda=39.49 (4.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.02834 sum_eta_lambda=39.48 (3.999 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.01162 sum_eta_lambda=39.5 (4.001 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.1019 sum_eta_lambda=59.23 (6.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.04252 sum_eta_lambda=59.24 (6.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.01743 sum_eta_lambda=59.25 (6.001 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.1529 sum_eta_lambda=88.88 (9.003 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.06378 sum_eta_lambda=88.86 (9.001 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.02614 sum_eta_lambda=88.86 (9.000 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.2548 sum_eta_lambda=148.1 (15.002 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.1063 sum_eta_lambda=148.1 (15.001 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.04357 sum_eta_lambda=148.1 (15.001 C; anchor lam_ref=0.005)
+[2026-09-12 16:52:49] [INFO] E8-e12_matched-sgd: 21 configs, 19 already done, 2 to run
+[2026-09-12 16:52:49] [INFO] E8-e12_matched-sgd: budget ~2.0 units
+GPU Scheduler initialized with GPUs: [0, 3]
+  Workers per GPU: 2 (Total workers: 4)
+
+Started 4 workers (2 per GPU) for 2 tasks
+================================================================================
+Worker 0 started on GPU 3 (PID: 1162481)
+GPU 3 (Worker 0): Processing task 0
+Worker 0 started on GPU 0 (PID: 1162479)
+GPU 0 (Worker 0): Processing task 1
+Worker 1 started on GPU 3 (PID: 1162482)
+Worker on GPU 3 finished
+Worker 1 started on GPU 0 (PID: 1162480)
+Worker on GPU 0 finished
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.01743] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.1529] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.1529] Epoch 25/100 | Train Loss: 2.7616 | Train Acc: 35.85% | Test Acc: 13.99% | Best: 38.73%
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.01743] Epoch 25/100 | Train Loss: 2.1178 | Train Acc: 46.66% | Test Acc: 21.92% | Best: 30.97%
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.1529] Epoch 50/100 | Train Loss: 3.7774 | Train Acc: 17.15% | Test Acc: 11.29% | Best: 38.73%
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.01743] Epoch 50/100 | Train Loss: 2.2802 | Train Acc: 46.14% | Test Acc: 28.13% | Best: 33.29%
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.1529] Epoch 75/100 | Train Loss: 4.2720 | Train Acc: 7.53% | Test Acc: 6.06% | Best: 38.73%
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.01743] Epoch 75/100 | Train Loss: 3.4805 | Train Acc: 32.13% | Test Acc: 15.92% | Best: 33.29%
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.1529] Epoch 100/100 | Train Loss: 4.4073 | Train Acc: 7.05% | Test Acc: 7.53% | Best: 38.73%
+GPU 0: Completed task 1
+Worker on GPU 0 finished
+[2026-09-12 17:19:17] [INFO]   [1/2] cosine mom=0.0 wd_sched=linear_up lam0=0.1529 T=100 -> best=38.73 diverged=0 (1580s)
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.01743] Epoch 100/100 | Train Loss: 4.6055 | Train Acc: 1.00% | Test Acc: 1.00% | Best: 33.29%
+GPU 3: Completed task 0
+Worker on GPU 3 finished
+[2026-09-12 17:19:49] [INFO]   [2/2] cosine mom=0.0 wd_sched=iso_product lam0=0.01743 T=100 -> best=33.29 diverged=0 (1612s)
+================================================================================
+All workers finished. Completed 2 tasks.
+[2026-09-12 17:19:49] [INFO] E8-e12_matched-sgd: finished 2/2 in 27.0 min
+=== 2026-09-12 17:19:50 finished sweep=e12_matched phase=sgd ===
+=== 2026-09-12 17:19:50 E12 setting resnet34/cifar100 done ===
