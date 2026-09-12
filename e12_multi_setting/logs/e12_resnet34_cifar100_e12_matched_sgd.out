@@ -1,0 +1,85 @@
+[2026-09-12 13:17:53] [INFO] sweep=e12_matched phase=sgd gpus=[0, 2, 3, 7] seeds=[42] workers_per_gpu=2 model=resnet34 dataset=cifar100 n_cfgs=21
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.01698 sum_eta_lambda=9.871 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.007086 sum_eta_lambda=9.873 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.002904 sum_eta_lambda=9.871 (1.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.03397 sum_eta_lambda=19.75 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.01417 sum_eta_lambda=19.74 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.005809 sum_eta_lambda=19.75 (2.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.05095 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.02126 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.008713 sum_eta_lambda=29.62 (3.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.06794 sum_eta_lambda=39.49 (4.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.02834 sum_eta_lambda=39.48 (3.999 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.01162 sum_eta_lambda=39.5 (4.001 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.1019 sum_eta_lambda=59.23 (6.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.04252 sum_eta_lambda=59.24 (6.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.01743 sum_eta_lambda=59.25 (6.001 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.1529 sum_eta_lambda=88.88 (9.003 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.06378 sum_eta_lambda=88.86 (9.001 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.02614 sum_eta_lambda=88.86 (9.000 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=   linear_up lam0=0.2548 sum_eta_lambda=148.1 (15.002 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape=      linear lam0=0.1063 sum_eta_lambda=148.1 (15.001 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO]   plan resnet34/cifar100 mom=0.0 shape= iso_product lam0=0.04357 sum_eta_lambda=148.1 (15.001 C; anchor lam_ref=0.005)
+[2026-09-12 13:17:53] [INFO] E8-e12_matched-sgd: 21 configs, 0 already done, 21 to run
+[2026-09-12 13:17:53] [INFO] E8-e12_matched-sgd: budget ~21.0 units
+GPU Scheduler initialized with GPUs: [0, 2, 3, 7]
+  Workers per GPU: 2 (Total workers: 8)
+
+Started 8 workers (2 per GPU) for 21 tasks
+================================================================================
+Worker 0 started on GPU 7 (PID: 643773)
+GPU 7 (Worker 0): Processing task 0
+Worker 1 started on GPU 0 (PID: 643768)
+GPU 0 (Worker 1): Processing task 1
+Worker 1 started on GPU 7 (PID: 643774)
+GPU 7 (Worker 1): Processing task 2
+Worker 0 started on GPU 0 (PID: 643767)
+GPU 0 (Worker 0): Processing task 3
+Worker 0 started on GPU 2 (PID: 643769)
+GPU 2 (Worker 0): Processing task 4
+Worker 1 started on GPU 3 (PID: 643772)
+GPU 3 (Worker 1): Processing task 5
+Worker 0 started on GPU 3 (PID: 643771)
+GPU 3 (Worker 0): Processing task 6
+Worker 1 started on GPU 2 (PID: 643770)
+GPU 2 (Worker 1): Processing task 7
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verifiedFiles already downloaded and verified
+
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.007086] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.03397] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01698] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002904] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.01417] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.005809] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.05095] start
+[e12_matched|SGD+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.02126] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():

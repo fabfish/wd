@@ -1,0 +1,2 @@
+[2026-09-12 13:17:46] [INFO] sweep=e12_fixed phase=all gpus=[0, 2, 3, 7] seeds=[42] workers_per_gpu=2 model=resnet34 dataset=cifar100 n_cfgs=14
+[2026-09-12 13:17:46] [INFO] E8-e12_fixed-all: 14 configs, 14 already done, 0 to run

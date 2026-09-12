@@ -7,8 +7,12 @@
   "mlp|mnist|sgdm": 0.0003,
   "resnet18|cifar100|sgd": 0.005,
   "resnet18|cifar100|sgdm": 0.000962,
+  "resnet34|cifar100|sgd": 0.005,
+  "resnet34|cifar100|sgdm": 0.001,
   "resnet50|cifar100|sgd": 0.005,
-  "resnet50|cifar100|sgdm": 0.000962,
+  "resnet50|cifar100|sgdm": 0.0011,
+  "vgg13|cifar100|sgd": 0.0075,
+  "vgg13|cifar100|sgdm": 0.0006,
   "vgg16|cifar100|sgd": 0.01,
-  "vgg16|cifar100|sgdm": 0.000962
+  "vgg16|cifar100|sgdm": 0.001
 }
