@@ -1,0 +1,618 @@
+[
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.04,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.06,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.08,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.12,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.18,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.3,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 3.333e-05,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 5e-05,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0002,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00025,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp_bn",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0004,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.04,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.06,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.09,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.15,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00026667,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0004,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0012,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0016,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0024,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "mlp",
+    "dataset": "cifar10",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0032,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00032067,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.000481,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.001443,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.001924,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.002405,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.002886,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet18",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.003848,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.0025,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.045,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.075,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00033333,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0025,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.004,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.0025,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.045,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.075,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00036667,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00055,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00165,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0022,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00275,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0033,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0044,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.00375,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.01125,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.0225,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.045,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.0675,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.1125,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0002,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0009,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0012,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0018,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0024,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.03,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.04,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.06,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.09,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.0,
+    "wd_sched": "fixed",
+    "wd": 0.15,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.00033333,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0015,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0025,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.004,
+    "exp": "e12_fill"
+  }
+]

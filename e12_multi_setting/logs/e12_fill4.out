@@ -1,0 +1,68 @@
+[2026-09-12 19:44:09] [INFO] e12_ms: 77 configs x 1 seeds = 77 runs, gpus=[0, 2, 3], workers_per_gpu=3
+[2026-09-12 19:44:09] [INFO] e12_ms: 77 configs, 0 already done, 77 to run
+[2026-09-12 19:44:09] [INFO] e12_ms: budget ~77.0 units
+GPU Scheduler initialized with GPUs: [0, 2, 3]
+  Workers per GPU: 3 (Total workers: 9)
+Worker 1 started on GPU 0 (PID: 1593391)
+GPU 0 (Worker 1): Processing task 6
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.3] start
+Worker 1 started on GPU 2 (PID: 1593394)
+GPU 2 (Worker 1): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] start
+Worker 1 started on GPU 3 (PID: 1593398)
+GPU 3 (Worker 1): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+Worker 2 started on GPU 3 (PID: 1593399)
+GPU 3 (Worker 2): Processing task 7
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=3.333e-05] start
+Worker 0 started on GPU 0 (PID: 1593390)
+GPU 0 (Worker 0): Processing task 4
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] start
+Worker 0 started on GPU 3 (PID: 1593396)
+GPU 3 (Worker 0): Processing task 8
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=5e-05] start
+Worker 2 started on GPU 0 (PID: 1593392)
+GPU 0 (Worker 2): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] start
+Worker 0 started on GPU 2 (PID: 1593393)
+GPU 2 (Worker 0): Processing task 3
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] start
+Worker 2 started on GPU 2 (PID: 1593395)
+GPU 2 (Worker 2): Processing task 5
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_fill|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:69: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():

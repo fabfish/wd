@@ -72,6 +72,11 @@ def build_md_body():
     RUNG = [0.33, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0, 15.0]
     tab['budget_r'] = [min(RUNG, key=lambda r: abs(b - r))
                        for b in tab['budget_c']]
+    # Keep only runs whose realized budget actually IS the nominal rung
+    # (ladder runs, lambda = f*lambda_ref or solved exactly). Grid points
+    # that merely land NEAR a rung (e.g. 8e-4 = 0.73C shown as 0.5) are
+    # dropped so every displayed cell is true to its column.
+    tab = tab[abs(tab['budget_c'] - tab['budget_r']) <= 0.11]
 
     out_lines = [
         '# E12 crosstab: best acc by shape x budget rung (setting-local C)',
