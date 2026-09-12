@@ -1,18 +1,52 @@
 #!/usr/bin/env python
 """E12 compact crosstab: per (setting, phase), rows = wd shape, cols = budget
 rung (rounded to nearest ladder value), cells = best acc. Same sources as
-e12_full_table.py. Writes e12_multi_setting/tables/e12_crosstab.md and prints."""
+e12_full_table.py.
+
+Rendering: empty cell for missing rungs (no NaN), row maximum bolded.
+Writes e12_multi_setting/tables/e12_crosstab.md and prints.
+Also (re)embeds the tables into e12_multi_setting/README.md between the
+markers "## 完整阶梯表" and "## 多种子结果".
+"""
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from e12_full_table import build_rows  # reuse
 
+ROOT = Path(__file__).resolve().parent.parent
+E12 = ROOT / 'e12_multi_setting'
+TABLES = E12 / 'tables'
+README = E12 / 'README.md'
+MARKER_START = '## 完整阶梯表'
+MARKER_END = '## 多种子结果'
 
-def main():
+
+def render_table(piv):
+    """Markdown table: header + one row per shape, bold per-row max, no NaN."""
+    cols = list(piv.columns)
+    header = '| wd_sched | ' + ' | '.join(f'{c:g}' for c in cols) + ' |'
+    sep = '|---|' + '---|' * len(cols)
+    lines = [header, sep]
+    for idx, row in piv.iterrows():
+        row_max = row.max()
+        cells = []
+        for c in cols:
+            v = row[c]
+            if pd.isna(v):
+                cells.append('')
+            else:
+                s = f'{v:.2f}'
+                if pd.notna(row_max) and v == row_max:
+                    s = f'**{s}**'
+                cells.append(s)
+        lines.append(f'| {idx} | ' + ' | '.join(cells) + ' |')
+    return '\n'.join(lines)
+
+
+def build_md_body():
     rows = build_rows()
     tab = pd.DataFrame(rows)
     tab['budget_r'] = tab['budget_c'].round(1)
@@ -22,7 +56,7 @@ def main():
         '',
         'Rows = WD schedule, columns = realized budget in setting-local C units',
         '(lambda_ref = fixed oracle of that setting/phase, seed 42).',
-        'R50/C100 matched rows fill in as the queue progresses.',
+        'Empty cells = budget not tested. Bold = best value in that row.',
         '',
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
@@ -32,13 +66,29 @@ def main():
         piv = piv.reindex(['fixed', 'linear_up', 'linear', 'iso_product'])
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
-        out_lines.append(piv.round(2).to_markdown())
+        out_lines.append(render_table(piv))
         out_lines.append('')
-    out = Path(__file__).resolve().parent.parent / 'e12_multi_setting' \
-        / 'tables' / 'e12_crosstab.md'
-    out.parent.mkdir(parents=True, exist_ok=True)
-    text = '\n'.join(out_lines)
-    out.write_text(text)
+    return '\n'.join(out_lines)
+
+
+def main():
+    text = build_md_body()
+    TABLES.mkdir(parents=True, exist_ok=True)
+    (TABLES / 'e12_crosstab.md').write_text(text)
+
+    # Embed into README (replace previous embedding, keep the rest intact).
+    readme = README.read_text()
+    start = readme.find(MARKER_START)
+    end = readme.find(MARKER_END)
+    if start == -1 or end == -1 or end <= start:
+        print('WARN: README markers not found; skipping embed')
+    else:
+        body = '\n'.join(text.split('\n', 1)[1:])  # drop the H1
+        new_readme = (readme[:start] + MARKER_START +
+                      '（所有测过的份额，行=形状，列=预算 C 单位）\n\n' +
+                      body.rstrip() + '\n\n' + readme[end:])
+        README.write_text(new_readme)
+        print(f'embedded into README ({len(new_readme)} bytes)')
     print(text)
 
 
