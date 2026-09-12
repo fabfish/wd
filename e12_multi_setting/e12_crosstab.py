@@ -23,6 +23,12 @@ README = E12 / 'README.md'
 MARKER_START = '## 完整阶梯表'
 MARKER_END = '## 多种子结果'
 
+# Row labels for the rendered tables (budget math uses the raw keys).
+SHAPE_LABELS = {'fixed': 'fixed (const λ)',
+                'linear_up': 'linear up',
+                'linear': 'linear down',
+                'iso_product': 'iso up'}
+
 
 def render_table(piv):
     """Markdown table: header + one row per shape, bold per-row max, no NaN."""
@@ -42,7 +48,8 @@ def render_table(piv):
                 if pd.notna(row_max) and v == row_max:
                     s = f'**{s}**'
                 cells.append(s)
-        lines.append(f'| {idx} | ' + ' | '.join(cells) + ' |')
+        label = SHAPE_LABELS.get(idx, idx)
+        lines.append(f'| {label} | ' + ' | '.join(cells) + ' |')
     return '\n'.join(lines)
 
 
