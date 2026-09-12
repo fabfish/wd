@@ -76,7 +76,7 @@ def build_md_body():
     # (ladder runs, lambda = f*lambda_ref or solved exactly). Grid points
     # that merely land NEAR a rung (e.g. 8e-4 = 0.73C shown as 0.5) are
     # dropped so every displayed cell is true to its column.
-    tab = tab[abs(tab['budget_c'] - tab['budget_r']) <= 0.11]
+    tab = tab[abs(tab['budget_c'] - tab['budget_r']) <= 0.06]
 
     out_lines = [
         '# E12 crosstab: best acc by shape x budget rung (setting-local C)',
