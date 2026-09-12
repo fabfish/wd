@@ -78,12 +78,12 @@ R50/C100 matched rows fill in as the queue progresses.
 
 ## resnet34/cifar100 / SGD
 
-| wd_sched    |    0.2 |    0.4 |    0.6 |    1.0 |    1.5 |    2.0 |    4.0 |
-|:------------|-------:|-------:|-------:|-------:|-------:|-------:|-------:|
-| fixed       |  76.51 |  77.55 |  78.53 |  78.87 |  78.69 |  78.66 |  77.07 |
-| linear_up   | nan    | nan    | nan    | nan    | nan    | nan    | nan    |
-| linear      | nan    | nan    | nan    | nan    | nan    | nan    | nan    |
-| iso_product | nan    | nan    | nan    | nan    | nan    | nan    | nan    |
+| wd_sched    |    0.2 |    0.4 |    0.6 |   1.0 |    1.5 |   2.0 |    3.0 |   4.0 |    6.0 |    9.0 |   15.0 |
+|:------------|-------:|-------:|-------:|------:|-------:|------:|-------:|------:|-------:|-------:|-------:|
+| fixed       |  76.51 |  77.55 |  78.53 | 78.87 |  78.69 | 78.66 | nan    | 77.07 | nan    | nan    | nan    |
+| linear_up   | nan    | nan    | nan    | 79.3  | nan    | 79.22 |  77.13 | 72.28 |  46.84 | nan    |  35.8  |
+| linear      | nan    | nan    | nan    | 78.52 | nan    | 78.22 |  77.78 | 76.77 |  73.77 |  19.97 |   3.53 |
+| iso_product | nan    | nan    | nan    | 79    | nan    | 78.98 |  69.9  | 40.65 | nan    |  25.26 |   9.13 |
 
 ## resnet34/cifar100 / SGDM
 
