@@ -1,0 +1,34 @@
+[
+  {
+    "model": "resnet50",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0005,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "resnet34",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0005,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg13",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0005,
+    "exp": "e12_fill"
+  },
+  {
+    "model": "vgg16",
+    "dataset": "cifar100",
+    "momentum": 0.9,
+    "wd_sched": "fixed",
+    "wd": 0.0005,
+    "exp": "e12_fill"
+  }
+]

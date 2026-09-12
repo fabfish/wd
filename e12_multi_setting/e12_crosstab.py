@@ -47,8 +47,14 @@ def render_table(piv, lam_piv):
             if pd.isna(v):
                 cells.append('')
             else:
-                lam = lam_piv.loc[idx, c]
-                s = f'{v:.2f} (λ={lam:.4g})'
+                # Lambda annotation only on the fixed row: there it IS the
+                # traditional const-WD value. On dynamic-shape rows lambda0 is
+                # just a shape parameter and would only add noise.
+                if idx == 'fixed':
+                    lam = lam_piv.loc[idx, c]
+                    s = f'{v:.2f} (λ={lam:.4g})'
+                else:
+                    s = f'{v:.2f}'
                 if pd.notna(row_max) and v == row_max:
                     s = f'**{s}**'
                 cells.append(s)
