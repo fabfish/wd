@@ -66,7 +66,12 @@ def render_table(piv, lam_piv):
 def build_md_body():
     rows = build_rows()
     tab = pd.DataFrame(rows)
-    tab['budget_r'] = tab['budget_c'].round(1)
+    # Snap realized budgets onto the nominal ladder rungs so every table
+    # shares the same integer-ish columns (no 0.94/0.96 rungs; 0.94C and
+    # 1.04C both land on the 1C column).
+    RUNG = [0.33, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0, 15.0]
+    tab['budget_r'] = [min(RUNG, key=lambda r: abs(b - r))
+                       for b in tab['budget_c']]
 
     out_lines = [
         '# E12 crosstab: best acc by shape x budget rung (setting-local C)',
@@ -89,6 +94,10 @@ def build_md_body():
         piv = piv.reindex(['fixed', 'linear_up', 'linear', 'iso_product'])
         lam_piv = lam_piv.reindex(['fixed', 'linear_up', 'linear',
                                    'iso_product'])
+        cols = [c for c in [0.33, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0,
+                            6.0, 9.0, 15.0] if c in piv.columns]
+        piv = piv[cols]
+        lam_piv = lam_piv[cols]
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
         out_lines.append(render_table(piv, lam_piv))

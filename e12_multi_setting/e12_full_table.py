@@ -79,9 +79,12 @@ def build_rows():
     df = df.assign(wd_sched_norm=ws.replace('', 'fixed'))
     df = df[df['wd_sched_norm'].isin(SHAPES)]
 
-    # per-(setting, phase) anchor: fixed oracle seed 42
+    # per-(setting, phase) anchor: fixed oracle seed 42, GRID runs only
+    # (e4 predicted points like 9.62e-4 are excluded from the anchor pool so
+    # 1C means "the best grid-searched const WD").
     anchors = {}
     fixed = df[df['wd_sched_norm'] == 'fixed']
+    fixed = fixed[fixed['exp'] != 'e4']
     for (model, dataset, mom), g in fixed.groupby(['model', 'dataset', 'momentum']):
         g = g[g['seed'] == 42]
         if g.empty:

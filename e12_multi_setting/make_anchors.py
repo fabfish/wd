@@ -27,47 +27,41 @@ def main():
     parser.add_argument('csv_path')
     parser.add_argument('out_path', nargs='?',
                         default='e12_multi_setting/anchors.json')
-    parser.add_argument('--extra-csv', nargs='*', default=None,
-                        help='additional CSVs (e.g. the E11 CSV) whose cosine '
-                             'fixed seed-42 rows also compete for the oracle')
     args = parser.parse_args()
 
     csv_path = Path(args.csv_path)
     if not csv_path.exists():
         raise SystemExit(f'CSV not found: {csv_path}. Run e12_fixed first.')
 
-    paths = [csv_path] + [Path(p) for p in (args.extra_csv or []) if Path(p).exists()]
-
+    # Oracle pool: ONLY grid runs (e12_fixed / e12_fill). The E4 predicted
+    # points (exp=e4, e.g. 9.62e-4) are deliberately excluded so the 1C
+    # anchor is "the best grid-searched const WD" — matching the paper
+    # narrative (grid search -> best wd = 1C -> rescale others to 0.xC).
     best = {}  # (model, dataset, phase) -> (acc, lambda)
-    for path in paths:
-        with open(path, newline='') as f:
-            for row in csv.DictReader(f):
-                # The oracle pool: fixed-WD rows under cosine LR. In the E12
-                # CSV these carry exp=e12_fixed; in the E11 CSV the legacy e4
-                # rows (blank wd_sched, scheduler=cosine) are also valid
-                # oracle candidates and can beat the E12 grid (they did for
-                # resnet50/vgg16 SGDM: 9.62e-4 > 6e-4).
-                ws = str(row.get('wd_sched', '')).strip()
-                is_fixed = ws in ('', 'fixed')
-                if str(row.get('scheduler', '')) != 'cosine' or not is_fixed:
-                    continue
-                if path != csv_path and str(row.get('exp', '')) != 'e4':
-                    continue
-                if str(row.get('diverged', '')).lower() in ('true', '1'):
-                    continue
-                try:
-                    acc = float(row['best_test_acc'])
-                    lam = float(row['wd'])
-                    seed = int(row['seed'])
-                    epochs = int(row['epochs'])
-                    bs = int(row['batch_size'])
-                except (KeyError, ValueError):
-                    continue
-                if lam <= 0 or seed != 42 or epochs != 100 or bs != 128:
-                    continue
-                key = (row['model'], row['dataset'], phase_of(row['momentum']))
-                if key not in best or acc > best[key][0]:
-                    best[key] = (acc, lam)
+    with open(csv_path, newline='') as f:
+        for row in csv.DictReader(f):
+            ws = str(row.get('wd_sched', '')).strip()
+            is_fixed = ws in ('', 'fixed')
+            exp = str(row.get('exp', ''))
+            if not is_fixed or exp not in ('e12_fixed', 'e12_fill'):
+                continue
+            if str(row.get('scheduler', '')) != 'cosine':
+                continue
+            if str(row.get('diverged', '')).lower() in ('true', '1'):
+                continue
+            try:
+                acc = float(row['best_test_acc'])
+                lam = float(row['wd'])
+                seed = int(row['seed'])
+                epochs = int(row['epochs'])
+                bs = int(row['batch_size'])
+            except (KeyError, ValueError):
+                continue
+            if lam <= 0 or seed != 42 or epochs != 100 or bs != 128:
+                continue
+            key = (row['model'], row['dataset'], phase_of(row['momentum']))
+            if key not in best or acc > best[key][0]:
+                best[key] = (acc, lam)
 
     if not best:
         raise SystemExit('No e12_fixed rows found in CSV.')

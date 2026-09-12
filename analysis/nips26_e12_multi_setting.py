@@ -47,6 +47,13 @@ E12_SHAPES = ['fixed', 'linear_up', 'linear', 'iso_product']
 SHAPE_LABELS = {'fixed': 'fixed (const)', 'linear_up': 'linear up',
                 'linear': 'linear down', 'iso_product': 'iso up (product)'}
 PHASE_LABELS = {0.9: 'SGDM', 0.0: 'SGD'}
+# Nominal ladder rungs; realized budgets are snapped onto these for display
+# so tables read in clean integer rungs (0.94C / 1.04C both land on 1C).
+RUNG = [0.33, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0, 15.0]
+
+
+def snap_budget(b):
+    return min(RUNG, key=lambda r: abs(b - r))
 LADDER = {'sgdm': [1 / 3, 1, 1.5, 2, 2.5, 3, 4],
           'sgd': [1, 2, 3, 4, 6, 9, 15]}
 
@@ -176,7 +183,7 @@ def setting_section(df, model, dataset, momentum, lam_ref_override=None):
         rows.append({
             'setting': label, 'wd_sched': sched, 'phase': PHASE_LABELS[momentum],
             'peak_acc': float(peak['best_test_acc']),
-            'peak_budget_c': float(peak['budget_c']),
+            'peak_budget_c': snap_budget(float(peak['budget_c'])),
             'peak_lambda0': float(peak['lambda0']),
             'n_runs': int((bdf['wd_sched'] == sched).sum()),
         })

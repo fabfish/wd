@@ -5,7 +5,6 @@
   "mlp|cifar10|sgdm": 0.0008,
   "mlp|mnist|sgd": 0.002,
   "mlp|mnist|sgdm": 0.0003,
-  "resnet18|cifar100|sgd": 0.005,
   "resnet18|cifar100|sgdm": 0.000962,
   "resnet34|cifar100|sgd": 0.005,
   "resnet34|cifar100|sgdm": 0.001,
