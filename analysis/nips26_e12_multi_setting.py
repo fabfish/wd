@@ -286,19 +286,10 @@ def main():
         key = f'{model}|{dataset}|{phase}'
         return float(anchors[key]) if key in anchors else None
 
-    # Merge legacy E11 fixed rows (e4: resnet50/vgg16 oracle points like
-    # 9.62e-4) into the E12 frame so the fixed curve/peak is complete.
+    # Legacy E11 fixed rows are NOT merged anymore: the E4 blind-prediction
+    # points (9.62e-4 etc.) are excluded from the grid-search narrative and
+    # live in e12_multi_setting/e4_prediction_points.md.
     df_merged = df
-    if not e11.empty:
-        extra = e11[
-            (e11['exp'] == 'e4')
-            & (e11['scheduler'] == 'cosine')
-            & (e11['seed'] == 42)
-            & (e11['epochs'] == 100)
-            & (e11['batch_size'] == 128)
-        ]
-        if not extra.empty and not df.empty:
-            df_merged = pd.concat([df, extra], ignore_index=True)
 
     all_rows = []
     for (model, dataset) in e12_pairs:

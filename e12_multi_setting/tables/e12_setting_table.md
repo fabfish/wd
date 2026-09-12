@@ -36,7 +36,7 @@ that setting/phase, seed 42). n_runs counts seed-42 rows.
 | resnet34/cifar100/SGD | SGD | linear_up | 79.30 | 1.00C | 0.01698 | 7 |
 | resnet34/cifar100/SGD | SGD | linear | 78.52 | 1.00C | 0.007086 | 7 |
 | resnet34/cifar100/SGD | SGD | iso_product | 79.00 | 1.00C | 0.002904 | 7 |
-| resnet50/cifar100/SGDM | SGDM | fixed | 78.20 | 1.00C | 0.000962 | 17 |
+| resnet50/cifar100/SGDM | SGDM | fixed | 77.72 | 1.00C | 0.0011 | 14 |
 | resnet50/cifar100/SGDM | SGDM | linear_up | 78.72 | 1.00C | 0.003057 | 9 |
 | resnet50/cifar100/SGDM | SGDM | linear | 77.01 | 0.50C | 0.0008503 | 7 |
 | resnet50/cifar100/SGDM | SGDM | iso_product | 78.51 | 0.50C | 0.0003485 | 9 |
@@ -52,7 +52,7 @@ that setting/phase, seed 42). n_runs counts seed-42 rows.
 | vgg13/cifar100/SGD | SGD | linear_up | 76.41 | 1.00C | 0.02548 | 7 |
 | vgg13/cifar100/SGD | SGD | linear | 75.24 | 1.00C | 0.01063 | 7 |
 | vgg13/cifar100/SGD | SGD | iso_product | 76.76 | 1.00C | 0.004357 | 7 |
-| vgg16/cifar100/SGDM | SGDM | fixed | 73.43 | 1.00C | 0.000962 | 13 |
+| vgg16/cifar100/SGDM | SGDM | fixed | 73.02 | 1.00C | 0.001 | 10 |
 | vgg16/cifar100/SGDM | SGDM | linear_up | 73.84 | 1.00C | 0.003397 | 8 |
 | vgg16/cifar100/SGDM | SGDM | linear | 72.46 | 1.00C | 0.001417 | 7 |
 | vgg16/cifar100/SGDM | SGDM | iso_product | 74.24 | 1.00C | 0.0005809 | 10 |

@@ -31,7 +31,7 @@ resnet34/cifar100/SGD,fixed,SGD,78.87,1.0,0.005,7
 resnet34/cifar100/SGD,linear_up,SGD,79.3,1.0,0.01698,7
 resnet34/cifar100/SGD,linear,SGD,78.52,1.0,0.007086,7
 resnet34/cifar100/SGD,iso_product,SGD,79.0,1.0,0.002904,7
-resnet50/cifar100/SGDM,fixed,SGDM,78.2,1.0,0.000962,17
+resnet50/cifar100/SGDM,fixed,SGDM,77.72,1.0,0.0011,14
 resnet50/cifar100/SGDM,linear_up,SGDM,78.72,1.0,0.003057,9
 resnet50/cifar100/SGDM,linear,SGDM,77.01,0.5,0.0008503,7
 resnet50/cifar100/SGDM,iso_product,SGDM,78.51,0.5,0.0003485,9
@@ -47,7 +47,7 @@ vgg13/cifar100/SGD,fixed,SGD,76.08,1.0,0.0075,7
 vgg13/cifar100/SGD,linear_up,SGD,76.41,1.0,0.02548,7
 vgg13/cifar100/SGD,linear,SGD,75.24,1.0,0.01063,7
 vgg13/cifar100/SGD,iso_product,SGD,76.76,1.0,0.004357,7
-vgg16/cifar100/SGDM,fixed,SGDM,73.43,1.0,0.000962,13
+vgg16/cifar100/SGDM,fixed,SGDM,73.02,1.0,0.001,10
 vgg16/cifar100/SGDM,linear_up,SGDM,73.84,1.0,0.003397,8
 vgg16/cifar100/SGDM,linear,SGDM,72.46,1.0,0.001417,7
 vgg16/cifar100/SGDM,iso_product,SGDM,74.24,1.0,0.0005809,10
