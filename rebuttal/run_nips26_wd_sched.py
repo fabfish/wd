@@ -90,7 +90,7 @@ DEFAULT_CSV = RESULTS_DIR / 'nips26_runs.csv'
 DATA_DIR = str(Path(__file__).resolve().parent.parent / 'data')
 
 RUN_KEY = ['model', 'dataset', 'method', 'batch_size', 'lr', 'wd', 'momentum',
-           'epochs', 'scheduler', 'seed', 'wd_sched']
+           'epochs', 'scheduler', 'seed', 'wd_sched', 'wd_mode']
 
 CSV_FIELDS = RUN_KEY + [
     'exp', 'sum_lr', 'best_test_acc', 'final_test_acc', 'final_train_loss',
@@ -360,7 +360,7 @@ def load_done_keys(csv_path):
     with open(csv_path, newline='') as f:
         for row in csv.DictReader(f):
             try:
-                cfg = {k: row[k] for k in RUN_KEY}
+                cfg = {k: row.get(k, 'coupled') for k in RUN_KEY}
                 for k in ('lr', 'wd', 'momentum'):
                     cfg[k] = float(cfg[k])
                 ws = str(cfg.get('wd_sched', '')).strip()
@@ -389,7 +389,7 @@ def append_row(csv_path, row):
 
 def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
              model='resnet18', seed=42, dataset='cifar100',
-             lr_mode='const', exp=None):
+             lr_mode='const', exp=None, wd_mode='coupled'):
     """
     lr_mode:
       const     -> scheduler='const'   (fixed LR; schedule only WD)
@@ -424,6 +424,7 @@ def make_cfg(wd_sched, lambda0, momentum, lr=0.1, epochs=100, batch_size=128,
         'momentum': float(momentum), 'epochs': int(epochs),
         'scheduler': scheduler_col,
         'seed': int(seed), 'wd_sched': wd_sched, 'exp': exp,
+        'wd_mode': wd_mode,
         'lr_mode': lr_mode,
         'num_workers': DEFAULT_NUM_WORKERS,
     }
@@ -630,10 +631,22 @@ def run_one(cfg):
     model = get_model(cfg['model'], num_classes=num_classes,
                       dataset=dataset).to(device)
 
-    optimizer = optim.SGD(
-        model.parameters(), lr=cfg['lr'],
-        momentum=cfg['momentum'], weight_decay=cfg['wd'],
-    )
+    if cfg.get('wd_mode', 'coupled') == 'decoupled':
+        # AdamW-style decoupled WD: params shrunk directly each
+        # step; the momentum buffer never sees the WD term.
+        # wd_fn below still drives group['weight_decay'] per
+        # epoch; train_epoch applies it multiplicatively.
+        optimizer = optim.SGD(
+            model.parameters(), lr=cfg['lr'],
+            momentum=cfg['momentum'], weight_decay=0.0,
+        )
+        for group in optimizer.param_groups:
+            group['decoupled_wd'] = True
+    else:
+        optimizer = optim.SGD(
+            model.parameters(), lr=cfg['lr'],
+            momentum=cfg['momentum'], weight_decay=cfg['wd'],
+        )
 
     lr_mode = cfg.get('lr_mode', cfg['scheduler'])
     lr_fn = wd_fn = None

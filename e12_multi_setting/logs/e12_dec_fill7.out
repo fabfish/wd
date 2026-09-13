@@ -1,0 +1,640 @@
+[2026-09-13 21:03:45] [INFO] e12_ms: 448 configs x 1 seeds = 448 runs, gpus=[0, 1, 3], workers_per_gpu=1
+[2026-09-13 21:03:45] [INFO] e12_ms: 448 configs, 6 already done, 442 to run
+[2026-09-13 21:03:45] [INFO] e12_ms: budget ~442.0 units
+GPU Scheduler initialized with GPUs: [0, 1, 3]
+  Workers per GPU: 1 (Total workers: 3)
+Worker 0 started on GPU 3 (PID: 2892273)
+GPU 3 (Worker 0): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+Worker 0 started on GPU 1 (PID: 2892272)
+GPU 1 (Worker 0): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] start
+Worker 0 started on GPU 0 (PID: 2892271)
+GPU 0 (Worker 0): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:87: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:87: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:87: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+GPU 3: Error in task 0: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 3
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] start
+GPU 1: Error in task 1: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 4
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] start
+GPU 0: Error in task 2: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 5
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] start
+GPU 3: Error in task 3: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 6
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.3] start
+GPU 1: Error in task 4: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 7
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=3.333e-05] start
+GPU 0: Error in task 5: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 8
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=5e-05] start
+GPU 3: Error in task 6: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 9
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00015] start
+GPU 1: Error in task 7: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 10
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0002] start
+GPU 0: Error in task 8: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 11
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00025] start
+GPU 3: Error in task 9: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 12
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0004] start
+GPU 1: Error in task 10: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 13
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.015] start
+GPU 0: Error in task 11: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 14
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+GPU 3: Error in task 12: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 15
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] start
+GPU 1: Error in task 13: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 16
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] start
+GPU 0: Error in task 14: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 17
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.09] start
+GPU 3: Error in task 15: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 18
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.15] start
+GPU 1: Error in task 16: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 19
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00026667] start
+GPU 0: Error in task 17: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 20
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0004] start
+GPU 3: Error in task 18: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 21
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0012] start
+GPU 1: Error in task 19: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 22
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0016] start
+GPU 0: Error in task 20: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 23
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0024] start
+GPU 3: Error in task 21: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 24
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0032] start
+GPU 1: Error in task 22: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 25
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00032067] start
+GPU 0: Error in task 23: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 26
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.000481] start
+GPU 3: Error in task 24: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 27
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001443] start
+GPU 1: Error in task 25: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 28
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001924] start
+GPU 0: Error in task 26: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 29
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.002405] start
+GPU 3: Error in task 27: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 30
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.002886] start
+GPU 1: Error in task 28: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 31
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003848] start
+GPU 0: Error in task 29: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 32
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0025] start
+GPU 3: Error in task 30: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 33
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.015] start
+GPU 1: Error in task 31: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 34
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+GPU 0: Error in task 32: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 35
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.045] start
+GPU 3: Error in task 33: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 36
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.075] start
+GPU 1: Error in task 34: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 37
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00033333] start
+GPU 0: Error in task 35: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 38
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0015] start
+GPU 3: Error in task 36: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 39
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0025] start
+GPU 1: Error in task 37: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 40
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.004] start
+GPU 0: Error in task 38: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 41
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0025] start
+GPU 3: Error in task 39: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 42
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.015] start
+GPU 1: Error in task 40: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 43
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+GPU 0: Error in task 41: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 44
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.045] start
+GPU 3: Error in task 42: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 45
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.075] start
+GPU 1: Error in task 43: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 46
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00036667] start
+GPU 0: Error in task 44: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 47
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00055] start
+GPU 3: Error in task 45: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 48
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00165] start
+GPU 1: Error in task 46: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 49
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0022] start
+GPU 0: Error in task 47: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 50
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00275] start
+GPU 1: Error in task 49: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 51
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0033] start
+GPU 3: Error in task 48: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 52
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0044] start
+GPU 0: Error in task 50: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 53
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00375] start
+GPU 1: Error in task 51: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 54
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.01125] start
+GPU 3: Error in task 52: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 55
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.015] start
+GPU 0: Error in task 53: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 56
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0225] start
+GPU 1: Error in task 54: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 57
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+GPU 3: Error in task 55: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 58
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.045] start
+GPU 0: Error in task 56: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 59
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0675] start
+GPU 1: Error in task 57: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 60
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.1125] start
+GPU 3: Error in task 58: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 61
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0002] start
+GPU 0: Error in task 59: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 62
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0009] start
+GPU 1: Error in task 60: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 63
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0012] start
+GPU 3: Error in task 61: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 64
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0015] start
+GPU 0: Error in task 62: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 65
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0018] start
+GPU 1: Error in task 63: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 66
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0024] start
+GPU 3: Error in task 64: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 67
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.015] start
+GPU 0: Error in task 65: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 68
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+GPU 1: Error in task 66: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 69
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] start
+GPU 3: Error in task 67: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 70
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] start
+GPU 0: Error in task 68: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 71
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.09] start
+GPU 1: Error in task 69: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 72
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.15] start
+GPU 3: Error in task 70: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 73
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.00033333] start
+GPU 0: Error in task 71: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 74
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0015] start
+GPU 1: Error in task 72: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 75
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0025] start
+GPU 3: Error in task 73: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 76
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.004] start
+GPU 0: Error in task 74: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 77
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001245] start
+GPU 1: Error in task 75: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 78
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0005197] start
+GPU 3: Error in task 76: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 79
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.000213] start
+GPU 0: Error in task 77: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 80
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003736] start
+GPU 1: Error in task 78: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 81
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001559] start
+GPU 3: Error in task 79: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 82
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.000639] start
+GPU 0: Error in task 80: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 83
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005605] start
+GPU 1: Error in task 81: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 84
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002338] start
+GPU 3: Error in task 82: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 85
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0009585] start
+GPU 0: Error in task 83: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 86
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.007473] start
+GPU 1: Error in task 84: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 87
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003118] start
+GPU 3: Error in task 85: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 88
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001278] start
+GPU 0: Error in task 86: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 89
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.009341] start
+GPU 1: Error in task 87: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 90
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.003897] start
+GPU 3: Error in task 88: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 91
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001597] start
+GPU 0: Error in task 89: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 92
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01121] start
+GPU 1: Error in task 90: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 93
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.004677] start
+GPU 3: Error in task 91: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 94
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.001917] start
+GPU 0: Error in task 92: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 95
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.01495] start
+GPU 1: Error in task 93: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 96
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.006236] start
+GPU 3: Error in task 94: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 97
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.002556] start
+GPU 0: Error in task 95: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 98
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.001132] start
+GPU 1: Error in task 96: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 99
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.0004724] start
+GPU 3: Error in task 97: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 100
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0001936] start
+GPU 0: Error in task 98: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 101
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] start
+GPU 1: Error in task 99: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 102
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] start
+GPU 3: Error in task 100: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 103
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] start
+GPU 0: Error in task 101: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 104
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.005095] start
+GPU 1: Error in task 102: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 1 (Worker 0): Processing task 105
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.002126] start
+GPU 3: Error in task 103: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 3 (Worker 0): Processing task 106
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0008713] start
+GPU 0: Error in task 104: a leaf Variable that requires grad is being used in an in-place operation.
+GPU 0 (Worker 0): Processing task 107
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.006794] start
+[2026-09-13 21:17:58] [INFO] e12_ms: 448 configs x 1 seeds = 448 runs, gpus=[0, 1, 3], workers_per_gpu=1
+[2026-09-13 21:17:58] [INFO] e12_ms: 448 configs, 6 already done, 442 to run
+[2026-09-13 21:17:58] [INFO] e12_ms: budget ~442.0 units
+GPU Scheduler initialized with GPUs: [0, 1, 3]
+  Workers per GPU: 1 (Total workers: 3)
+Worker 0 started on GPU 3 (PID: 2952513)
+GPU 3 (Worker 0): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] start
+Worker 0 started on GPU 0 (PID: 2952511)
+GPU 0 (Worker 0): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] start
+Worker 0 started on GPU 1 (PID: 2952512)
+GPU 1 (Worker 0): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+
+Started 3 workers (1 per GPU) for 442 tasks
+================================================================================
+[2026-09-13 21:24:51] [INFO]   [1/442] cosine mom=0.0 wd_sched=fixed lam0=0.04 T=100 -> best=38.82 diverged=0 (406s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] Epoch 25/100 | Train Loss: 2.0157 | Train Acc: 28.71% | Test Acc: 28.22% | Best: 38.82%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] Epoch 50/100 | Train Loss: 1.9772 | Train Acc: 29.40% | Test Acc: 29.04% | Best: 38.82%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] Epoch 75/100 | Train Loss: 1.9002 | Train Acc: 31.86% | Test Acc: 30.41% | Best: 38.82%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.04] Epoch 100/100 | Train Loss: 1.7125 | Train Acc: 38.28% | Test Acc: 33.18% | Best: 38.82%
+GPU 3: Completed task 1
+GPU 3 (Worker 0): Processing task 3
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] start
+[2026-09-13 21:24:56] [INFO]   [2/442] cosine mom=0.0 wd_sched=fixed lam0=0.06 T=100 -> best=26.15 diverged=0 (412s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] Epoch 25/100 | Train Loss: 2.3027 | Train Acc: 10.02% | Test Acc: 10.00% | Best: 26.15%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] Epoch 50/100 | Train Loss: 2.3027 | Train Acc: 9.80% | Test Acc: 10.00% | Best: 26.15%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] Epoch 75/100 | Train Loss: 2.3026 | Train Acc: 9.94% | Test Acc: 10.00% | Best: 26.15%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.06] Epoch 100/100 | Train Loss: 2.3027 | Train Acc: 10.00% | Test Acc: 10.00% | Best: 26.15%
+GPU 0: Completed task 2
+GPU 0 (Worker 0): Processing task 4
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] start
+[2026-09-13 21:25:16] [INFO]   [3/442] cosine mom=0.0 wd_sched=fixed lam0=0.03 T=100 -> best=51.73 diverged=0 (432s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] Epoch 25/100 | Train Loss: 1.8228 | Train Acc: 39.85% | Test Acc: 35.60% | Best: 42.57%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] Epoch 50/100 | Train Loss: 1.7625 | Train Acc: 42.00% | Test Acc: 40.58% | Best: 42.57%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] Epoch 75/100 | Train Loss: 1.6065 | Train Acc: 48.30% | Test Acc: 41.89% | Best: 46.32%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.03] Epoch 100/100 | Train Loss: 1.1836 | Train Acc: 68.92% | Test Acc: 51.54% | Best: 51.73%
+GPU 1: Completed task 0
+GPU 1 (Worker 0): Processing task 5
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] start
+[2026-09-13 21:31:33] [INFO]   [4/442] cosine mom=0.0 wd_sched=fixed lam0=0.12 T=100 -> best=10.00 diverged=0 (394s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] Epoch 25/100 | Train Loss: 2.3027 | Train Acc: 10.08% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] Epoch 50/100 | Train Loss: 2.3027 | Train Acc: 9.93% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] Epoch 75/100 | Train Loss: 2.3026 | Train Acc: 9.98% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.12] Epoch 100/100 | Train Loss: 2.3027 | Train Acc: 10.00% | Test Acc: 10.00% | Best: 10.00%
+GPU 0: Completed task 4
+GPU 0 (Worker 0): Processing task 6
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.3] start
+[2026-09-13 21:31:45] [INFO]   [5/442] cosine mom=0.0 wd_sched=fixed lam0=0.08 T=100 -> best=19.08 diverged=0 (411s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] Epoch 25/100 | Train Loss: 2.3027 | Train Acc: 10.10% | Test Acc: 10.00% | Best: 19.08%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] Epoch 50/100 | Train Loss: 2.3027 | Train Acc: 9.82% | Test Acc: 10.00% | Best: 19.08%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] Epoch 75/100 | Train Loss: 2.3026 | Train Acc: 10.01% | Test Acc: 10.00% | Best: 19.08%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.08] Epoch 100/100 | Train Loss: 2.3027 | Train Acc: 10.00% | Test Acc: 10.00% | Best: 19.08%
+GPU 3: Completed task 3
+GPU 3 (Worker 0): Processing task 7
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=3.333e-05] start
+[2026-09-13 21:32:53] [INFO]   [6/442] cosine mom=0.0 wd_sched=fixed lam0=0.18 T=100 -> best=10.00 diverged=0 (453s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] Epoch 25/100 | Train Loss: 2.3026 | Train Acc: 10.08% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] Epoch 50/100 | Train Loss: 2.3027 | Train Acc: 9.88% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] Epoch 75/100 | Train Loss: 2.3026 | Train Acc: 9.98% | Test Acc: 10.00% | Best: 10.00%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.18] Epoch 100/100 | Train Loss: 2.3027 | Train Acc: 10.00% | Test Acc: 10.00% | Best: 10.00%
+GPU 1: Completed task 5
+GPU 1 (Worker 0): Processing task 8
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=5e-05] start

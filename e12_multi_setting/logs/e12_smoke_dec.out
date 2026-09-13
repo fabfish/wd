@@ -1,0 +1,23 @@
+[2026-09-13 21:03:15] [INFO] e12_ms: 1 configs x 1 seeds = 1 runs, gpus=[0], workers_per_gpu=1
+[2026-09-13 21:03:15] [INFO] e12_ms: 1 configs, 0 already done, 1 to run
+[2026-09-13 21:03:15] [INFO] e12_ms: budget ~1.0 units
+GPU Scheduler initialized with GPUs: [0]
+  Workers per GPU: 1 (Total workers: 1)
+Worker 0 started on GPU 0 (PID: 2891468)
+GPU 0 (Worker 0): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0005] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:87: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+GPU 0: Error in task 0: a leaf Variable that requires grad is being used in an in-place operation.
+Worker on GPU 0 finished
+
+Started 1 workers (1 per GPU) for 1 tasks
+================================================================================
+================================================================================
+All workers finished. Completed 1 tasks.
+
+Warning: 1 tasks failed:
+  Task 0: a leaf Variable that requires grad is being used in an in-place operation.
+[2026-09-13 21:03:42] [INFO] e12_ms: finished 0/1 in 0.4 min

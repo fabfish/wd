@@ -36,6 +36,26 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = False
 
 
+
+def _apply_decoupled_wd(optimizer):
+    """AdamW-style decoupled weight decay: shrink params before step.
+
+    Runs for param groups carrying the 'decoupled_wd' flag. Must be called
+    after backward() and before optimizer.step()/scaler.step().
+    """
+    import torch
+    with torch.no_grad():
+        for group in optimizer.param_groups:
+            if not group.get('decoupled_wd', False):
+                continue
+            decay = 1.0 - float(group['lr']) * float(
+                group.get('weight_decay', 0.0))
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                p.mul_(decay)
+
+
 def train_epoch(model, train_loader, optimizer, scheduler, device, use_amp=True,
                 scaler=None, return_acc=False):
     """
@@ -71,12 +91,14 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, use_amp=True,
                 loss = criterion(outputs, targets)
 
             scaler.scale(loss).backward()
+            _apply_decoupled_wd(optimizer)
             scaler.step(optimizer)
             scaler.update()
         else:
             outputs = model(inputs)
             loss = criterion(outputs, targets)
             loss.backward()
+            _apply_decoupled_wd(optimizer)
             optimizer.step()
 
         total_loss += loss.item() * inputs.size(0)

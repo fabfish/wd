@@ -60,7 +60,8 @@ def main():
         for seed in seeds:
             cfg = make_cfg(wd_sched, lam0, momentum, lr=0.1, epochs=100,
                            batch_size=128, model=model, seed=seed,
-                           dataset=dataset, lr_mode=lr_mode, exp=exp)
+                           dataset=dataset, lr_mode=lr_mode, exp=exp,
+                           wd_mode=entry.get('wd_mode', 'coupled'))
             cfgs.append(cfg)
 
     logger = get_logger(f'e12_ms_{len(raw)}cfg')
