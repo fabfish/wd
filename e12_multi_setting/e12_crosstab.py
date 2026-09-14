@@ -36,7 +36,7 @@ def render_table(piv, lam_piv):
     Each cell shows acc and the lambda0 of that run, e.g. "58.15 (λ=0.01)".
     """
     cols = list(piv.columns)
-    header = '| wd_sched | ' + ' | '.join(f'{c:g}' for c in cols) + ' |'
+    header = '| wd_sched | ' + ' | '.join(f'{c:.2f}' for c in cols) + ' |'
     sep = '|---|' + '---|' * len(cols)
     lines = [header, sep]
     for idx, row in piv.iterrows():
@@ -66,17 +66,6 @@ def render_table(piv, lam_piv):
 def build_md_body():
     rows = build_rows()
     tab = pd.DataFrame(rows)
-    # Snap realized budgets onto the nominal ladder rungs so every table
-    # shares the same integer-ish columns (no 0.94/0.96 rungs; 0.94C and
-    # 1.04C both land on the 1C column).
-    RUNG = [0.33, 0.5, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 9.0, 15.0]
-    tab['budget_r'] = [min(RUNG, key=lambda r: abs(b - r))
-                       for b in tab['budget_c']]
-    # Keep only runs whose realized budget actually IS the nominal rung
-    # (ladder runs, lambda = f*lambda_ref or solved exactly). Grid points
-    # that merely land NEAR a rung (e.g. 8e-4 = 0.73C shown as 0.5) are
-    # dropped so every displayed cell is true to its column.
-    tab = tab[abs(tab['budget_c'] - tab['budget_r']) <= 0.06]
 
     out_lines = [
         '# E12 crosstab: best acc by shape x budget rung (setting-local C)',
@@ -88,21 +77,21 @@ def build_md_body():
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
         g = g[g['seed'] == 42] if 'seed' in g else g
-        # One run per (shape, budget rung): the highest-acc one, so lambda0
-        # shown is the lambda0 of the run whose acc is displayed.
+        # Columns = every realized budget (simple C = integral ratio),
+        # rounded to 2 decimals; no snap, no filtering. One run per
+        # (shape, budget col): the highest-acc one.
+        g = g.assign(budget_c2=g['budget_c'].round(2))
         best = g.sort_values('best_acc', ascending=False).drop_duplicates(
-            ['wd_sched', 'budget_r'])
-        piv = best.pivot_table(index='wd_sched', columns='budget_r',
+            ['wd_sched', 'budget_c2'])
+        piv = best.pivot_table(index='wd_sched', columns='budget_c2',
                                values='best_acc', aggfunc='max')
-        lam_piv = best.pivot_table(index='wd_sched', columns='budget_r',
+        lam_piv = best.pivot_table(index='wd_sched', columns='budget_c2',
                                    values='lambda0', aggfunc='first')
         piv = piv.reindex(['fixed', 'linear_up', 'linear', 'iso_product'])
         lam_piv = lam_piv.reindex(['fixed', 'linear_up', 'linear',
                                    'iso_product'])
-        cols = [c for c in [0.33, 0.5, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0,
-                            4.0, 6.0, 9.0, 15.0] if c in piv.columns]
-        piv = piv[cols]
-        lam_piv = lam_piv[cols]
+        piv = piv[sorted(piv.columns)]
+        lam_piv = lam_piv[sorted(lam_piv.columns)]
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
         out_lines.append(render_table(piv, lam_piv))

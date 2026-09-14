@@ -59,7 +59,7 @@ def load_and_label(csv_path, tag):
     return df
 
 
-def build_rows():
+def build_rows(wd_mode='coupled'):
     frames = []
     if CSV.exists():
         frames.append(load_and_label(CSV, 'e12'))
@@ -77,6 +77,8 @@ def build_rows():
     # (e.g. 9.62e-4 on R50/VGG16) are excluded and documented separately in
     # e12_multi_setting/e4_prediction_points.md.
     df = df[df['exp'] != 'e4']
+    if wd_mode:
+        df = df[df['wd_mode'].fillna('coupled') == wd_mode]
     mom = df['momentum'].astype(float)
     df = df[(np.isclose(mom, 0.0)) | (np.isclose(mom, 0.9))]
     ws = df['wd_sched'].fillna('').astype(str).str.strip()
