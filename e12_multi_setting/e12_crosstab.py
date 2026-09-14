@@ -24,7 +24,7 @@ MARKER_START = '## 完整阶梯表'
 MARKER_END = '## 多种子结果'
 
 # Row labels for the rendered tables (budget math uses the raw keys).
-SHAPE_LABELS = {'fixed': 'fixed (const λ)',
+SHAPE_LABELS = {'fixed': 'fixed',
                 'linear_up': 'linear up',
                 'linear': 'linear down',
                 'iso_product': 'iso up'}
@@ -77,37 +77,33 @@ def build_md_body():
         '',
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
-        fixed = g[g['wd_sched'] == 'fixed']
-        if fixed.empty:
+        if g.empty:
             continue
-        # Columns = union of realized C (2 dp) over all shapes.
-        c_cols = sorted(set(g['budget_c'].round(2)))
-        # Lambda row: the fixed-ladder lambda whose C lands on the column.
-        fixed_by_c = fixed.groupby(fixed['budget_c'].round(2))
-        lam_of_c = {}
-        for c in c_cols:
-            if c in fixed_by_c.groups:
-                lam_of_c[c] = float(
-                    fixed_by_c.get_group(c)['lambda0'].iloc[0])
-        header1 = '| \u03bb | ' + ' | '.join(
-            (f'{lam_of_c[c]:.4g}' if c in lam_of_c else '')
-            for c in c_cols) + ' |'
+        # Columns = every measured rung: one column per (lambda0, C) pair,
+        # ordered by C. Row1 = lambda0, row2 = C = integral ratio (2 dp).
+        g = g.assign(c2=g['budget_c'].round(2))
+        col_keys = sorted(
+            set(zip(g['lambda0'].round(6), g['c2'])),
+            key=lambda t: (t[1], t[0]))
+        header1 = '| λ | ' + ' | '.join(
+            f'{lam:.4g}' for lam, c in col_keys) + ' |'
         header2 = '| C | ' + ' | '.join(
-            f'{c:.2f}' for c in c_cols) + ' |'
-        sep = '|---|' + '---|' * len(c_cols)
+            f'{c:.2f}' for lam, c in col_keys) + ' |'
+        sep = '|---|' + '---|' * len(col_keys)
         lines = [header1, header2, sep]
         for shape in ['fixed', 'linear_up', 'linear', 'iso_product']:
             h = g[g['wd_sched'] == shape]
             row_max = float(h['best_acc'].max()) if len(h) else None
-            by_c = h.groupby(h['budget_c'].round(2))
             cells = []
-            for c in c_cols:
-                if c in by_c.groups:
-                    v = float(by_c.get_group(c)['best_acc'].max())
+            for lam, c in col_keys:
+                sub = h[(h['lambda0'].round(6) == lam)
+                        & (h['c2'] == c)]
+                v = float(sub['best_acc'].max()) if len(sub) else None
+                if v is None:
+                    cells.append('')
+                else:
                     bold = (row_max is not None and v == row_max)
                     cells.append(f'**{v:.2f}**' if bold else f'{v:.2f}')
-                else:
-                    cells.append('')
             label = SHAPE_LABELS.get(shape, shape)
             lines.append('| ' + label + ' | ' + ' | '.join(cells) + ' |')
         out_lines.append(f'## {setting} / {phase}')
