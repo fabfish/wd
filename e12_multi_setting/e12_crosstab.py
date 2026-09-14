@@ -66,38 +66,55 @@ def render_table(piv, lam_piv):
 def build_md_body():
     rows = build_rows()
     tab = pd.DataFrame(rows)
-
     out_lines = [
-        '# E12 crosstab: best acc by shape x budget rung (setting-local C)',
+        '# E12 crosstab: acc by shape x measured lambda (setting-local C)',
         '',
-        'Rows = WD schedule, columns = realized budget in setting-local C units',
-        '(lambda_ref = fixed oracle of that setting/phase, seed 42).',
-        'Empty cells = budget not tested. Bold = best value in that row.',
+        'Row 1 = measured lambda0 of the fixed-const-WD ladder. '
+        'Row 2 = realized budget C = integral(lambda*eta) / '
+        'integral(lambda_ref*eta) (simple division).',
+        'Cells = best test acc (seed 42, coupled WD). '
+        'Dynamic-shape cells land on the column whose C matches (2 dp).',
         '',
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
-        g = g[g['seed'] == 42] if 'seed' in g else g
-        # Columns = every realized budget (simple C = integral ratio),
-        # rounded to 2 decimals; no snap, no filtering. One run per
-        # (shape, budget col): the highest-acc one.
-        g = g.assign(budget_c2=g['budget_c'].round(2))
-        best = g.sort_values('best_acc', ascending=False).drop_duplicates(
-            ['wd_sched', 'budget_c2'])
-        piv = best.pivot_table(index='wd_sched', columns='budget_c2',
-                               values='best_acc', aggfunc='max')
-        lam_piv = best.pivot_table(index='wd_sched', columns='budget_c2',
-                                   values='lambda0', aggfunc='first')
-        piv = piv.reindex(['fixed', 'linear_up', 'linear', 'iso_product'])
-        lam_piv = lam_piv.reindex(['fixed', 'linear_up', 'linear',
-                                   'iso_product'])
-        piv = piv[sorted(piv.columns)]
-        lam_piv = lam_piv[sorted(lam_piv.columns)]
+        fixed = g[g['wd_sched'] == 'fixed']
+        if fixed.empty:
+            continue
+        # Columns = union of realized C (2 dp) over all shapes.
+        c_cols = sorted(set(g['budget_c'].round(2)))
+        # Lambda row: the fixed-ladder lambda whose C lands on the column.
+        fixed_by_c = fixed.groupby(fixed['budget_c'].round(2))
+        lam_of_c = {}
+        for c in c_cols:
+            if c in fixed_by_c.groups:
+                lam_of_c[c] = float(
+                    fixed_by_c.get_group(c)['lambda0'].iloc[0])
+        header1 = '| \u03bb | ' + ' | '.join(
+            (f'{lam_of_c[c]:.4g}' if c in lam_of_c else '')
+            for c in c_cols) + ' |'
+        header2 = '| C | ' + ' | '.join(
+            f'{c:.2f}' for c in c_cols) + ' |'
+        sep = '|---|' + '---|' * len(c_cols)
+        lines = [header1, header2, sep]
+        for shape in ['fixed', 'linear_up', 'linear', 'iso_product']:
+            h = g[g['wd_sched'] == shape]
+            row_max = float(h['best_acc'].max()) if len(h) else None
+            by_c = h.groupby(h['budget_c'].round(2))
+            cells = []
+            for c in c_cols:
+                if c in by_c.groups:
+                    v = float(by_c.get_group(c)['best_acc'].max())
+                    bold = (row_max is not None and v == row_max)
+                    cells.append(f'**{v:.2f}**' if bold else f'{v:.2f}')
+                else:
+                    cells.append('')
+            label = SHAPE_LABELS.get(shape, shape)
+            lines.append('| ' + label + ' | ' + ' | '.join(cells) + ' |')
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
-        out_lines.append(render_table(piv, lam_piv))
+        out_lines.extend(lines)
         out_lines.append('')
     return '\n'.join(out_lines)
-
 
 def main():
     text = build_md_body()
@@ -116,7 +133,7 @@ def main():
                       '（所有测过的份额，行=形状，列=预算 C 单位）\n\n' +
                       body.rstrip() + '\n\n' + readme[end:])
         README.write_text(new_readme)
-        print(f'embedded into README ({len(new_readme)} bytes)')
+        print('embedded into README (%d bytes)' % len(new_readme))
     print(text)
 
 

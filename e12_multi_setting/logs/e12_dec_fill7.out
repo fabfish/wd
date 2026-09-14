@@ -2248,3 +2248,23 @@ GPU 3 (Worker 0): Processing task 169
 Files already downloaded and verified
 Files already downloaded and verified
 [e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.004] start
+[2026-09-14 15:39:38] [INFO]   [168/442] cosine mom=0.9 wd_sched=fixed lam0=0.005 T=100 -> best=67.94 diverged=0 (1159s)
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.005] Epoch 25/100 | Train Loss: 2.8225 | Train Acc: 27.63% | Test Acc: 14.45% | Best: 19.25%
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.005] Epoch 50/100 | Train Loss: 2.4840 | Train Acc: 34.81% | Test Acc: 25.35% | Best: 27.19%
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.005] Epoch 75/100 | Train Loss: 1.8546 | Train Acc: 49.84% | Test Acc: 42.78% | Best: 42.78%
+[e12_dec|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.005] Epoch 100/100 | Train Loss: 0.8845 | Train Acc: 76.52% | Test Acc: 67.90% | Best: 67.94%
+GPU 0: Completed task 167
+GPU 0 (Worker 0): Processing task 170
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.006] start
+[2026-09-14 15:42:56] [INFO]   [169/442] cosine mom=0.0 wd_sched=fixed lam0=0.003 T=100 -> best=77.85 diverged=0 (1169s)
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003] Epoch 25/100 | Train Loss: 1.2345 | Train Acc: 66.38% | Test Acc: 40.36% | Best: 46.85%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003] Epoch 50/100 | Train Loss: 0.8607 | Train Acc: 76.75% | Test Acc: 52.47% | Best: 57.93%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003] Epoch 75/100 | Train Loss: 0.2893 | Train Acc: 93.83% | Test Acc: 70.07% | Best: 70.07%
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.003] Epoch 100/100 | Train Loss: 0.0693 | Train Acc: 99.88% | Test Acc: 77.85% | Best: 77.85%
+GPU 1: Completed task 168
+GPU 1 (Worker 0): Processing task 171
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_dec|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0075] start
