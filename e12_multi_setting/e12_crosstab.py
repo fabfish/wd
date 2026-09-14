@@ -84,9 +84,9 @@ def build_md_body():
         g = g.assign(c2=g['budget_c'].round(2))
         col_keys = sorted(
             set(zip(g['lambda0'].round(6), g['c2'])),
-            key=lambda t: (t[1], t[0]))
+            key=lambda t: (t[0], t[1]))
         header1 = '| λ | ' + ' | '.join(
-            f'{lam:.4g}' for lam, c in col_keys) + ' |'
+            f'{lam:.3g}' for lam, c in col_keys) + ' |'
         header2 = '| C | ' + ' | '.join(
             f'{c:.2f}' for lam, c in col_keys) + ' |'
         sep = '|---|' + '---|' * len(col_keys)
