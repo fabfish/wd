@@ -3,7 +3,7 @@
 Columns = complete-grid budget rungs: C where all four shapes (fixed, linear up, linear down, iso up) were measured. Shape-specific probe rungs are excluded here; they live in the full ladder table.
 Row 1 (lambda) = const-WD value of that rung (measured fixed lambda).
 Row 2 (C) = realized budget = integral(lambda*eta) / integral(lambda_ref*eta) (simple division).
-Cells = best test acc (seed 42, coupled WD); per-row max bolded. Where multi-seed runs exist, an "ms:" line follows with mean±std (n seeds).
+Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed results live in the multiseed table (tables/e12_multiseed.md), not here.
 
 ## resnet18/cifar100 / SGD
 
@@ -14,7 +14,6 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Where multi-see
 | linear up | 77.12 | **78.30** | 78.04 | 77.74 | 76.07 | 70.89 | 63.26 | 41.20 |
 | linear down | 76.69 | 77.37 | **78.04** | 77.12 | 77.18 | 76.64 | 76.22 | 72.91 |
 | iso up | 77.26 | **78.71** | 78.53 | 75.70 | 57.78 | 46.49 | 39.43 | 34.97 |
-ms: fixed@0.67C 77.65±0.16 (3s) | linear up@1.20C 78.17±0.07 (3s) | linear down@1.00C 77.54±0.23 (2s)
 
 ## resnet18/cifar100 / SGDM
 
@@ -55,7 +54,6 @@ ms: fixed@0.67C 77.65±0.16 (3s) | linear up@1.20C 78.17±0.07 (3s) | linear dow
 | linear up | 78.04 | 79.14 | 79.55 | 79.79 | **79.84** | 79.20 | 78.98 | 76.42 | 71.92 | 67.29 | 62.48 | 47.77 | 39.15 | 24.71 |
 | linear down | 78.89 | 78.93 | **79.25** | 79.01 | 79.22 | 77.87 | 78.36 | 76.93 | 75.03 | 73.10 | 69.53 | 59.57 | 27.76 | 3.30 |
 | iso up | 77.81 | 78.66 | 79.31 | 79.12 | **79.60** | 76.81 | 75.07 | 66.06 | 45.41 | 39.75 | 38.86 | 31.97 | 29.38 | 7.15 |
-ms: fixed@0.93C 79.26±0.15 (2s) | linear up@0.93C 79.67±0.06 (2s) | iso up@0.93C 79.85±0.00 (2s)
 
 ## resnet50/cifar100 / SGDM
 
@@ -66,17 +64,16 @@ ms: fixed@0.93C 79.26±0.15 (2s) | linear up@0.93C 79.67±0.06 (2s) | iso up@0.9
 | linear up | 78.07 | 78.68 | 78.72 | **78.75** | 78.27 | 77.21 | 76.02 | 74.54 | 71.90 | 65.31 |
 | linear down | 75.05 | **77.01** | 76.47 | 75.29 | 76.42 | 71.69 | 64.81 | 64.63 | 62.13 | 55.50 |
 | iso up | 75.68 | 78.51 | 77.42 | **78.59** | 77.33 | 76.59 | 74.38 | 60.62 | 69.48 | 47.17 |
-ms: fixed@0.87C 76.92±0.85 (3s) | linear up@0.82C 78.09±0.20 (2s) | iso up@0.55C 78.62±0.02 (2s)
 
 ## vgg13/cifar100 / SGD
 
-| λ | 0.0075 | 0.015 | 0.0225 | 0.03 | 0.045 | 0.0675 | 0.113 |
-|---|---|---|---|---|---|---|---|
-| C | 0.67 | 1.33 | 2.00 | 2.67 | 4.00 | 6.00 | 10.00 |
-| fixed | **76.08** | 75.87 | 75.41 | 74.11 | 61.49 | 5.51 | 3.48 |
-| linear up | **76.41** | 76.08 | 70.78 | 59.46 | 40.79 | 36.60 | 27.64 |
-| linear down | **75.24** | 74.94 | 74.52 | 74.10 | 34.46 | 4.43 | 1.00 |
-| iso up | **76.76** | 71.25 | 43.23 | 35.57 | 26.94 | 16.83 | 6.18 |
+| λ | 0.00375 | 0.0075 | 0.0112 | 0.015 | 0.0225 | 0.03 | 0.045 | 0.0675 | 0.113 |
+|---|---|---|---|---|---|---|---|---|---|
+| C | 0.33 | 0.67 | 1.00 | 1.33 | 2.00 | 2.67 | 4.00 | 6.00 | 10.00 |
+| fixed | 75.11 | 76.08 | **76.59** | 75.87 | 75.41 | 74.11 | 61.49 | 5.51 | 3.48 |
+| linear up | 75.59 | 76.41 | **76.66** | 76.08 | 70.78 | 59.46 | 40.79 | 36.60 | 27.64 |
+| linear down | 74.83 | 75.24 | **75.60** | 74.94 | 74.52 | 74.10 | 34.46 | 4.43 | 1.00 |
+| iso up | 76.26 | **76.76** | 76.30 | 71.25 | 43.23 | 35.57 | 26.94 | 16.83 | 6.18 |
 
 ## vgg13/cifar100 / SGDM
 
@@ -97,7 +94,6 @@ ms: fixed@0.87C 76.92±0.85 (3s) | linear up@0.82C 78.09±0.20 (2s) | iso up@0.5
 | linear up | **75.43** | 70.48 | 45.21 | 35.91 | 28.99 | 25.53 | 18.47 |
 | linear down | **74.29** | 73.44 | 66.26 | 4.21 | 4.04 | 2.52 | 1.00 |
 | iso up | **75.89** | 47.34 | 31.69 | 22.46 | 11.38 | 4.31 | 3.83 |
-ms: fixed@1.00C 74.88±0.21 (2s) | iso up@1.00C 76.11±0.33 (2s)
 
 ## vgg16/cifar100 / SGDM
 
@@ -108,4 +104,3 @@ ms: fixed@1.00C 74.88±0.21 (2s) | iso up@1.00C 76.11±0.33 (2s)
 | linear up | 73.07 | **73.84** | 73.11 | 72.47 | 71.79 | 70.72 | 67.79 |
 | linear down | 72.24 | **72.46** | 72.16 | 71.57 | 71.40 | 70.06 | 68.02 |
 | iso up | 72.86 | **74.24** | 73.68 | 72.35 | 71.86 | 69.77 | 66.57 |
-ms: fixed@0.91C 73.12±0.03 (2s) | iso up@0.91C 73.61±0.23 (2s)

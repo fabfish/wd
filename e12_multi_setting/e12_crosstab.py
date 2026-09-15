@@ -56,30 +56,8 @@ def _anchor_of(g):
     return float(one['lambda0'].iloc[0])
 
 
-def _ms_line(g):
-    """Compact multi-seed annotation for a setting block, or None.
-
-    Uses all seeds of exp=e12_ms rows; reports mean±std per (shape, C)."""
-    ms = g[g['exp'] == 'e12_ms']
-    if ms.empty:
-        return None
-    parts = []
-    for shape in SHAPES:
-        h = ms[ms['wd_sched'] == shape]
-        for c, s in h.groupby(h['budget_c'].round(2)):
-            acc = s['best_acc'].astype(float)
-            if len(acc) < 2:
-                continue
-            parts.append('%s@%.2fC %.2f±%.2f (%ds)' % (
-                SHAPE_LABELS.get(shape, shape), c,
-                acc.mean(), acc.std(ddof=0), len(acc)))
-    if not parts:
-        return None
-    return 'ms: ' + ' | '.join(parts)
-
-
 def build_md_body(include_mlp=True):
-    rows = build_rows(include_ms=True)
+    rows = build_rows()
     tab = pd.DataFrame(rows)
     if not include_mlp:
         tab = tab[~tab['setting'].str.startswith('mlp')]
@@ -95,8 +73,8 @@ def build_md_body(include_mlp=True):
         'Row 2 (C) = realized budget = integral(lambda*eta) / '
         'integral(lambda_ref*eta) (simple division).',
         'Cells = best test acc (seed 42, coupled WD); per-row max bolded. '
-        'Where multi-seed runs exist, an "ms:" line follows with '
-        'mean±std (n seeds).',
+        'Multi-seed results live in the multiseed table (tables/'
+        'e12_multiseed.md), not here.',
         '',
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
@@ -146,7 +124,7 @@ def build_md_body(include_mlp=True):
             label = SHAPE_LABELS.get(shape, shape)
             lines.append('| ' + label + ' | ' + ' | '.join(cells) + ' |')
 
-        ms_line = _ms_line(g)
+        ms_line = None  # ms annotations removed (kept in CSV/multiseed table)
         if ms_line:
             lines.append(ms_line)
 

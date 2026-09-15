@@ -98,7 +98,7 @@ fixed 网格最优 1.1e-3 在 1C——两者差 +1.00 分。
 Columns = complete-grid budget rungs: C where all four shapes (fixed, linear up, linear down, iso up) were measured. Shape-specific probe rungs are excluded here; they live in the full ladder table.
 Row 1 (lambda) = const-WD value of that rung (measured fixed lambda).
 Row 2 (C) = realized budget = integral(lambda*eta) / integral(lambda_ref*eta) (simple division).
-Cells = best test acc (seed 42, coupled WD); per-row max bolded. Where multi-seed runs exist, an "ms:" line follows with mean±std (n seeds).
+Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed results live in the multiseed table (tables/e12_multiseed.md), not here.
 
 ## resnet18/cifar100 / SGD
 
@@ -109,7 +109,6 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Where multi-see
 | linear up | 77.12 | **78.30** | 78.04 | 77.74 | 76.07 | 70.89 | 63.26 | 41.20 |
 | linear down | 76.69 | 77.37 | **78.04** | 77.12 | 77.18 | 76.64 | 76.22 | 72.91 |
 | iso up | 77.26 | **78.71** | 78.53 | 75.70 | 57.78 | 46.49 | 39.43 | 34.97 |
-ms: fixed@0.67C 77.65±0.16 (3s) | linear up@1.20C 78.17±0.07 (3s) | linear down@1.00C 77.54±0.23 (2s)
 
 ## resnet18/cifar100 / SGDM
 
@@ -150,7 +149,6 @@ ms: fixed@0.67C 77.65±0.16 (3s) | linear up@1.20C 78.17±0.07 (3s) | linear dow
 | linear up | 78.04 | 79.14 | 79.55 | 79.79 | **79.84** | 79.20 | 78.98 | 76.42 | 71.92 | 67.29 | 62.48 | 47.77 | 39.15 | 24.71 |
 | linear down | 78.89 | 78.93 | **79.25** | 79.01 | 79.22 | 77.87 | 78.36 | 76.93 | 75.03 | 73.10 | 69.53 | 59.57 | 27.76 | 3.30 |
 | iso up | 77.81 | 78.66 | 79.31 | 79.12 | **79.60** | 76.81 | 75.07 | 66.06 | 45.41 | 39.75 | 38.86 | 31.97 | 29.38 | 7.15 |
-ms: fixed@0.93C 79.26±0.15 (2s) | linear up@0.93C 79.67±0.06 (2s) | iso up@0.93C 79.85±0.00 (2s)
 
 ## resnet50/cifar100 / SGDM
 
@@ -161,17 +159,16 @@ ms: fixed@0.93C 79.26±0.15 (2s) | linear up@0.93C 79.67±0.06 (2s) | iso up@0.9
 | linear up | 78.07 | 78.68 | 78.72 | **78.75** | 78.27 | 77.21 | 76.02 | 74.54 | 71.90 | 65.31 |
 | linear down | 75.05 | **77.01** | 76.47 | 75.29 | 76.42 | 71.69 | 64.81 | 64.63 | 62.13 | 55.50 |
 | iso up | 75.68 | 78.51 | 77.42 | **78.59** | 77.33 | 76.59 | 74.38 | 60.62 | 69.48 | 47.17 |
-ms: fixed@0.87C 76.92±0.85 (3s) | linear up@0.82C 78.09±0.20 (2s) | iso up@0.55C 78.62±0.02 (2s)
 
 ## vgg13/cifar100 / SGD
 
-| λ | 0.0075 | 0.015 | 0.0225 | 0.03 | 0.045 | 0.0675 | 0.113 |
-|---|---|---|---|---|---|---|---|
-| C | 0.67 | 1.33 | 2.00 | 2.67 | 4.00 | 6.00 | 10.00 |
-| fixed | **76.08** | 75.87 | 75.41 | 74.11 | 61.49 | 5.51 | 3.48 |
-| linear up | **76.41** | 76.08 | 70.78 | 59.46 | 40.79 | 36.60 | 27.64 |
-| linear down | **75.24** | 74.94 | 74.52 | 74.10 | 34.46 | 4.43 | 1.00 |
-| iso up | **76.76** | 71.25 | 43.23 | 35.57 | 26.94 | 16.83 | 6.18 |
+| λ | 0.00375 | 0.0075 | 0.0112 | 0.015 | 0.0225 | 0.03 | 0.045 | 0.0675 | 0.113 |
+|---|---|---|---|---|---|---|---|---|---|
+| C | 0.33 | 0.67 | 1.00 | 1.33 | 2.00 | 2.67 | 4.00 | 6.00 | 10.00 |
+| fixed | 75.11 | 76.08 | **76.59** | 75.87 | 75.41 | 74.11 | 61.49 | 5.51 | 3.48 |
+| linear up | 75.59 | 76.41 | **76.66** | 76.08 | 70.78 | 59.46 | 40.79 | 36.60 | 27.64 |
+| linear down | 74.83 | 75.24 | **75.60** | 74.94 | 74.52 | 74.10 | 34.46 | 4.43 | 1.00 |
+| iso up | 76.26 | **76.76** | 76.30 | 71.25 | 43.23 | 35.57 | 26.94 | 16.83 | 6.18 |
 
 ## vgg13/cifar100 / SGDM
 
@@ -192,7 +189,6 @@ ms: fixed@0.87C 76.92±0.85 (3s) | linear up@0.82C 78.09±0.20 (2s) | iso up@0.5
 | linear up | **75.43** | 70.48 | 45.21 | 35.91 | 28.99 | 25.53 | 18.47 |
 | linear down | **74.29** | 73.44 | 66.26 | 4.21 | 4.04 | 2.52 | 1.00 |
 | iso up | **75.89** | 47.34 | 31.69 | 22.46 | 11.38 | 4.31 | 3.83 |
-ms: fixed@1.00C 74.88±0.21 (2s) | iso up@1.00C 76.11±0.33 (2s)
 
 ## vgg16/cifar100 / SGDM
 
@@ -203,7 +199,6 @@ ms: fixed@1.00C 74.88±0.21 (2s) | iso up@1.00C 76.11±0.33 (2s)
 | linear up | 73.07 | **73.84** | 73.11 | 72.47 | 71.79 | 70.72 | 67.79 |
 | linear down | 72.24 | **72.46** | 72.16 | 71.57 | 71.40 | 70.06 | 68.02 |
 | iso up | 72.86 | **74.24** | 73.68 | 72.35 | 71.86 | 69.77 | 66.57 |
-ms: fixed@0.91C 73.12±0.03 (2s) | iso up@0.91C 73.61±0.23 (2s)
 
 ## 多种子结果（第二轮，ms2）
 
@@ -294,12 +289,28 @@ E12 实验线收敛：5 个主 setting × 2 相位 × 4 形状的 budget ladder�
 BN 消融全部完成。全部结果、表格、图与结论见本目录与
 rebuttal/e12_cross_setting_material.md；后续可能的方向见 next_steps.md。
 
+## R34/SGDM 与 R50/SGD：raise 未占优的解释与做法（2026-09-15）
+
+两个反例的 peak-vs-peak 差距很小，且都源于 fixed 曲线的"刀尖"：
+- R34/SGDM：fixed 相邻三档 0.90C=78.05 → 1.00C=78.41 → 1.05C=77.69（±0.7 摆动）；lin_up/iso 在 0.5–1.5C 是平台（77.2–78.2）。
+- R50/SGD：fixed 0.83C=79.21 → 0.90C=79.89 → 1.00C=79.40，0.90C 是单档 +0.5 尖峰（fill7 新档、单种子）；lin_up 79.84@1.11C、iso 79.60@1.11C 与 fixed 几乎打平。
+
+解释：
+1. fixed 曲线在峰值附近锯齿状，单档尖峰大概率是种子噪声；raise 形状是平台，对 C/λ0 不敏感。
+2. 实践含义：fixed 要拿到 78.4/79.9 必须精确命中约 0.1 宽的窗口，选错邻档掉 0.4–0.7 分；raise 在 0.5–1.5C 整段稳定。鲁棒性（峰值邻域均值、跨种子均值）才是 raise 的优势，而不是单点峰值。
+3. 理论侧：R34/SGDM（SGDM + 较深网，动量有效步长大）的 fixed 曲线对 λ 极端敏感，这正是 schedule 方法要解决的痛点；R50/SGD 的 fixed 新峰值只比 lin_up 高 0.05，属平局而非劣势。
+
+做法（已并入 ms2 队列）：
+- 多种子：两个 setting 各 4 形状 @ seed-42 峰值 × seeds 123/2024。
+- 峰值邻域加密：R34/SGDM fixed 0.95/1.025C + lin_up/iso 1.1/1.2/1.3C；R50/SGD fixed 0.85/0.95C + lin_up 1.2–1.5C + iso 1.2/1.3C。
+- 呈现：用"峰值±0.1C 邻域均值 / 跨种子均值"对比，而非单点 peak。
+
 ## 意见与待办清单（2026-09-15）
 
 - [x] MLP 系列不进主阶梯表（分辨率低、有干扰），已移至 `tables/e12_crosstab_mlp.md`。
 - [x] 主表只呈现完整 grid search 位置（四个形状都实测过的 C 档）；单形状探测档不进主表（保留在 full ladder 表与 CSV）。
-- [x] 主表支持多种子呈现：有 e12_ms 数据的 setting 在表下附 `ms:` 行（mean±std，n seeds）。
-- [x] 分析"哪些 case 未体现 wd raise schedule 胜过 fixed"（非 MLP 10 个 setting×相位）：反例 2 个——**R34/SGDM −0.17**、**R50/SGD −0.05**；边缘 1 个——**VGG13/SGD +0.17**；其余 7 个 raise 显著胜出（+0.51 ~ +1.25）。
-- [x] 分析"最优值贴左边界"：**VGG13/SGD**（fixed/iso 峰值在左界 0.67C）、**VGG16/SGD**（fixed/iso 峰值在左界 1.00C）→ 需更小 C 搜索。
-- [x] ms2 队列已排（39 个，`/tmp/wd_queue/ms2_configs.json`）：R34/SGDM、R50/SGD、VGG13/SGD 各 4 形状@seed-42 峰值 C × seeds 123/2024（λ0 与 seed-42 严格对齐）；VGG13/SGD 0.22–0.53C、VGG16/SGD 0.30–0.75C 小 C 补档（3 动态形状 × seed 42）。
-- [ ] fill7 完成后：启动 ms2 队列 → 重生成全部表格（含 ms 标注）→ 补 decoupled 结论 → push → 删监控 cron。
+- [x] ms 标注行形式不好看 → 已从主表去掉；多种子结果后续以 `tables/e12_multiseed.md` 或独立小节呈现。
+- [x] 分析"哪些 case 未体现 wd raise schedule 胜过 fixed"（非 MLP 10 个 setting×相位）：反例 2 个——**R34/SGDM −0.17**、**R50/SGD −0.05**；边缘 1 个——**VGG13/SGD +0.17**；其余 7 个 raise 显著胜出（+0.51 ~ +1.25）。两个反例的解释与做法见上一节。
+- [x] 分析"最优值贴左边界"：**VGG13/SGD**（fixed/iso 峰值在左界 0.67C）、**VGG16/SGD**（fixed/iso 峰值在左界 1.00C）→ 已排更小 C 搜索。
+- [x] ms2 队列已排（55 个，`/tmp/wd_queue/ms2_configs.json`）：反例/边缘 3 setting 各 4 形状@seed-42 峰值 × seeds 123/2024；R34/SGDM 与 R50/SGD 峰值邻域加密 16 个；VGG13/SGD 0.22–0.53C、VGG16/SGD 0.30–0.75C 小 C 补档 27 个。
+- [ ] fill7 完成后：启动 ms2 队列 → 重生成全部表格 → 补 decoupled 结论 → push → 删监控 cron。
