@@ -98,7 +98,7 @@ fixed 网格最优 1.1e-3 在 1C——两者差 +1.00 分。
 Columns = complete-grid budget rungs: C where all four shapes (fixed, linear up, linear down, iso up) were measured. Shape-specific probe rungs are excluded here; they live in the full ladder table.
 Row 1 (lambda) = const-WD value of that rung (measured fixed lambda).
 Row 2 (C) = realized budget = integral(lambda*eta) / integral(lambda_ref*eta) (simple division).
-Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed results live in the multiseed table (tables/e12_multiseed.md), not here.
+Cells = best test acc (seed 42, coupled WD); per-row max bolded. A heatmap of the same grid follows each table (blue = low acc, red = high acc). Multi-seed results live in the multiseed table (tables/e12_multiseed.md), not here.
 
 ## resnet18/cifar100 / SGD
 
@@ -110,6 +110,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear down | 76.69 | 77.37 | **78.04** | 77.12 | 77.18 | 76.64 | 76.22 | 72.91 |
 | iso up | 77.26 | **78.71** | 78.53 | 75.70 | 57.78 | 46.49 | 39.43 | 34.97 |
 
+![](figures/e12_heat_resnet18_c100_sgd.png)
+
 ## resnet18/cifar100 / SGDM
 
 | λ | 0.0002 | 0.0006 | 0.00105 | 0.00158 | 0.00179 | 0.0021 | 0.00263 | 0.00315 | 0.0042 |
@@ -119,6 +121,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear up | 75.84 | 77.81 | **78.40** | 77.68 | 77.44 | 77.20 | 75.12 | 73.96 | 70.15 |
 | linear down | 74.43 | **76.44** | 75.55 | 75.78 | 75.53 | 74.90 | 73.73 | 72.93 | 70.61 |
 | iso up | 75.86 | **78.22** | 78.12 | 77.27 | 77.50 | 76.97 | 74.51 | 71.37 | 67.36 |
+
+![](figures/e12_heat_resnet18_c100_sgdm.png)
 
 ## resnet34/cifar100 / SGD
 
@@ -130,6 +134,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear down | 77.50 | 78.48 | 78.52 | 78.31 | **78.94** | 78.05 | 78.22 | 78.24 | 77.78 | 77.08 | 76.77 | 77.01 | 73.77 | 19.97 | 3.53 |
 | iso up | 76.94 | 78.23 | 79.00 | 78.87 | 78.65 | **79.29** | 78.98 | 77.32 | 69.90 | 54.11 | 40.65 | 38.27 | 33.29 | 25.26 | 9.13 |
 
+![](figures/e12_heat_resnet34_c100_sgd.png)
+
 ## resnet34/cifar100 / SGDM
 
 | λ | 0.000333 | 0.0005 | 0.0009 | 0.001 | 0.0015 | 0.002 | 0.0025 | 0.003 | 0.004 |
@@ -139,6 +145,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear up | 76.46 | 77.24 | 78.07 | **78.16** | 77.57 | 77.30 | 74.95 | 74.62 | 70.15 |
 | linear down | 76.75 | 76.35 | **76.98** | 76.97 | 76.31 | 74.08 | 72.80 | 71.54 | 65.07 |
 | iso up | 76.74 | 77.81 | **78.24** | 78.18 | 77.71 | 77.50 | 75.19 | 72.65 | 69.87 |
+
+![](figures/e12_heat_resnet34_c100_sgdm.png)
 
 ## resnet50/cifar100 / SGD
 
@@ -150,6 +158,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear down | 78.89 | 78.93 | **79.25** | 79.01 | 79.22 | 77.87 | 78.36 | 76.93 | 75.03 | 73.10 | 69.53 | 59.57 | 27.76 | 3.30 |
 | iso up | 77.81 | 78.66 | 79.31 | 79.12 | **79.60** | 76.81 | 75.07 | 66.06 | 45.41 | 39.75 | 38.86 | 31.97 | 29.38 | 7.15 |
 
+![](figures/e12_heat_resnet50_c100_sgd.png)
+
 ## resnet50/cifar100 / SGDM
 
 | λ | 0.000367 | 0.0006 | 0.0009 | 0.0011 | 0.0012 | 0.00165 | 0.0022 | 0.00275 | 0.0033 | 0.0044 |
@@ -159,6 +169,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear up | 78.07 | 78.68 | 78.72 | **78.75** | 78.27 | 77.21 | 76.02 | 74.54 | 71.90 | 65.31 |
 | linear down | 75.05 | **77.01** | 76.47 | 75.29 | 76.42 | 71.69 | 64.81 | 64.63 | 62.13 | 55.50 |
 | iso up | 75.68 | 78.51 | 77.42 | **78.59** | 77.33 | 76.59 | 74.38 | 60.62 | 69.48 | 47.17 |
+
+![](figures/e12_heat_resnet50_c100_sgdm.png)
 
 ## vgg13/cifar100 / SGD
 
@@ -170,6 +182,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear down | 74.83 | 75.24 | **75.60** | 74.94 | 75.08 | 74.52 | 73.76 | 74.10 | 72.26 | 34.46 | 4.43 | 1.00 |
 | iso up | 76.26 | **76.76** | 76.30 | 71.25 | 65.05 | 43.23 | 36.13 | 35.57 | 33.36 | 26.94 | 16.83 | 6.18 |
 
+![](figures/e12_heat_vgg13_c100_sgd.png)
+
 ## vgg13/cifar100 / SGDM
 
 | λ | 0.0002 | 0.0006 | 0.0009 | 0.0011 | 0.0012 | 0.0015 | 0.00165 | 0.0018 | 0.0022 | 0.0024 | 0.00275 | 0.0033 | 0.0044 |
@@ -179,6 +193,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear up | 73.41 | 74.69 | **74.81** | 74.76 | 74.48 | 74.10 | 73.81 | 74.05 | 73.29 | 73.14 | 72.65 | 71.72 | 68.48 |
 | linear down | 72.00 | 73.39 | **73.94** | 73.52 | 73.56 | 73.21 | 73.52 | 73.27 | 72.61 | 72.49 | 71.53 | 70.78 | 68.57 |
 | iso up | 73.00 | 74.75 | 75.08 | 75.11 | **75.31** | 75.26 | 74.90 | 74.57 | 74.33 | 73.56 | 73.29 | 71.90 | 68.47 |
+
+![](figures/e12_heat_vgg13_c100_sgdm.png)
 
 ## vgg16/cifar100 / SGD
 
@@ -190,6 +206,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear down | 74.05 | 74.09 | 74.20 | **74.29** | 74.06 | 73.44 | 71.44 | 66.26 | 4.04 | 2.52 | 1.00 |
 | iso up | 74.85 | 76.14 | **76.52** | 75.89 | 69.60 | 47.34 | 34.26 | 31.69 | 11.38 | 4.31 | 3.83 |
 
+![](figures/e12_heat_vgg16_c100_sgd.png)
+
 ## vgg16/cifar100 / SGDM
 
 | λ | 0.000333 | 0.001 | 0.0015 | 0.00165 | 0.002 | 0.0022 | 0.0025 | 0.00275 | 0.003 | 0.0033 | 0.004 | 0.0044 |
@@ -199,6 +217,8 @@ Cells = best test acc (seed 42, coupled WD); per-row max bolded. Multi-seed resu
 | linear up | 73.07 | **73.84** | 73.11 | 72.89 | 72.47 | 72.35 | 71.79 | 71.37 | 70.72 | 70.54 | 67.79 | 66.37 |
 | linear down | 72.24 | **72.46** | 72.16 | 72.26 | 71.57 | 71.18 | 71.40 | 70.69 | 70.06 | 69.34 | 68.02 | 66.75 |
 | iso up | 72.86 | **74.24** | 73.68 | 73.21 | 72.35 | 72.96 | 71.86 | 71.12 | 69.77 | 69.43 | 66.57 | 64.83 |
+
+![](figures/e12_heat_vgg16_c100_sgdm.png)
 
 ## 多种子结果（第二轮，ms2）
 
