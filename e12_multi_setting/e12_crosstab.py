@@ -59,7 +59,10 @@ def build_md_body():
     out_lines = [
         '# E12 crosstab: acc by shape x budget rung (setting-local C)',
         '',
-        'Columns = every measured budget rung (union across shapes, 2 dp).',
+        'Columns = complete-grid budget rungs: C where all four shapes '
+        '(fixed, linear up, linear down, iso up) were measured. '
+        'Shape-specific probe rungs are excluded here; they live in the '
+        'full ladder table.',
         'Row 1 (lambda) = const-WD value of that rung: measured fixed lambda '
         'where one exists, else lambda_ref x C (equivalent fixed lambda).',
         'Row 2 (C) = realized budget = integral(lambda*eta) / '
@@ -75,7 +78,18 @@ def build_md_body():
             continue
         lam_ref = _anchor_of(g)
         c2 = g['budget_c'].round(2)
-        cols = sorted(c for c in c2.unique() if c >= 0.005)
+
+        # Columns = complete-grid rungs only: C where ALL four shapes were
+        # measured. Shape-specific probe rungs (single-shape extra density,
+        # e.g. fill rungs) are excluded here; they live in the full ladder
+        # table.
+        cov = {}
+        for _, r in g.iterrows():
+            cov.setdefault(round(float(r['budget_c']), 2), set()).add(
+                r['wd_sched'])
+        all_shapes = set(['fixed', 'linear_up', 'linear', 'iso_product'])
+        cols = sorted(c for c, s in cov.items()
+                      if c >= 0.005 and all_shapes <= s)
 
         # measured fixed lambda per rounded C (for the lambda row)
         fixed_lam = {}
