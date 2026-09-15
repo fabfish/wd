@@ -27,6 +27,13 @@ FIG = E12 / 'figures'
 CMAP = 'RdYlBu_r'
 
 
+def _exp_s(v, a, hi, exp_mR, den):
+    """Exponential-in-value mapping anchored at the max: s = (e^{a(v-hi)} -
+    e^{-aR}) / (1 - e^{-aR}) in [0, 1]. Color steps grow exponentially as v
+    approaches the max, so closely-spaced top values get distinct shades."""
+    return (np.exp(a * (v - hi)) - exp_mR) / den
+
+
 def _text_color(rgb):
     """black on light cells, white on dark cells (perceived luminance)."""
     r, g, b = rgb
@@ -48,29 +55,34 @@ def make_heatmaps(include_mlp=False):
             for j, c in enumerate(cols):
                 mat[i, j] = acc[s].get(c, np.nan)
 
-        # per-table scale, centered at the mean so the red half spans the
-        # whole above-average range (stronger discrimination at the top end)
-        lo, hi = np.nanmin(mat), np.nanmax(mat)
-        if hi - lo < 1e-6:
-            lo, hi = lo - 0.5, hi + 0.5
-        center = np.nanmean(mat)
-        pad = (hi - lo) * 0.08
-        vmin, vmax = lo - pad, hi + pad
-        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=center,
-                                       vmax=vmax)
+        # Exponential-in-value scale anchored at the max: closely-spaced top
+        # values (76-79.5) each get a clearly distinct shade, while the
+        # collapse tail saturates to deep blue. a = 1 / (max - p75) so the
+        # top quartile of values spans ~63% of the colormap.
+        flat = mat[~np.isnan(mat)]
+        hi = float(np.nanmax(mat))
+        vmin = float(np.nanmin(mat))
+        span_top = max(hi - float(np.percentile(flat, 75)), 0.3)
+        a = 1.0 / span_top
+        R = hi - vmin
+        if R < 1e-9:
+            R = 1.0
+        exp_mR = np.exp(-a * R)
+        den = 1.0 - exp_mR
+        s = _exp_s(mat, a, hi, exp_mR, den)
 
         ncol = len(cols)
         fig, ax = plt.subplots(figsize=(max(3.2, ncol * 0.62),
                                         2.2 + len(shapes) * 0.42))
         cmap = plt.get_cmap(CMAP)
-        im = ax.imshow(mat, cmap=cmap, norm=norm,
+        im = ax.imshow(s, cmap=cmap, vmin=0.0, vmax=1.0,
                        aspect='auto', interpolation='nearest')
         for i in range(len(shapes)):
             for j in range(ncol):
                 v = mat[i, j]
                 if np.isnan(v):
                     continue
-                rgb = cmap(norm(v))[:3]
+                rgb = cmap(s[i, j])[:3]
                 ax.text(j, i, f'{v:.1f}', ha='center', va='center',
                         fontsize=9, color=_text_color(rgb))
         ax.set_xticks(range(ncol))
