@@ -135,3 +135,53 @@ Worker on GPU 3 finished
 ================================================================================
 All workers finished. Completed 11 tasks.
 [2026-09-11 14:56:35] [INFO] e12_ms: finished 11/11 in 213.8 min
+[2026-09-15 18:01:41] [INFO] e12_ms: 55 configs x 3 seeds = 165 runs, gpus=[0, 1, 3], workers_per_gpu=3
+[2026-09-15 18:01:41] [INFO] e12_ms: 165 configs, 12 already done, 153 to run
+[2026-09-15 18:01:41] [INFO] e12_ms: budget ~153.0 units
+GPU Scheduler initialized with GPUs: [0, 1, 3]
+  Workers per GPU: 3 (Total workers: 9)
+Worker 2 started on GPU 1 (PID: 1883535)
+GPU 1 (Worker 2): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001] start
+Worker 1 started on GPU 0 (PID: 1883531)
+GPU 0 (Worker 1): Processing task 4
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001276] start
+Worker 0 started on GPU 1 (PID: 1883533)
+GPU 1 (Worker 0): Processing task 7
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005228] start
+Worker 2 started on GPU 3 (PID: 1883538)
+GPU 3 (Worker 2): Processing task 6
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005228] start
+Worker 0 started on GPU 3 (PID: 1883536)
+GPU 3 (Worker 0): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.001] start
+Worker 0 started on GPU 0 (PID: 1883530)
+GPU 0 (Worker 0): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] start
+Worker 1 started on GPU 3 (PID: 1883537)
+GPU 3 (Worker 1): Processing task 5
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001276] start
+Worker 1 started on GPU 1 (PID: 1883534)
+GPU 1 (Worker 1): Processing task 3
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear_up|T=100|lr0=0.1|lam0=0.003397] start
+Worker 2 started on GPU 0 (PID: 1883532)
+GPU 0 (Worker 2): Processing task 8
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGD+WD|cosine|wd_sched=fixed|T=100|lr0=0.1|lam0=0.0054] start
