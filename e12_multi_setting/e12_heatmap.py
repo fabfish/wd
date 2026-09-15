@@ -14,6 +14,7 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -47,23 +48,29 @@ def make_heatmaps(include_mlp=False):
             for j, c in enumerate(cols):
                 mat[i, j] = acc[s].get(c, np.nan)
 
-        # per-table scale, padded slightly so extremes are not clipped
+        # per-table scale, centered at the mean so the red half spans the
+        # whole above-average range (stronger discrimination at the top end)
         lo, hi = np.nanmin(mat), np.nanmax(mat)
-        pad = max(0.05, (hi - lo) * 0.08)
+        if hi - lo < 1e-6:
+            lo, hi = lo - 0.5, hi + 0.5
+        center = np.nanmean(mat)
+        pad = (hi - lo) * 0.08
         vmin, vmax = lo - pad, hi + pad
+        norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=center,
+                                       vmax=vmax)
 
         ncol = len(cols)
         fig, ax = plt.subplots(figsize=(max(3.2, ncol * 0.62),
                                         2.2 + len(shapes) * 0.42))
         cmap = plt.get_cmap(CMAP)
-        im = ax.imshow(mat, cmap=cmap, vmin=vmin, vmax=vmax,
+        im = ax.imshow(mat, cmap=cmap, norm=norm,
                        aspect='auto', interpolation='nearest')
         for i in range(len(shapes)):
             for j in range(ncol):
                 v = mat[i, j]
                 if np.isnan(v):
                     continue
-                rgb = cmap((v - vmin) / (vmax - vmin))[:3]
+                rgb = cmap(norm(v))[:3]
                 ax.text(j, i, f'{v:.1f}', ha='center', va='center',
                         fontsize=9, color=_text_color(rgb))
         ax.set_xticks(range(ncol))
