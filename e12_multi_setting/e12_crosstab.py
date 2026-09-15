@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 """E12 compact crosstab: per (setting, phase), rows = wd shape, columns =
-measured budget rungs (realized C, 2 dp, union across shapes), cells = best
+complete-grid budget rungs (C measured for ALL four shapes), cells = best
 test acc. Same sources as e12_full_table.py.
 
 Column semantics:
-  - columns = every measured C rung (simple division: integral ratio vs the
-    fixed-WD oracle lambda_ref), sorted ascending.
-  - row 1 (lambda) = the const-WD lambda of that rung: the measured fixed-run
-    lambda where one exists, else lambda_ref * C (the equivalent fixed lambda
-    spending the same shrinkage budget).
+  - columns = complete-grid rungs only: C (2 dp) where fixed, linear_up,
+    linear, iso_product all have a measured run. Single-shape probe rungs
+    are excluded here; they live in the full ladder table.
+  - row 1 (lambda) = the const-WD lambda of that rung (measured fixed run;
+    complete columns always have one).
   - row 2 (C) = the budget rung in setting-local C units.
-  - shape rows = best test acc at the rung (empty = not measured). Dynamic
-    shapes land on the column whose realized C matches (2 dp); their
-    per-shape lambda0 lives in the full ladder table, not here.
+  - shape rows = best test acc at the rung; per-row maximum bolded; no NaN.
+  - where multi-seed runs exist (exp=e12_ms), a compact "ms:" line follows
+    the table: shape@C mean±std (n seeds).
+
+MLP settings are excluded from the main output (they are noisy and live in
+e12_crosstab_mlp.md instead).
 
 Rendering: the lambda row is the markdown header (separator directly after
 it) so it renders as the first row on GitHub, C is the second row, shape rows
-follow; per-row maximum bolded, empty cells for missing rungs (no NaN).
+follow.
 Writes e12_multi_setting/tables/e12_crosstab.md and prints.
 Also (re)embeds the tables into e12_multi_setting/README.md between the
 markers "## 完整阶梯表" and "## 多种子结果".
@@ -36,7 +39,7 @@ README = E12 / 'README.md'
 MARKER_START = '## 完整阶梯表'
 MARKER_END = '## 多种子结果'
 
-# Row labels for the rendered tables (budget math uses the raw keys).
+SHAPES = ['fixed', 'linear_up', 'linear', 'iso_product']
 SHAPE_LABELS = {'fixed': 'fixed',
                 'linear_up': 'linear up',
                 'linear': 'linear down',
@@ -53,9 +56,33 @@ def _anchor_of(g):
     return float(one['lambda0'].iloc[0])
 
 
-def build_md_body():
-    rows = build_rows()
+def _ms_line(g):
+    """Compact multi-seed annotation for a setting block, or None.
+
+    Uses all seeds of exp=e12_ms rows; reports mean±std per (shape, C)."""
+    ms = g[g['exp'] == 'e12_ms']
+    if ms.empty:
+        return None
+    parts = []
+    for shape in SHAPES:
+        h = ms[ms['wd_sched'] == shape]
+        for c, s in h.groupby(h['budget_c'].round(2)):
+            acc = s['best_acc'].astype(float)
+            if len(acc) < 2:
+                continue
+            parts.append('%s@%.2fC %.2f±%.2f (%ds)' % (
+                SHAPE_LABELS.get(shape, shape), c,
+                acc.mean(), acc.std(ddof=0), len(acc)))
+    if not parts:
+        return None
+    return 'ms: ' + ' | '.join(parts)
+
+
+def build_md_body(include_mlp=True):
+    rows = build_rows(include_ms=True)
     tab = pd.DataFrame(rows)
+    if not include_mlp:
+        tab = tab[~tab['setting'].str.startswith('mlp')]
     out_lines = [
         '# E12 crosstab: acc by shape x budget rung (setting-local C)',
         '',
@@ -63,37 +90,35 @@ def build_md_body():
         '(fixed, linear up, linear down, iso up) were measured. '
         'Shape-specific probe rungs are excluded here; they live in the '
         'full ladder table.',
-        'Row 1 (lambda) = const-WD value of that rung: measured fixed lambda '
-        'where one exists, else lambda_ref x C (equivalent fixed lambda).',
+        'Row 1 (lambda) = const-WD value of that rung (measured fixed '
+        'lambda).',
         'Row 2 (C) = realized budget = integral(lambda*eta) / '
         'integral(lambda_ref*eta) (simple division).',
-        'Cells = best test acc (seed 42, coupled WD); empty = not measured; '
-        'per-row max bolded. Dynamic-shape cells land on the column whose '
-        'realized C matches (2 dp); per-shape lambda0 is in the full ladder '
-        'table.',
+        'Cells = best test acc (seed 42, coupled WD); per-row max bolded. '
+        'Where multi-seed runs exist, an "ms:" line follows with '
+        'mean±std (n seeds).',
         '',
     ]
     for (setting, phase), g in tab.groupby(['setting', 'phase'], sort=True):
         if g.empty:
             continue
-        lam_ref = _anchor_of(g)
-        c2 = g['budget_c'].round(2)
+        g42 = g[g['seed'] == 42]  # grid (single-seed) rows
+        lam_ref = _anchor_of(g42)
 
-        # Columns = complete-grid rungs only: C where ALL four shapes were
-        # measured. Shape-specific probe rungs (single-shape extra density,
-        # e.g. fill rungs) are excluded here; they live in the full ladder
-        # table.
+        # Columns = complete-grid rungs only (all four shapes measured).
         cov = {}
-        for _, r in g.iterrows():
+        for _, r in g42.iterrows():
             cov.setdefault(round(float(r['budget_c']), 2), set()).add(
                 r['wd_sched'])
-        all_shapes = set(['fixed', 'linear_up', 'linear', 'iso_product'])
+        all_shapes = set(SHAPES)
         cols = sorted(c for c, s in cov.items()
                       if c >= 0.005 and all_shapes <= s)
+        if not cols:
+            continue
 
         # measured fixed lambda per rounded C (for the lambda row)
         fixed_lam = {}
-        for _, r in g[g['wd_sched'] == 'fixed'].iterrows():
+        for _, r in g42[g42['wd_sched'] == 'fixed'].iterrows():
             c = round(float(r['budget_c']), 2)
             fixed_lam.setdefault(c, float(r['lambda0']))
 
@@ -103,8 +128,8 @@ def build_md_body():
         header2 = '| C | ' + ' | '.join(f'{c:.2f}' for c in cols) + ' |'
         lines = [header1, sep, header2]
 
-        for shape in ['fixed', 'linear_up', 'linear', 'iso_product']:
-            h = g[g['wd_sched'] == shape]
+        for shape in SHAPES:
+            h = g42[g42['wd_sched'] == shape]
             acc = {}
             for c in cols:
                 sub = h[h['budget_c'].round(2) == c]
@@ -121,6 +146,10 @@ def build_md_body():
             label = SHAPE_LABELS.get(shape, shape)
             lines.append('| ' + label + ' | ' + ' | '.join(cells) + ' |')
 
+        ms_line = _ms_line(g)
+        if ms_line:
+            lines.append(ms_line)
+
         out_lines.append(f'## {setting} / {phase}')
         out_lines.append('')
         out_lines.extend(lines)
@@ -129,9 +158,12 @@ def build_md_body():
 
 
 def main():
-    text = build_md_body()
+    text = build_md_body(include_mlp=False)
     TABLES.mkdir(parents=True, exist_ok=True)
     (TABLES / 'e12_crosstab.md').write_text(text)
+
+    mlp_text = build_md_body(include_mlp=True)
+    (TABLES / 'e12_crosstab_mlp.md').write_text(mlp_text)
 
     # Embed into README (replace previous embedding, keep the rest intact).
     readme = README.read_text()

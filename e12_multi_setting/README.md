@@ -96,69 +96,9 @@ fixed 网格最优 1.1e-3 在 1C——两者差 +1.00 分。
 
 
 Columns = complete-grid budget rungs: C where all four shapes (fixed, linear up, linear down, iso up) were measured. Shape-specific probe rungs are excluded here; they live in the full ladder table.
-Row 1 (lambda) = const-WD value of that rung: measured fixed lambda where one exists, else lambda_ref x C (equivalent fixed lambda).
+Row 1 (lambda) = const-WD value of that rung (measured fixed lambda).
 Row 2 (C) = realized budget = integral(lambda*eta) / integral(lambda_ref*eta) (simple division).
-Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max bolded. Dynamic-shape cells land on the column whose realized C matches (2 dp); per-shape lambda0 is in the full ladder table.
-
-## mlp/cifar10 / SGD
-
-| λ | 0.00333 | 0.005 | 0.01 | 0.02 | 0.03 | 0.04 | 0.06 | 0.09 | 0.15 |
-|---|---|---|---|---|---|---|---|---|---|
-| C | 0.33 | 0.50 | 1.00 | 2.00 | 3.00 | 4.00 | 6.00 | 9.00 | 15.00 |
-| fixed | 57.89 | 58.13 | **58.15** | 55.59 | 52.59 | 49.38 | 44.55 | 38.47 | 28.48 |
-| linear up | 57.79 | **58.01** | 54.86 | 53.49 | 52.66 | 52.06 | 51.80 | 51.14 | 50.25 |
-| linear down | **57.33** | 57.12 | 56.84 | 56.78 | 56.29 | 55.03 | 53.81 | 50.89 | 44.98 |
-| iso up | **57.77** | 56.83 | 55.27 | 52.06 | 50.02 | 48.96 | 46.16 | 42.97 | 36.98 |
-
-## mlp/cifar10 / SGDM
-
-| λ | 0.000267 | 0.0008 | 0.001 | 0.0012 | 0.0016 | 0.002 | 0.0024 | 0.003 | 0.0032 |
-|---|---|---|---|---|---|---|---|---|---|
-| C | 0.30 | 0.89 | 1.11 | 1.33 | 1.78 | 2.22 | 2.67 | 3.33 | 3.56 |
-| fixed | 54.50 | **57.07** | 56.86 | 56.47 | 56.82 | 56.42 | 56.54 | 56.15 | 55.89 |
-| linear up | 55.66 | 58.04 | **58.66** | 57.78 | 58.18 | 57.99 | 57.80 | 57.01 | 56.95 |
-| linear down | 53.79 | **55.51** | 55.07 | 55.13 | 55.22 | 54.55 | 54.78 | 53.96 | 53.41 |
-| iso up | 56.83 | 58.71 | 58.67 | **59.04** | 58.16 | 57.57 | 56.90 | 55.75 | 55.45 |
-
-## mlp/mnist / SGD
-
-| λ | 0.002 |
-|---|---|
-| C | 1.00 |
-| fixed | **98.38** |
-| linear up | **98.34** |
-| linear down | **98.47** |
-| iso up | **98.32** |
-
-## mlp/mnist / SGDM
-
-| λ | 0.0001 | 0.0003 | 0.0006 |
-|---|---|---|---|
-| C | 0.33 | 1.00 | 2.00 |
-| fixed | 98.72 | **98.76** | 98.70 |
-| linear up | 98.68 | **98.73** | 98.57 |
-| linear down | 98.74 | **98.77** | 98.71 |
-| iso up | **98.67** | 98.66 | 98.58 |
-
-## mlp_bn/cifar10 / SGD
-
-| λ | 0.02 | 0.04 | 0.06 | 0.08 | 0.12 | 0.18 | 0.3 |
-|---|---|---|---|---|---|---|---|
-| C | 1.00 | 2.00 | 3.00 | 4.00 | 6.00 | 9.00 | 15.00 |
-| fixed | **56.74** | 56.35 | 52.91 | 39.22 | 26.27 | 10.00 | 10.00 |
-| linear up | **56.75** | 52.58 | 52.02 | 51.76 | 51.17 | 51.57 | 50.84 |
-| linear down | **55.68** | 55.10 | 54.96 | 31.66 | 10.00 | 10.00 | 10.00 |
-| iso up | **52.50** | 49.15 | 46.33 | 44.62 | 41.43 | 33.48 | 10.00 |
-
-## mlp_bn/cifar10 / SGDM
-
-| λ | 3.33e-05 | 0.0001 | 0.00015 | 0.0002 | 0.00025 | 0.0003 | 0.0004 |
-|---|---|---|---|---|---|---|---|
-| C | 0.07 | 0.20 | 0.30 | 0.40 | 0.50 | 0.60 | 0.80 |
-| fixed | 57.70 | 58.31 | 58.30 | **58.65** | 58.09 | 58.06 | 57.72 |
-| linear up | 57.50 | 57.34 | 57.13 | **57.90** | 56.92 | 57.17 | 57.22 |
-| linear down | 57.03 | 58.22 | 58.56 | 58.71 | 58.13 | **58.91** | 58.81 |
-| iso up | 57.55 | **57.99** | 57.47 | 57.28 | 56.88 | 56.89 | 56.61 |
+Cells = best test acc (seed 42, coupled WD); per-row max bolded. Where multi-seed runs exist, an "ms:" line follows with mean±std (n seeds).
 
 ## resnet18/cifar100 / SGD
 
@@ -169,6 +109,7 @@ Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max b
 | linear up | 77.12 | **78.30** | 78.04 | 77.74 | 76.07 | 70.89 | 63.26 | 41.20 |
 | linear down | 76.69 | 77.37 | **78.04** | 77.12 | 77.18 | 76.64 | 76.22 | 72.91 |
 | iso up | 77.26 | **78.71** | 78.53 | 75.70 | 57.78 | 46.49 | 39.43 | 34.97 |
+ms: fixed@0.67C 77.65±0.16 (3s) | linear up@1.20C 78.17±0.07 (3s) | linear down@1.00C 77.54±0.23 (2s)
 
 ## resnet18/cifar100 / SGDM
 
@@ -209,6 +150,7 @@ Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max b
 | linear up | 78.04 | 79.14 | 79.55 | 79.79 | **79.84** | 79.20 | 78.98 | 76.42 | 71.92 | 67.29 | 62.48 | 47.77 | 39.15 | 24.71 |
 | linear down | 78.89 | 78.93 | **79.25** | 79.01 | 79.22 | 77.87 | 78.36 | 76.93 | 75.03 | 73.10 | 69.53 | 59.57 | 27.76 | 3.30 |
 | iso up | 77.81 | 78.66 | 79.31 | 79.12 | **79.60** | 76.81 | 75.07 | 66.06 | 45.41 | 39.75 | 38.86 | 31.97 | 29.38 | 7.15 |
+ms: fixed@0.93C 79.26±0.15 (2s) | linear up@0.93C 79.67±0.06 (2s) | iso up@0.93C 79.85±0.00 (2s)
 
 ## resnet50/cifar100 / SGDM
 
@@ -219,6 +161,7 @@ Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max b
 | linear up | 78.07 | 78.68 | 78.72 | **78.75** | 78.27 | 77.21 | 76.02 | 74.54 | 71.90 | 65.31 |
 | linear down | 75.05 | **77.01** | 76.47 | 75.29 | 76.42 | 71.69 | 64.81 | 64.63 | 62.13 | 55.50 |
 | iso up | 75.68 | 78.51 | 77.42 | **78.59** | 77.33 | 76.59 | 74.38 | 60.62 | 69.48 | 47.17 |
+ms: fixed@0.87C 76.92±0.85 (3s) | linear up@0.82C 78.09±0.20 (2s) | iso up@0.55C 78.62±0.02 (2s)
 
 ## vgg13/cifar100 / SGD
 
@@ -249,6 +192,7 @@ Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max b
 | linear up | **75.43** | 70.48 | 45.21 | 35.91 | 28.99 | 25.53 | 18.47 |
 | linear down | **74.29** | 73.44 | 66.26 | 4.21 | 4.04 | 2.52 | 1.00 |
 | iso up | **75.89** | 47.34 | 31.69 | 22.46 | 11.38 | 4.31 | 3.83 |
+ms: fixed@1.00C 74.88±0.21 (2s) | iso up@1.00C 76.11±0.33 (2s)
 
 ## vgg16/cifar100 / SGDM
 
@@ -259,6 +203,7 @@ Cells = best test acc (seed 42, coupled WD); empty = not measured; per-row max b
 | linear up | 73.07 | **73.84** | 73.11 | 72.47 | 71.79 | 70.72 | 67.79 |
 | linear down | 72.24 | **72.46** | 72.16 | 71.57 | 71.40 | 70.06 | 68.02 |
 | iso up | 72.86 | **74.24** | 73.68 | 72.35 | 71.86 | 69.77 | 66.57 |
+ms: fixed@0.91C 73.12±0.03 (2s) | iso up@0.91C 73.61±0.23 (2s)
 
 ## 多种子结果（第二轮，ms2）
 
@@ -348,3 +293,13 @@ E12 实验线收敛：5 个主 setting × 2 相位 × 4 形状的 budget ladder�
 （每个 setting×相位 3 种子覆盖 fixed 与峰值形状）、崩塌边界、fixed 加密、
 BN 消融全部完成。全部结果、表格、图与结论见本目录与
 rebuttal/e12_cross_setting_material.md；后续可能的方向见 next_steps.md。
+
+## 意见与待办清单（2026-09-15）
+
+- [x] MLP 系列不进主阶梯表（分辨率低、有干扰），已移至 `tables/e12_crosstab_mlp.md`。
+- [x] 主表只呈现完整 grid search 位置（四个形状都实测过的 C 档）；单形状探测档不进主表（保留在 full ladder 表与 CSV）。
+- [x] 主表支持多种子呈现：有 e12_ms 数据的 setting 在表下附 `ms:` 行（mean±std，n seeds）。
+- [x] 分析"哪些 case 未体现 wd raise schedule 胜过 fixed"（非 MLP 10 个 setting×相位）：反例 2 个——**R34/SGDM −0.17**、**R50/SGD −0.05**；边缘 1 个——**VGG13/SGD +0.17**；其余 7 个 raise 显著胜出（+0.51 ~ +1.25）。
+- [x] 分析"最优值贴左边界"：**VGG13/SGD**（fixed/iso 峰值在左界 0.67C）、**VGG16/SGD**（fixed/iso 峰值在左界 1.00C）→ 需更小 C 搜索。
+- [x] ms2 队列已排（39 个，`/tmp/wd_queue/ms2_configs.json`）：R34/SGDM、R50/SGD、VGG13/SGD 各 4 形状@seed-42 峰值 C × seeds 123/2024（λ0 与 seed-42 严格对齐）；VGG13/SGD 0.22–0.53C、VGG16/SGD 0.30–0.75C 小 C 补档（3 动态形状 × seed 42）。
+- [ ] fill7 完成后：启动 ms2 队列 → 重生成全部表格（含 ms 标注）→ 补 decoupled 结论 → push → 删监控 cron。

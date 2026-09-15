@@ -59,7 +59,7 @@ def load_and_label(csv_path, tag):
     return df
 
 
-def build_rows(wd_mode='coupled'):
+def build_rows(wd_mode='coupled', include_ms=False):
     frames = []
     if CSV.exists():
         frames.append(load_and_label(CSV, 'e12'))
@@ -107,8 +107,13 @@ def build_rows(wd_mode='coupled'):
             h = g[g['wd_sched_norm'] == sched]
             if h.empty:
                 continue
-            # one row per (seed42) lambda rung
-            for _, r in h[h['seed'] == 42].iterrows():
+            # one row per (seed42) lambda rung; optionally also multi-seed
+            # rows (exp=e12_ms, seeds != 42) for the crosstab ms annotations
+            emit = h[h['seed'] == 42]
+            if include_ms:
+                ms_extra = h[(h['exp'] == 'e12_ms') & (h['seed'] != 42)]
+                emit = pd.concat([emit, ms_extra])
+            for _, r in emit.iterrows():
                 lam = float(r['wd'])
                 rows.append({
                     'setting': f'{model}/{dataset}',
@@ -120,6 +125,7 @@ def build_rows(wd_mode='coupled'):
                     'best_acc': float(r['best_test_acc']),
                     'diverged': int(r['diverged']),
                     'exp': r['exp'],
+                    'seed': int(r['seed']),
                     'src': r['src'],
                 })
     return rows
