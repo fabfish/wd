@@ -110,7 +110,9 @@ def build_md_body(include_mlp=True):
         'integral(lambda_ref*eta) (simple division).',
         'Cells = best test acc (seed 42, coupled WD); per-row max bolded. '
         'A heatmap of the same grid follows each table (blue = low acc, '
-        'red = high acc). Multi-seed results live in the multiseed table '
+        'red = high acc). In heatmap columns where fixed beats every '
+        'dynamic shape, cells with multi-seed data show the multi-seed '
+        'mean (bold). Multi-seed results live in the multiseed table '
         '(tables/e12_multiseed.md), not here.',
         '',
     ]

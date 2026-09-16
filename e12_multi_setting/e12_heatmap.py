@@ -42,7 +42,7 @@ def _text_color(rgb):
 
 
 def make_heatmaps(include_mlp=False):
-    rows = build_rows()
+    rows = build_rows(include_ms=True)
     tab = pd.DataFrame(rows)
     if not include_mlp:
         tab = tab[~tab['setting'].str.startswith('mlp')]
@@ -54,6 +54,37 @@ def make_heatmaps(include_mlp=False):
         for i, s in enumerate(shapes):
             for j, c in enumerate(cols):
                 mat[i, j] = acc[s].get(c, np.nan)
+
+        # Multi-seed means per (shape, C) from ALL seeds present
+        g = tab[(tab['setting'] == setting) & (tab['phase'] == phase)]
+        ms_mean = {}
+        ms_n = {}
+        for i, s in enumerate(shapes):
+            for j, c in enumerate(cols):
+                sub = g[(g['wd_sched'] == s)
+                        & (g['budget_c'].round(2) == c)]
+                if len(sub):
+                    ms_mean[(i, j)] = float(sub['best_acc'].mean())
+                    ms_n[(i, j)] = len(sub)
+        # Columns where fixed clearly beats every dynamic shape (seed 42):
+        # there, cell values show the multi-seed mean (bold) when available.
+        dyn_rows = {s: i for i, s in enumerate(shapes) if s != 'fixed'}
+        fixed_win_cols = set()
+        for j, c in enumerate(cols):
+            fv = mat[0, j]
+            if np.isnan(fv):
+                continue
+            dvals = [mat[i, j] for i in dyn_rows.values()
+                     if not np.isnan(mat[i, j])]
+            if dvals and fv > max(dvals):
+                fixed_win_cols.add(j)
+
+        display = mat.copy()
+        bold_mask = np.zeros_like(mat, dtype=bool)
+        for (i, j) in ms_mean:
+            if j in fixed_win_cols and ms_n[(i, j)] >= 2:
+                display[i, j] = ms_mean[(i, j)]
+                bold_mask[i, j] = True
 
         # Exponential-in-value scale anchored at the max: closely-spaced top
         # values (76-79.5) each get a clearly distinct shade, while the
@@ -79,12 +110,13 @@ def make_heatmaps(include_mlp=False):
                        aspect='auto', interpolation='nearest')
         for i in range(len(shapes)):
             for j in range(ncol):
-                v = mat[i, j]
+                v = display[i, j]
                 if np.isnan(v):
                     continue
                 rgb = cmap(s[i, j])[:3]
                 ax.text(j, i, f'{v:.1f}', ha='center', va='center',
-                        fontsize=9, color=_text_color(rgb))
+                        fontsize=9, color=_text_color(rgb),
+                        fontweight='bold' if bold_mask[i, j] else 'normal')
         ax.set_xticks(range(ncol))
         ax.set_xticklabels([f'{c:.2f}' for c in cols], fontsize=8)
         ax.set_yticks(range(len(shapes)))
