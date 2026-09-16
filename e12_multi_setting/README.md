@@ -320,6 +320,40 @@ rebuttal/e12_cross_setting_material.md；后续可能的方向见 next_steps.md�
 
 结论：非 MLP 的 10 个 setting×相位现在 **10/10 raise 胜出**；此前两个反例的 fixed 优势是单种子刀尖峰值。鲁棒性叙事成立：fixed 峰值对种子与 λ 极端敏感（±0.5 摆动），raise 形状（尤其 iso / linear_up）平台稳定。
 
+## 红区多种子验证（ms5，2026-09-17）
+
+对每张热力图的最红区域（seed-42 下各 shape 最优格，与全局峰值差 ≤0.6 分）
+全部补满 3 种子（42/123/2024）。结论：
+
+| setting | phase | 红区最优（3-seed 均值） | 次优红区 | 判定 |
+|---|---|---|---:|---|
+| resnet18/cifar100 | SGD | iso 78.47（78.03~78.71） | lin_up 78.16；fixed 78.20（单种子） | iso 稳定最优 |
+| resnet18/cifar100 | SGDM | iso 78.30（78.12~78.48） | lin_up 78.21（77.87~78.40） | seed-42 lin_up 领先，多子种后 iso 微超（噪声内并列） |
+| resnet34/cifar100 | SGD | iso 79.14（78.89~79.29） | lin_up 79.02（78.38~79.54） | seed-42 lin_up 领先，多子种后 iso 微超（噪声内并列） |
+| resnet34/cifar100 | SGDM | iso 78.47（78.35~78.55） | lin_up 78.24；fixed 78.09 | iso 稳定高出 fixed +0.38 |
+| resnet50/cifar100 | SGD | lin_up 79.75（79.40~80.03） | fixed 79.59（79.41~79.89）；iso 79.49 | lin_up 稳定高出 fixed +0.16 |
+| resnet50/cifar100 | SGDM | lin_up 78.48（77.94~78.97） | iso 78.06（77.34~78.59） | lin_up 稳定最优 |
+| vgg13/cifar100 | SGD | iso 77.04（76.76~77.38） | lin_up 76.57；fixed 75.92（75.53~76.59） | iso 稳定高出 fixed +1.12 |
+| vgg13/cifar100 | SGDM | iso 75.13（74.89~75.31） | lin_up 74.86（74.70~75.06） | iso 稳定最优 |
+| vgg16/cifar100 | SGD | iso 76.37（76.04~76.69） | lin_up 76.17（75.94~76.37） | iso 稳定最优 |
+| vgg16/cifar100 | SGDM | iso 73.82（73.38~74.24） | lin_up 73.72（73.30~73.95） | iso 稳定最优 |
+
+要点：
+
+- **10/10 setting 的红区最优均为动态 wd（8×iso、2×lin_up），fixed 无一居首**。
+  三个有 fixed 红区多子种数据的 case（R34/SGDM、R50/SGD、VGG13/SGD）里，
+  fixed 的 3-seed 均值分别落后 iso/lin_up 0.38/0.16/1.12 分——与"反例复核"
+  小节的结论一致。
+- **2 个并列**（R18/SGDM、R34/SGD）：seed-42 的 linear_up 峰值在多种子后
+  回落到与 iso 打平（差 <0.15 分，均在种子噪声内）。iso 与 linear_up 在
+  各自红区基本等价；iso 的 3-seed 方差普遍更小（回落 0.1~0.2 vs lin_up
+  的 0.3~0.5）。
+- seed-42 的最优档值多是最幸运种子的上限（如 lin_up 79.54、80.03），
+  多子种均值普遍回落 0.2~0.5 分——红区结论（raise 形状胜 fixed）不受影响，
+  但绝对峰值应引用多种子均值。
+- 遗留缺口：R18/SGD fixed 0.0075（78.20）与 R34/SGD fixed 0.006（78.93）
+  尚无多种子，见 ms6。
+
 ## Decoupled WD 对照（已裁，不进主文）
 
 coupled vs decoupled（AdamW 式实现：`optim.SGD(weight_decay=0)` + 显式 `p.mul_(1 - lr*wd)`）配对 146 组：胜 41 / 负 94 / 平 11，均值约 **−4.4 分**；大 λ 档 decoupled 严重崩坏（可达 −70 分），小 λ 档与 coupled 接近（冒烟 56.01 vs 56.05）。共跑 184 个后裁掉剩余，结论：**decoupled 不进入主文对比**。
