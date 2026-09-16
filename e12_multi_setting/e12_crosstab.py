@@ -40,6 +40,8 @@ MARKER_START = '## 完整阶梯表'
 MARKER_END = '## 多种子结果'
 
 SHAPES = ['fixed', 'linear_up', 'linear', 'iso_product']
+# Display order: fixed + iso up on top, both linear rows at the bottom
+DISPLAY_SHAPES = ['fixed', 'iso_product', 'linear_up', 'linear']
 SHAPE_LABELS = {'fixed': 'fixed',
                 'linear_up': 'linear up',
                 'linear': 'linear down',
@@ -132,7 +134,7 @@ def build_md_body(include_mlp=True):
         header2 = '| C | ' + ' | '.join(f'{c:.2f}' for c in cols) + ' |'
         lines = [header1, sep, header2]
 
-        for shape in SHAPES:
+        for shape in DISPLAY_SHAPES:
             d = acc[shape]
             row_max = max(d.values()) if d else None
             cells = []

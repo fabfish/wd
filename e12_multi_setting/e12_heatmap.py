@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 from e12_full_table import build_rows
-from e12_crosstab import iter_grids, SHAPE_LABELS
+from e12_crosstab import iter_grids, SHAPE_LABELS, DISPLAY_SHAPES
 
 E12 = Path(__file__).resolve().parent
 FIG = E12 / 'figures'
@@ -49,7 +49,7 @@ def make_heatmaps(include_mlp=False):
     FIG.mkdir(parents=True, exist_ok=True)
     made = []
     for setting, phase, cols, lam_ref, acc in iter_grids(tab):
-        shapes = ['fixed', 'linear_up', 'linear', 'iso_product']
+        shapes = list(DISPLAY_SHAPES)
         mat = np.full((len(shapes), len(cols)), np.nan)
         for i, s in enumerate(shapes):
             for j, c in enumerate(cols):
