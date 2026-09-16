@@ -1,0 +1,77 @@
+[2026-09-16 19:02:00] [INFO] e12_ms: 2 configs x 2 seeds = 4 runs, gpus=[0, 1, 3], workers_per_gpu=3
+[2026-09-16 19:02:00] [INFO] e12_ms: 4 configs, 0 already done, 4 to run
+[2026-09-16 19:02:00] [INFO] e12_ms: budget ~4.0 units
+GPU Scheduler initialized with GPUs: [0, 1, 3]
+  Workers per GPU: 3 (Total workers: 9)
+Worker 1 started on GPU 3 (PID: 3808839)
+Worker on GPU 3 finished
+Worker 0 started on GPU 3 (PID: 3808838)
+Worker on GPU 3 finished
+Worker 0 started on GPU 1 (PID: 3808835)
+Worker on GPU 1 finished
+Worker 0 started on GPU 0 (PID: 3808832)
+Worker on GPU 0 finished
+Worker 2 started on GPU 3 (PID: 3808840)
+Worker on GPU 3 finished
+Worker 1 started on GPU 0 (PID: 3808833)
+GPU 0 (Worker 1): Processing task 1
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] start
+Worker 1 started on GPU 1 (PID: 3808836)
+GPU 1 (Worker 1): Processing task 2
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] start
+Worker 2 started on GPU 1 (PID: 3808837)
+GPU 1 (Worker 2): Processing task 0
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] start
+Worker 2 started on GPU 0 (PID: 3808834)
+GPU 0 (Worker 2): Processing task 3
+Files already downloaded and verified
+Files already downloaded and verified
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] start
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/yzy/Documents/GitHub/wd/wd_core/utils.py:89: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 25/100 | Train Loss: 1.5143 | Train Acc: 57.42% | Test Acc: 48.51% | Best: 50.63%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 50/100 | Train Loss: 0.9071 | Train Acc: 73.20% | Test Acc: 59.38% | Best: 62.32%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 75/100 | Train Loss: 0.0941 | Train Acc: 97.26% | Test Acc: 73.27% | Best: 73.27%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 100/100 | Train Loss: 0.0062 | Train Acc: 99.93% | Test Acc: 77.20% | Best: 77.20%
+GPU 0: Completed task 1
+Worker on GPU 0 finished
+
+Started 9 workers (3 per GPU) for 4 tasks
+================================================================================
+[2026-09-16 19:45:02] [INFO]   [1/4] cosine mom=0.9 wd_sched=linear lam0=0.001417 T=100 -> best=77.20 diverged=0 (2574s)
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 25/100 | Train Loss: 1.2172 | Train Acc: 64.93% | Test Acc: 57.32% | Best: 57.32%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 50/100 | Train Loss: 1.0807 | Train Acc: 68.67% | Test Acc: 53.58% | Best: 58.83%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 75/100 | Train Loss: 0.9935 | Train Acc: 72.01% | Test Acc: 59.21% | Best: 60.08%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 100/100 | Train Loss: 0.0933 | Train Acc: 99.31% | Test Acc: 78.27% | Best: 78.27%
+GPU 0: Completed task 3
+Worker on GPU 0 finished
+[2026-09-16 19:45:03] [INFO]   [2/4] cosine mom=0.9 wd_sched=iso_product lam0=0.0005809 T=100 -> best=78.27 diverged=0 (2575s)
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 25/100 | Train Loss: 1.2098 | Train Acc: 65.23% | Test Acc: 54.48% | Best: 58.46%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 50/100 | Train Loss: 1.0389 | Train Acc: 69.90% | Test Acc: 59.37% | Best: 60.51%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 75/100 | Train Loss: 0.9408 | Train Acc: 73.87% | Test Acc: 61.08% | Best: 61.46%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=iso_product|T=100|lr0=0.1|lam0=0.0005809] Epoch 100/100 | Train Loss: 0.1044 | Train Acc: 99.36% | Test Acc: 78.51% | Best: 78.51%
+GPU 1: Completed task 2
+Worker on GPU 1 finished
+[2026-09-16 19:46:12] [INFO]   [3/4] cosine mom=0.9 wd_sched=iso_product lam0=0.0005809 T=100 -> best=78.51 diverged=0 (2645s)
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 25/100 | Train Loss: 1.5384 | Train Acc: 57.04% | Test Acc: 45.88% | Best: 49.00%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 50/100 | Train Loss: 0.9108 | Train Acc: 73.20% | Test Acc: 58.35% | Best: 59.46%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 75/100 | Train Loss: 0.0977 | Train Acc: 97.16% | Test Acc: 72.83% | Best: 72.83%
+[e12_ms|SGDM+WD|cos_shape|wd_sched=linear|T=100|lr0=0.1|lam0=0.001417] Epoch 100/100 | Train Loss: 0.0058 | Train Acc: 99.95% | Test Acc: 77.08% | Best: 77.23%
+GPU 1: Completed task 0
+Worker on GPU 1 finished
+[2026-09-16 19:46:13] [INFO]   [4/4] cosine mom=0.9 wd_sched=linear lam0=0.001417 T=100 -> best=77.23 diverged=0 (2645s)
+================================================================================
+All workers finished. Completed 4 tasks.
+[2026-09-16 19:46:14] [INFO] e12_ms: finished 4/4 in 44.2 min
