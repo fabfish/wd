@@ -89,10 +89,11 @@ def make_heatmaps(include_mlp=False):
         # Exponential-in-value scale anchored at the max: closely-spaced top
         # values (76-79.5) each get a clearly distinct shade, while the
         # collapse tail saturates to deep blue. a = 1 / (max - p75) so the
-        # top quartile of values spans ~63% of the colormap.
-        flat = mat[~np.isnan(mat)]
-        hi = float(np.nanmax(mat))
-        vmin = float(np.nanmin(mat))
+        # top quartile of values spans ~63% of the colormap. Colors follow
+        # the DISPLAYED value (multi-seed mean where applied).
+        flat = display[~np.isnan(display)]
+        hi = float(np.nanmax(flat))
+        vmin = float(np.nanmin(flat))
         span_top = max(hi - float(np.percentile(flat, 75)), 0.3)
         a = 1.0 / span_top
         R = hi - vmin
@@ -100,7 +101,7 @@ def make_heatmaps(include_mlp=False):
             R = 1.0
         exp_mR = np.exp(-a * R)
         den = 1.0 - exp_mR
-        s = _exp_s(mat, a, hi, exp_mR, den)
+        s = _exp_s(display, a, hi, exp_mR, den)
 
         ncol = len(cols)
         fig, ax = plt.subplots(figsize=(max(3.2, ncol * 0.62),
