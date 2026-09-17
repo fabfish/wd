@@ -66,23 +66,12 @@ def make_heatmaps(include_mlp=False):
                 if len(sub):
                     ms_mean[(i, j)] = float(sub['best_acc'].mean())
                     ms_n[(i, j)] = len(sub)
-        # Columns where fixed clearly beats every dynamic shape (seed 42):
-        # there, cell values show the multi-seed mean (bold) when available.
-        dyn_rows = {s: i for i, s in enumerate(shapes) if s != 'fixed'}
-        fixed_win_cols = set()
-        for j, c in enumerate(cols):
-            fv = mat[0, j]
-            if np.isnan(fv):
-                continue
-            dvals = [mat[i, j] for i in dyn_rows.values()
-                     if not np.isnan(mat[i, j])]
-            if dvals and fv > max(dvals):
-                fixed_win_cols.add(j)
-
+        # Any cell with multi-seed data (>=2 seeds) shows the multi-seed
+        # mean (bold); single-seed cells show the seed-42 value.
         display = mat.copy()
         bold_mask = np.zeros_like(mat, dtype=bool)
         for (i, j) in ms_mean:
-            if j in fixed_win_cols and ms_n[(i, j)] >= 2:
+            if ms_n[(i, j)] >= 2:
                 display[i, j] = ms_mean[(i, j)]
                 bold_mask[i, j] = True
 
