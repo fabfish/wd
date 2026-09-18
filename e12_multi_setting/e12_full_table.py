@@ -108,10 +108,12 @@ def build_rows(wd_mode='coupled', include_ms=False):
             if h.empty:
                 continue
             # one row per (seed42) lambda rung; optionally also multi-seed
-            # rows (exp=e12_ms, seeds != 42) for the crosstab ms annotations
+            # rows (seeds != 42, any exp that ran multiple seeds: e12_ms and
+            # e12_fill) for the crosstab/heatmap ms annotations
             emit = h[h['seed'] == 42]
             if include_ms:
-                ms_extra = h[(h['exp'] == 'e12_ms') & (h['seed'] != 42)]
+                ms_extra = h[(h['exp'].isin(['e12_ms', 'e12_fill']))
+                             & (h['seed'] != 42)]
                 emit = pd.concat([emit, ms_extra])
             for _, r in emit.iterrows():
                 lam = float(r['wd'])
