@@ -95,7 +95,7 @@ def _heat_key(setting, phase):
 
 
 def build_md_body(include_mlp=True):
-    rows = build_rows()
+    rows = build_rows(include_ms=True)
     tab = pd.DataFrame(rows)
     if not include_mlp:
         tab = tab[~tab['setting'].str.startswith('mlp')]
@@ -110,12 +110,11 @@ def build_md_body(include_mlp=True):
         'lambda).',
         'Row 2 (C) = realized budget = integral(lambda*eta) / '
         'integral(lambda_ref*eta) (simple division).',
-        'Cells = best test acc (seed 42, coupled WD); per-row max bolded. '
-        'A heatmap of the same grid follows each table (blue = low acc, '
-        'red = high acc). In heatmap columns where fixed beats every '
-        'dynamic shape, cells with multi-seed data show the multi-seed '
-        'mean (bold). Multi-seed results live in the multiseed table '
-        '(tables/e12_multiseed.md), not here.',
+        'Cells = best test acc (coupled WD). Any cell with multi-seed '
+        'data (>=2 seeds) shows the multi-seed mean (bold); otherwise the '
+        'seed-42 value. Per-row max is bold. A heatmap of the same grid '
+        'follows each table (blue = low acc, red = high acc), using the '
+        'identical cell values and bold rule.',
         '',
     ]
     for setting, phase, cols, lam_ref, acc in iter_grids(tab):
@@ -134,16 +133,37 @@ def build_md_body(include_mlp=True):
         header2 = '| C | ' + ' | '.join(f'{c:.2f}' for c in cols) + ' |'
         lines = [header1, sep, header2]
 
-        for shape in DISPLAY_SHAPES:
+        g = tab[(tab['setting'] == setting) & (tab['phase'] == phase)]
+        ms_mean = {}
+        ms_n = {}
+        for i, shape in enumerate(DISPLAY_SHAPES):
+            for j, c in enumerate(cols):
+                sub = g[(g['wd_sched'] == shape)
+                        & (g['budget_c'].round(2) == c)]
+                if len(sub):
+                    ms_mean[(i, j)] = float(sub['best_acc'].mean())
+                    ms_n[(i, j)] = len(sub)
+
+        for i, shape in enumerate(DISPLAY_SHAPES):
             d = acc[shape]
-            row_max = max(d.values()) if d else None
-            cells = []
-            for c in cols:
+            disp = {}
+            for j, c in enumerate(cols):
                 if c not in d:
+                    disp[c] = None
+                elif ms_n.get((i, j), 1) >= 2:
+                    disp[c] = ms_mean[(i, j)]
+                else:
+                    disp[c] = d[c]
+            vals = [v for v in disp.values() if v is not None]
+            row_max = max(vals) if vals else None
+            cells = []
+            for j, c in enumerate(cols):
+                v = disp[c]
+                if v is None:
                     cells.append('')
                 else:
-                    v = d[c]
-                    cells.append(f'**{v:.2f}**' if v == row_max else f'{v:.2f}')
+                    is_bold = (v == row_max) or (ms_n.get((i, j), 1) >= 2)
+                    cells.append(f'**{v:.2f}**' if is_bold else f'{v:.2f}')
             label = SHAPE_LABELS.get(shape, shape)
             lines.append('| ' + label + ' | ' + ' | '.join(cells) + ' |')
 
